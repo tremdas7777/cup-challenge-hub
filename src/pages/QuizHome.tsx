@@ -447,7 +447,7 @@ export default function QuizHome() {
           </p>
         </div>
 
-        {/* Contest Banner - Supplement Bundle */}
+        {/* Bonus Banner */}
         <div className="bg-centauro-gold text-foreground py-0">
           <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
@@ -457,30 +457,13 @@ export default function QuizHome() {
                 </div>
               </div>
               <div className="text-center md:text-left flex-1">
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 mb-1">Exklusiver Bonus</p>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 mb-1">Deine 2 Gewinne</p>
                 <h3 className="text-xl md:text-2xl font-black tracking-tight mb-1">
-                  GEWINNE EIN PREMIUM SUPPLEMENT-PAKET!
+                  ESN COMBO PACK + €150 GUTSCHEIN
                 </h3>
                 <p className="text-sm font-semibold opacity-80">
-                  Sichere dir deine Prämien und nimm automatisch an der Verlosung eines <strong>ESN Premium Pakets</strong> im Wert von <strong>€500</strong> teil!
+                  Du hast in der Rubbelkarte das <strong>ESN Supplement Combo Pack</strong> und einen <strong>€150 ESN Gutschein</strong> gewonnen — gratis, du zahlst nur den Versand.
                 </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 mt-5">
-              <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <Gift className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">Whey Protein</p>
-                <p className="text-[9px] opacity-70">Designer Whey</p>
-              </div>
-              <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <Star className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">Kreatin</p>
-                <p className="text-[9px] opacity-70">Crea-Stack</p>
-              </div>
-              <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <Zap className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">Pre-Workout</p>
-                <p className="text-[9px] opacity-70">Crank Booster</p>
               </div>
             </div>
           </div>
@@ -495,82 +478,51 @@ export default function QuizHome() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            {/* Whey Protein */}
-            <Card data-shirt-card className={`overflow-hidden border shadow-sm hover:shadow-md transition-shadow ${showSelectionError && !selectedSize ? 'border-destructive' : 'border-border'}`}>
+            {/* Combo Pack */}
+            <Card className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow">
               <div className="relative bg-secondary p-6 flex items-center justify-center h-56">
-                <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
+                <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider z-10">
                   Exklusiv
                 </span>
-                <div className="text-7xl">🥤</div>
+                <img src={comboPackImg} alt="ESN Combo Pack" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Designer Whey Protein</h3>
-                <p className="text-muted-foreground text-xs mb-3">Premium Whey Protein - 1kg Beutel</p>
-                
-                {/* Flavor selector */}
-                <div className="mb-3">
-                  <p className="text-xs font-bold text-foreground mb-2">Geschmack:</p>
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => { setSelectedColor('amarela'); setShowSelectionError(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-black border-2 transition-all ${
-                        selectedColor === 'amarela'
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-secondary text-foreground border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-amber-700 border border-amber-800" />
-                      Schokolade
-                    </button>
-                    <button
-                      onClick={() => { setSelectedColor('azul'); setShowSelectionError(false); }}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-md text-xs font-black border-2 transition-all ${
-                        selectedColor === 'azul'
-                          ? 'bg-primary text-primary-foreground border-primary'
-                          : 'bg-secondary text-foreground border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-pink-300 border border-pink-400" />
-                      Vanille
-                    </button>
-                  </div>
-                  {showSelectionError && !selectedColor && <p className="text-destructive text-xs font-semibold mt-1.5">Bitte wähle einen Geschmack</p>}
-                </div>
-
+                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Supplement Combo Pack</h3>
+                <p className="text-muted-foreground text-xs mb-3">8 Premium ESN Produkte im Set</p>
                 <ul className="space-y-1.5 text-xs mb-4">
-                  {['Premium Qualität', '30g Protein pro Portion', 'Made in Germany'].map((item) => (
+                  {['Whey Protein, Creatine, Isoclear', 'Pre-Workout, Daily Vitamins, Protein Bar', 'Magnesium, Ashwagandha'].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-foreground">
                       <CheckCircle size={12} className="text-centauro-green shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-2 pt-3 border-t border-border">
-                  <span className="text-muted-foreground line-through text-xs">€49,90</span>
+                  <span className="text-muted-foreground line-through text-xs">€249,90</span>
                   <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRATIS</span>
                 </div>
               </div>
             </Card>
 
-            {/* Kreatin */}
+            {/* Gift Card €150 */}
             <Card className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow">
               <div className="relative bg-secondary p-6 flex items-center justify-center h-56">
-                <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                  Exklusiv
+                <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider z-10">
+                  Bonus
                 </span>
-                <div className="text-7xl">💪</div>
+                <img src={giftCardImg} alt="ESN Gutschein €150" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Kreatin Monohydrat</h3>
-                <p className="text-muted-foreground text-xs mb-3">Creapure® Kreatin - 500g Dose</p>
+                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Gutschein €150</h3>
+                <p className="text-muted-foreground text-xs mb-3">Einlösbar im offiziellen ESN Shop</p>
                 <ul className="space-y-1.5 text-xs mb-4">
-                  {['Creapure® Qualität', 'Mikronisiert', 'Laborgeprüft'].map((item) => (
+                  {['Wert von €150', '12 Monate gültig', 'Kombinierbar mit Aktionen'].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-foreground">
                       <CheckCircle size={12} className="text-centauro-green shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-2 pt-3 border-t border-border">
-                  <span className="text-muted-foreground line-through text-xs">€34,90</span>
+                  <span className="text-muted-foreground line-through text-xs">€150,00</span>
                   <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRATIS</span>
                 </div>
               </div>
@@ -584,35 +536,35 @@ export default function QuizHome() {
             </h3>
             <div className="space-y-3 mb-5">
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <div className="w-16 h-16 flex items-center justify-center text-3xl">🥤</div>
+                <img src={comboPackImg} alt="ESN Combo" className="w-16 h-16 object-contain" />
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">ESN Designer Whey {selectedColor === 'azul' ? '(Vanille)' : selectedColor === 'amarela' ? '(Schokolade)' : ''}</p>
-                  <p className="text-xs text-muted-foreground">Premium Whey Protein - 1kg</p>
+                  <p className="font-bold text-foreground text-sm">ESN Supplement Combo Pack</p>
+                  <p className="text-xs text-muted-foreground">8 Premium Produkte</p>
                 </div>
                 <p className="font-black text-centauro-green text-sm">GRATIS</p>
               </div>
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <div className="w-16 h-16 flex items-center justify-center text-3xl">💪</div>
+                <img src={giftCardImg} alt="ESN Gutschein" className="w-16 h-16 object-contain" />
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">ESN Kreatin Monohydrat 500g</p>
-                  <p className="text-xs text-muted-foreground">Creapure® Qualität</p>
+                  <p className="font-bold text-foreground text-sm">ESN Gutschein €150</p>
+                  <p className="text-xs text-muted-foreground">Einlösbar im ESN Shop</p>
                 </div>
                 <p className="font-black text-centauro-green text-sm">GRATIS</p>
               </div>
               <div className="border-t border-foreground/20" />
               <div className="flex items-center gap-4 p-3.5 bg-centauro-gold/10 rounded-md border border-centauro-gold/30">
-                <div className="w-16 h-16 flex items-center justify-center text-3xl">🎁</div>
+                <div className="w-16 h-16 flex items-center justify-center text-3xl">🚚</div>
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">Premium Supplement-Paket Verlosung</p>
-                  <p className="text-xs text-muted-foreground">ESN Paket im Wert von €500 • Verlosung am 15.06.2026</p>
+                  <p className="font-bold text-foreground text-sm">Versandkosten</p>
+                  <p className="text-xs text-muted-foreground">Einziger zu zahlender Betrag</p>
                 </div>
-                <p className="font-black text-centauro-gold text-sm">INKLUSIVE</p>
+                <p className="font-black text-foreground text-base">€10,00</p>
               </div>
             </div>
             <div className="bg-secondary p-5 rounded-md text-center">
               <p className="text-muted-foreground text-xs font-medium mb-1">Du sparst</p>
-              <p className="text-3xl font-black text-foreground mb-0.5 line-through decoration-destructive decoration-2">€84,80</p>
-              <p className="text-sm font-bold text-centauro-green">an 100% kostenlosen Prämien!</p>
+              <p className="text-3xl font-black text-foreground mb-0.5 line-through decoration-destructive decoration-2">€399,90</p>
+              <p className="text-sm font-bold text-centauro-green">Du zahlst nur €10,00 Versand!</p>
             </div>
           </Card>
 

@@ -701,7 +701,7 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-8">
             {[
-              { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand', desc: 'Whey + Kreatin' },
+              { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand', desc: 'Combo + Gutschein' },
               { icon: Truck, color: 'text-foreground', title: 'Lieferung', desc: '3-5 Werktage' },
               { icon: Shield, color: 'text-foreground', title: 'Sicher', desc: 'Geschützter Kauf' },
             ].map(({ icon: Icon, color, title, desc }) => (

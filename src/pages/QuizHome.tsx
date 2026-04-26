@@ -582,16 +582,10 @@ export default function QuizHome() {
                 SICHERE DIR JETZT DEINE PRÄMIEN
               </h3>
               <p className="text-primary-foreground/70 text-xs font-semibold mb-6 max-w-sm mx-auto">
-                Sofortige Lieferung von Whey & Kreatin + nimm an der <span className="text-centauro-gold font-black">Verlosung des Premium Pakets</span> teil!
+                Combo Pack + €150 Gutschein gratis — du zahlst nur <span className="text-centauro-gold font-black">€10 Versand</span>!
               </p>
               <Button
                 onClick={() => {
-                  if (!selectedColor) {
-                    setShowSelectionError(true);
-                    const card = document.querySelector('[data-shirt-card]');
-                    card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    return;
-                  }
                   const isExternal = localStorage.getItem('externalCheckout') === 'true';
                   if (isExternal) {
                     handleGoToCheckout();
@@ -602,12 +596,12 @@ export default function QuizHome() {
                 className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-6 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
-                JETZT SICHERN
+                JETZT SICHERN — NUR €10 VERSAND
               </Button>
               <div className="flex items-center justify-center gap-1.5 mt-4">
-                <Gift size={12} className="text-centauro-gold" />
+                <Truck size={12} className="text-centauro-gold" />
                 <p className="text-centauro-gold text-xs font-bold">
-                  + Premium Paket Verlosung (€500 Wert)
+                  Versandkosten: nur €10,00
                 </p>
               </div>
               <p className="text-primary-foreground/40 text-[10px] font-medium mt-2">

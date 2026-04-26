@@ -17,6 +17,10 @@ import quizBannerPreload from '@/assets/esn-quiz-banner.png';
 import gymHero from '@/assets/esn-hero-banner.jpg';
 import comboPackImg from '@/assets/esn-combo-pack.png';
 import giftCardImg from '@/assets/esn-gift-card.png';
+import creatineImg from '@/assets/esn-creatine.png';
+import isoclearImg from '@/assets/esn-isoclear.png';
+import designerWheyImg from '@/assets/esn-designer-whey.png';
+import proteinBarImg from '@/assets/esn-protein-bar.png';
 import { Mail, Phone, MapPin as MapPinIcon } from 'lucide-react';
 import { playCorrectSound, playWrongSound, playRevealSound, unlockAudio } from '@/lib/quizSounds';
 

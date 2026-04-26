@@ -660,7 +660,6 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
                   src={wonPrizes[wonPrizes.length - 1].image}
                   alt={wonPrizes[wonPrizes.length - 1].label}
                   className="w-44 h-44 object-contain"
-                  style={{ mixBlendMode: 'multiply' }}
                 />
               </div>
             ) : wonPrizes.length > 0 ? (

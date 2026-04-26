@@ -459,10 +459,10 @@ export default function QuizHome() {
               <div className="text-center md:text-left flex-1">
                 <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 mb-1">Deine 2 Gewinne</p>
                 <h3 className="text-xl md:text-2xl font-black tracking-tight mb-1">
-                  ESN COMBO PACK + €150 GUTSCHEIN
+                  ESN BUNDLE + €150 GUTSCHEIN
                 </h3>
                 <p className="text-sm font-semibold opacity-80">
-                  Du hast in der Rubbelkarte das <strong>ESN Supplement Combo Pack</strong> und einen <strong>€150 ESN Gutschein</strong> gewonnen — gratis, du zahlst nur den Versand.
+                  Du hast in der Rubbelkarte das <strong>ESN Bundle</strong> und einen <strong>€150 ESN Gutschein</strong> gewonnen — gratis, du zahlst nur den Versand.
                 </p>
               </div>
             </div>
@@ -478,16 +478,16 @@ export default function QuizHome() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            {/* Combo Pack */}
+            {/* Bundle */}
             <Card className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow">
               <div className="relative bg-secondary p-6 flex items-center justify-center h-56">
                 <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider z-10">
                   Exklusiv
                 </span>
-                <img src={comboPackImg} alt="ESN Combo Pack" className="max-h-full max-w-full object-contain" />
+                <img src={comboPackImg} alt="ESN Bundle" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Supplement Combo Pack</h3>
+                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Bundle</h3>
                 <p className="text-muted-foreground text-xs mb-3">8 Premium ESN Produkte im Set</p>
                 <ul className="space-y-1.5 text-xs mb-4">
                   {['Whey Protein, Creatine, Isoclear', 'Pre-Workout, Daily Vitamins, Protein Bar', 'Magnesium, Ashwagandha'].map((item) => (
@@ -536,9 +536,9 @@ export default function QuizHome() {
             </h3>
             <div className="space-y-3 mb-5">
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <img src={comboPackImg} alt="ESN Combo" className="w-16 h-16 object-contain" />
+                <img src={comboPackImg} alt="ESN Bundle" className="w-16 h-16 object-contain" />
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">ESN Supplement Combo Pack</p>
+                  <p className="font-bold text-foreground text-sm">ESN Bundle</p>
                   <p className="text-xs text-muted-foreground">8 Premium Produkte</p>
                 </div>
                 <p className="font-black text-centauro-green text-sm">GRATIS</p>
@@ -582,7 +582,7 @@ export default function QuizHome() {
                 SICHERE DIR JETZT DEINE PRÄMIEN
               </h3>
               <p className="text-primary-foreground/70 text-xs font-semibold mb-6 max-w-sm mx-auto">
-                Combo Pack + €150 Gutschein gratis — du zahlst nur <span className="text-centauro-gold font-black">€12 Versand</span>!
+                Bundle + €150 Gutschein gratis — du zahlst nur <span className="text-centauro-gold font-black">€12 Versand</span>!
               </p>
               <Button
                 onClick={() => {
@@ -701,7 +701,7 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-8">
             {[
-              { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand', desc: 'Combo + Gutschein' },
+              { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand', desc: 'Bundle + Gutschein' },
               { icon: Truck, color: 'text-foreground', title: 'Lieferung', desc: '3-5 Werktage' },
               { icon: Shield, color: 'text-foreground', title: 'Sicher', desc: 'Geschützter Kauf' },
             ].map(({ icon: Icon, color, title, desc }) => (

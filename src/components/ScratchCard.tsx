@@ -21,7 +21,7 @@ const ALL_ITEMS: ScratchItem[] = [
   { id: 'creatine', label: 'Ultrapure Creatine', emoji: '💪', image: creatineImg },
   { id: 'isoclear', label: 'Isoclear Isolate', emoji: '🥤', image: isoclearImg },
   { id: 'whey', label: 'Designer Whey', emoji: '🥇', image: designerWheyImg },
-  { id: 'combo', label: 'ESN Combo (8 Produkte)', emoji: '🎁', image: comboImg },
+  { id: 'combo', label: 'ESN Bundle (8 Produkte)', emoji: '🎁', image: comboImg },
   { id: 'bar', label: 'Designer Protein Bar', emoji: '🍫', image: proteinBarImg },
 ];
 

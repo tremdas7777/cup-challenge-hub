@@ -877,9 +877,9 @@ export default function Checkout() {
         <Card className="p-4 mb-6 border border-border">
           <h3 className="text-sm font-black text-foreground mb-3 uppercase tracking-tight">Bestellübersicht</h3>
           <div className="flex items-center gap-3 mb-2">
-            <img src={comboPackImg} alt="ESN Combo" className="w-12 h-12 object-contain" />
+            <img src={comboPackImg} alt="ESN Bundle" className="w-12 h-12 object-contain" />
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">ESN Supplement Combo Pack</p>
+              <p className="text-xs font-bold text-foreground">ESN Bundle</p>
               <p className="text-[10px] text-muted-foreground">8 Premium Produkte</p>
             </div>
             <span className="text-xs font-black text-centauro-green">GRATIS</span>

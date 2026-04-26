@@ -1,0 +1,1 @@
+UPDATE public.gateway_config SET product_ticket_cents = 3290, updated_at = now();

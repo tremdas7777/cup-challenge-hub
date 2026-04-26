@@ -6,53 +6,62 @@
 
 @layer base {
   :root {
-    /* Centauro Brand - RED (#E60000) + White + Dark Gray */
+    /* ESN Brand - Dark/Black + Orange/Amber accent */
     --background: 0 0% 100%;
-    --foreground: 0 0% 13%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 13%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 13%;
+    --popover-foreground: 0 0% 10%;
 
-    /* Centauro Red - exact brand color #E60000 = hsl(0, 100%, 45%) */
-    --primary: 0 100% 45%;
+    /* ESN Black - exact brand color #1A1A1A */
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 13%;
+    --secondary-foreground: 0 0% 10%;
 
     --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
     --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 13%;
+    --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 0 100% 45%;
+    --ring: 30 100% 50%;
 
     --radius: 0.5rem;
 
-    /* Centauro custom tokens */
-    --centauro-red: 0 100% 45%;
-    --centauro-dark-red: 0 100% 35%;
-    --centauro-black: 0 0% 13%;
-    --centauro-gold: 43 96% 56%;
+    /* ESN custom tokens */
+    --esn-black: 0 0% 10%;
+    --esn-dark: 0 0% 7%;
+    --esn-charcoal: 0 0% 15%;
+    --esn-orange: 30 100% 50%;
+    --esn-green: 145 63% 42%;
+    --esn-gold: 43 96% 56%;
+
+    /* Keep centauro names for backward compat with unchanged components */
+    --centauro-red: 0 0% 10%;
+    --centauro-dark-red: 0 0% 7%;
+    --centauro-black: 0 0% 7%;
+    --centauro-gold: 30 100% 50%;
     --centauro-green: 145 63% 42%;
+    --centauro-success: 145 63% 42%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 26%;
-    --sidebar-primary: 0 100% 45%;
+    --sidebar-primary: 0 0% 10%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 91%;
-    --sidebar-ring: 0 100% 45%;
+    --sidebar-ring: 30 100% 50%;
   }
 }
 
@@ -73,7 +82,7 @@
     min-height: 100%;
     min-height: 100svh;
     min-height: 100dvh;
-    background: hsl(var(--centauro-black));
+    background: hsl(var(--esn-dark));
   }
 
   body {
@@ -81,7 +90,7 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
     margin: 0;
-    background-color: hsl(var(--centauro-black));
+    background-color: hsl(var(--esn-dark));
     overscroll-behavior-y: none;
   }
 
@@ -92,17 +101,17 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px hsl(0 100% 45% / 0.3); }
-  50% { box-shadow: 0 0 30px hsl(0 100% 45% / 0.6); }
+  0%, 100% { box-shadow: 0 0 15px hsl(30 100% 50% / 0.3); }
+  50% { box-shadow: 0 0 30px hsl(30 100% 50% / 0.6); }
 }
 
 @keyframes pulse-glow-green {
   0%, 100% { 
-    box-shadow: 0 0 20px hsl(145 63% 42% / 0.4), 0 0 60px hsl(145 63% 42% / 0.15), inset 0 0 20px hsl(145 63% 42% / 0.1);
+    box-shadow: 0 0 20px hsl(30 100% 50% / 0.4), 0 0 60px hsl(30 100% 50% / 0.15), inset 0 0 20px hsl(30 100% 50% / 0.1);
     transform: scale(1);
   }
   50% { 
-    box-shadow: 0 0 40px hsl(145 63% 42% / 0.7), 0 0 100px hsl(145 63% 42% / 0.3), inset 0 0 30px hsl(145 63% 42% / 0.15);
+    box-shadow: 0 0 40px hsl(30 100% 50% / 0.7), 0 0 100px hsl(30 100% 50% / 0.3), inset 0 0 30px hsl(30 100% 50% / 0.15);
     transform: scale(1.03);
   }
 }

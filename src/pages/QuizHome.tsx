@@ -12,16 +12,9 @@ import { CheckCircle, Trophy, Truck, Shield, Clock, Users, Gift, ShoppingCart, S
 import { trackEvent } from '@/lib/funnelTracking';
 import { fireConversionEvent } from '@/lib/pixelManager';
 import { fireSaleWebhook } from '@/lib/webhookManager';
-import camisaAmarelaImg from '@/assets/camisa-brasil-hero.webp';
-import camisaAzulImg from '@/assets/camisa-azul.png';
-import albumImg from '@/assets/album-copa-hero.webp';
-import centauroLogo from '@/assets/centauro-logo.webp';
-import stadiumHero from '@/assets/stadium-hero.webp';
-import centauroWorldcupLogo from '@/assets/centauro-worldcup-logo.webp';
-import cbfLogo from '@/assets/cbf-logo.webp';
-import ingressosVipImg from '@/assets/ingressos-vip-copa.png';
-import quizBannerPreload from '@/assets/quiz-banner-hq.webp';
-import quizBannerHome from '@/assets/quiz-banner-home.webp';
+import esnLogo from '@/assets/esn-logo.png';
+import quizBannerPreload from '@/assets/esn-quiz-banner.png';
+import gymHero from '@/assets/esn-hero-banner.jpg';
 import { Mail, Phone, MapPin as MapPinIcon } from 'lucide-react';
 import { playCorrectSound, playWrongSound, playRevealSound, unlockAudio } from '@/lib/quizSounds';
 
@@ -35,51 +28,51 @@ interface Question {
 const quizQuestions: Question[] = [
   {
     id: 1,
-    question: 'Quantas vezes o Brasil ganhou a Copa do Mundo?',
-    options: ['3 vezes', '4 vezes', '5 vezes', '6 vezes'],
+    question: 'Wie viel Gramm Protein sollte man täglich pro kg Körpergewicht zu sich nehmen?',
+    options: ['0,5g', '1,0g', '1,6–2,2g', '5,0g'],
     correctAnswer: 2,
   },
   {
     id: 2,
-    question: 'Em que ano o Brasil venceu sua primeira Copa do Mundo?',
-    options: ['1950', '1958', '1962', '1970'],
+    question: 'Welches Supplement ist das meistverkaufte weltweit?',
+    options: ['Kreatin', 'Whey Protein', 'BCAAs', 'Omega-3'],
     correctAnswer: 1,
   },
   {
     id: 3,
-    question: 'Qual jogador é o maior artilheiro da Seleção em Copas?',
-    options: ['Ronaldo Fenômeno', 'Pelé', 'Ronaldinho', 'Neymar'],
-    correctAnswer: 0,
-  },
-  {
-    id: 4,
-    question: 'Quantos gols Pelé marcou pela Seleção Brasileira?',
-    options: ['70 gols', '77 gols', '85 gols', '90 gols'],
+    question: 'Wofür steht ESN?',
+    options: ['European Sport Nutrition', 'Elite Sports Nutrition', 'Essential Supplement Network', 'Energy Sport Nährstoffe'],
     correctAnswer: 1,
   },
   {
+    id: 4,
+    question: 'Was ist Kreatin-Monohydrat?',
+    options: ['Ein Vitamin', 'Ein Kohlenhydrat', 'Eine natürliche Aminosäure', 'Ein Fettverbrenner'],
+    correctAnswer: 2,
+  },
+  {
     id: 5,
-    question: 'Contra qual seleção será o segundo jogo do Brasil na fase de grupos da Copa do Mundo 2026?',
-    options: ['Haiti', 'Escócia', 'Marrocos', 'Colômbia'],
+    question: 'Wie viele essentielle Aminosäuren gibt es?',
+    options: ['5', '9', '12', '20'],
     correctAnswer: 1,
   },
   {
     id: 6,
-    question: 'Qual seleção é a maior rival do Brasil em Copas?',
-    options: ['Itália', 'Alemanha', 'Argentina', 'França'],
-    correctAnswer: 2,
+    question: 'Was ist das anabole Fenster nach dem Training?',
+    options: ['5 Minuten', '30–60 Minuten', '24 Stunden', 'Es existiert nicht'],
+    correctAnswer: 1,
   },
   {
     id: 7,
-    question: 'Qual país sediará a Copa do Mundo 2026?',
-    options: ['Brasil', 'Argentina', 'EUA, México e Canadá', 'Austrália'],
-    correctAnswer: 2,
+    question: 'Welches Vitamin wird durch Sonnenlicht produziert?',
+    options: ['Vitamin A', 'Vitamin B12', 'Vitamin C', 'Vitamin D'],
+    correctAnswer: 3,
   },
   {
     id: 8,
-    question: 'Quantas Copas do Mundo Ronaldo Fenômeno disputou?',
-    options: ['2 Copas', '3 Copas', '4 Copas', '5 Copas'],
-    correctAnswer: 2,
+    question: 'Was ist der Hauptvorteil von Whey Isolat gegenüber Konzentrat?',
+    options: ['Besserer Geschmack', 'Höherer Proteingehalt', 'Mehr Fett', 'Mehr Zucker'],
+    correctAnswer: 1,
   },
 ];
 
@@ -94,7 +87,7 @@ export default function QuizHome() {
 
   // Preload ALL critical images during splash, then dismiss splash
   useEffect(() => {
-    const criticalImages = [centauroLogo, cbfLogo, quizBannerPreload, stadiumHero, camisaAmarelaImg, camisaAzulImg, albumImg];
+    const criticalImages = [esnLogo, quizBannerPreload, gymHero];
     let loaded = 0;
     const total = criticalImages.length;
     const startTime = Date.now();
@@ -145,8 +138,7 @@ export default function QuizHome() {
   // Centralized Safari theme-color management based on current screen
   useEffect(() => {
     // Use red for splash, loading animation, and scratch card screens; dark for others
-    const isRedScreen = showSplash || showAnimation || showScratchCard;
-    const color = isRedScreen ? '#E30613' : '#212121';
+    const color = '#1A1A1A';
 
     let dynamicTag = document.head.querySelector('meta[name="theme-color"][data-dynamic-theme="true"]') as HTMLMetaElement | null;
 
@@ -326,9 +318,10 @@ export default function QuizHome() {
       <div className={`fixed inset-0 z-50 flex min-h-[100svh] min-h-[100dvh] w-full flex-col items-center justify-center overflow-hidden overscroll-none bg-primary transition-all duration-400 ${splashExiting ? 'opacity-0 scale-110' : 'opacity-100 scale-100'}`}>
         <div className="relative flex flex-col items-center gap-6">
           <img
-            src={centauroLogo}
-            alt="Centauro"
-            className="h-16 md:h-24 object-contain brightness-0 invert animate-fade-in"
+            src={esnLogo}
+            alt="ESN"
+            className="h-16 md:h-24 object-contain animate-fade-in"
+            style={{ mixBlendMode: 'screen' }}
           />
           <div className="flex items-center gap-3 animate-fade-in" style={{ animationDelay: '0.3s', animationFillMode: 'both' }}>
             <div className="w-2 h-2 rounded-full bg-primary-foreground/80 animate-bounce" style={{ animationDelay: '0s' }} />
@@ -344,38 +337,34 @@ export default function QuizHome() {
   if (showHome) {
     return (
       <div className={`bg-foreground flex flex-col min-h-screen min-h-[100svh] min-h-[100dvh] transition-all duration-500 ease-in-out ${homeExiting ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+        {/* ESN Logo Bar */}
         <div className="bg-primary py-4 px-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-center -translate-x-2">
-            <img src={centauroLogo} alt="Centauro" className="h-14 md:h-20 object-contain brightness-0 invert" />
-            <div className="w-px h-8 bg-primary-foreground/30 ml-2 mr-4" />
-            <img src={cbfLogo} alt="CBF" className="h-14 md:h-20 object-contain" />
+          <div className="max-w-4xl mx-auto flex items-center justify-center">
+            <img src={esnLogo} alt="ESN" className="h-14 md:h-20 object-contain" style={{ mixBlendMode: 'screen' }} />
           </div>
         </div>
 
-        {/* Players banner - same size as quiz */}
-        <div className="w-full h-40 md:h-56 lg:h-72 relative overflow-hidden z-10">
-          <img
-             src={quizBannerPreload}
-            alt="Jogadores Seleção Brasileira"
-            className="w-full h-full object-cover object-top block"
-            style={{ WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 65%, rgba(0,0,0,0.3) 85%, transparent 100%)', maskImage: 'linear-gradient(to bottom, black 0%, black 65%, rgba(0,0,0,0.3) 85%, transparent 100%)' }}
-          />
-        </div>
-
-        {/* Hero content with stadium as background - fills all remaining space */}
+        {/* Full hero section with single background image */}
         <div
-          className="relative flex-1 flex flex-col items-center justify-center text-center px-5 py-16 md:py-12 -mt-12 min-h-[60vh]"
-          style={{ backgroundImage: `url(${stadiumHero})`, backgroundSize: 'cover', backgroundPosition: 'center top' }}
+          className="relative flex-1 flex flex-col items-center justify-center text-center px-5 py-16 md:py-20"
+          style={{
+            backgroundImage: `url(${gymHero})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            minHeight: '80vh',
+          }}
         >
-          <div className="absolute inset-0 bg-foreground/80" />
+          {/* Dark gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/90" />
+
           <div className="relative z-10 max-w-lg mx-auto flex flex-col items-center">
 
-            <h1 className="text-3xl md:text-5xl font-black text-primary-foreground leading-[1.1] mb-4 tracking-tight">
-              Prove que você é o maior torcedor do Brasil
+            <h1 className="text-3xl md:text-5xl font-black text-primary-foreground leading-[1.1] mb-4 tracking-tight drop-shadow-lg">
+              Teste dein Fitness-Wissen & gewinne Preise
             </h1>
 
-            <p className="text-sm md:text-lg text-primary-foreground/70 mb-8 leading-relaxed max-w-md">
-              Teste seus conhecimentos sobre a Seleção e <strong className="text-primary-foreground">desbloqueie prêmios exclusivos</strong>
+            <p className="text-sm md:text-lg text-primary-foreground/80 mb-8 leading-relaxed max-w-md drop-shadow">
+              Beantworte 8 Fragen über Supplements & Ernährung und <strong className="text-primary-foreground">sichere dir exklusive ESN Prämien</strong>
             </p>
 
             <Button
@@ -391,15 +380,15 @@ export default function QuizHome() {
                   animation: 'shimmer 2.5s linear infinite',
                 }}
               />
-              <span className="relative z-10">PARTICIPAR AGORA</span>
+              <span className="relative z-10">JETZT STARTEN</span>
             </Button>
 
-            <p className="text-primary-foreground/30 text-[11px] mt-3 font-semibold">100% Gratuito · 2 minutos · Resultado na hora</p>
+            <p className="text-primary-foreground/30 text-[11px] mt-3 font-semibold">100% Kostenlos · 2 Minuten · Sofort Ergebnis</p>
 
-            {/* Minimal social proof */}
+            {/* Social proof */}
             <div className="flex items-center gap-1.5 mt-6 text-primary-foreground/40 text-[11px] font-bold">
               <Users size={12} className="text-centauro-green/70" />
-              <span>2.847 pessoas já participaram</span>
+              <span>4.231 Teilnehmer haben bereits mitgemacht</span>
             </div>
           </div>
         </div>
@@ -420,12 +409,10 @@ export default function QuizHome() {
   if (quizComplete) {
     return (
       <div className="min-h-screen bg-background">
-        {/* Centauro Top Bar */}
+        {/* ESN Top Bar */}
         <div className="bg-primary py-4 px-4">
-          <div className="max-w-4xl mx-auto flex items-center justify-center -translate-x-2">
-            <img src={centauroLogo} alt="Centauro" className="h-14 md:h-20 object-contain brightness-0 invert" />
-            <div className="w-px h-8 bg-primary-foreground/30 ml-2 mr-4" />
-            <img src={cbfLogo} alt="CBF" className="h-14 md:h-20 object-contain" />
+          <div className="max-w-4xl mx-auto flex items-center justify-center">
+            <img src={esnLogo} alt="ESN" className="h-14 md:h-20 object-contain" style={{ mixBlendMode: 'screen' }} />
           </div>
         </div>
 
@@ -433,13 +420,13 @@ export default function QuizHome() {
         <div className="bg-foreground text-primary-foreground py-2.5">
           <div className="max-w-4xl mx-auto px-4 flex items-center justify-center gap-6 text-xs font-bold">
             <div className="flex items-center gap-2">
-              <Clock size={14} className="text-primary" />
-              <span>Oferta expira em:</span>
-              <span className="text-primary animate-countdown font-mono">{formatTime(timeLeft)}</span>
+              <Clock size={14} className="text-centauro-gold" />
+              <span>Angebot endet in:</span>
+              <span className="text-centauro-gold animate-countdown font-mono">{formatTime(timeLeft)}</span>
             </div>
             <div className="hidden md:flex items-center gap-2">
               <Users size={14} className="text-centauro-gold" />
-              <span>{viewersCount} pessoas vendo agora</span>
+              <span>{viewersCount} Personen sehen sich das gerade an</span>
             </div>
           </div>
         </div>
@@ -451,47 +438,47 @@ export default function QuizHome() {
           </div>
           <Trophy className="w-16 h-16 text-centauro-gold mx-auto mb-3" />
           <h1 className="text-4xl md:text-5xl font-black text-primary-foreground mb-2 tracking-tight">
-            PARABÉNS!
+            HERZLICHEN GLÜCKWUNSCH!
           </h1>
           <p className="text-lg font-semibold text-primary-foreground/90">
-            Você desbloqueou seus prêmios exclusivos!
+            Du hast deine exklusiven Prämien freigeschaltet!
           </p>
         </div>
 
-        {/* Contest Banner - 2 Ingressos Copa */}
+        {/* Contest Banner - Supplement Bundle */}
         <div className="bg-centauro-gold text-foreground py-0">
           <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
             <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
               <div className="flex items-center gap-3 shrink-0">
                 <div className="w-14 h-14 bg-foreground rounded-full flex items-center justify-center">
-                  <Ticket className="w-7 h-7 text-centauro-gold" />
+                  <Gift className="w-7 h-7 text-centauro-gold" />
                 </div>
               </div>
               <div className="text-center md:text-left flex-1">
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 mb-1">Bônus Exclusivo</p>
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70 mb-1">Exklusiver Bonus</p>
                 <h3 className="text-xl md:text-2xl font-black tracking-tight mb-1">
-                  CONCORRA A 2 INGRESSOS PARA A COPA 2026!
+                  GEWINNE EIN PREMIUM SUPPLEMENT-PAKET!
                 </h3>
                 <p className="text-sm font-semibold opacity-80">
-                  Ao garantir seus prêmios, você automaticamente concorre a <strong>2 ingressos VIP</strong> para assistir a Copa do Mundo 2026 com <strong>tudo pago</strong>!
+                  Sichere dir deine Prämien und nimm automatisch an der Verlosung eines <strong>ESN Premium Pakets</strong> im Wert von <strong>€500</strong> teil!
                 </p>
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3 mt-5">
               <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <Plane className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">Passagem Aérea</p>
-                <p className="text-[9px] opacity-70">Ida e Volta</p>
+                <Gift className="w-5 h-5 mx-auto mb-1 opacity-80" />
+                <p className="text-[10px] font-bold">Whey Protein</p>
+                <p className="text-[9px] opacity-70">Designer Whey</p>
               </div>
               <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <MapPin className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">Hospedagem</p>
-                <p className="text-[9px] opacity-70">Hotel 5 Estrelas</p>
+                <Star className="w-5 h-5 mx-auto mb-1 opacity-80" />
+                <p className="text-[10px] font-bold">Kreatin</p>
+                <p className="text-[9px] opacity-70">Crea-Stack</p>
               </div>
               <div className="bg-foreground/10 rounded-md p-3 text-center">
-                <Ticket className="w-5 h-5 mx-auto mb-1 opacity-80" />
-                <p className="text-[10px] font-bold">2 Ingressos VIP</p>
-                <p className="text-[9px] opacity-70">Jogo do Brasil</p>
+                <Zap className="w-5 h-5 mx-auto mb-1 opacity-80" />
+                <p className="text-[10px] font-bold">Pre-Workout</p>
+                <p className="text-[9px] opacity-70">Crank Booster</p>
               </div>
             </div>
           </div>
@@ -501,26 +488,26 @@ export default function QuizHome() {
           {/* Products */}
           <div className="flex items-center gap-2 mb-6">
             <div className="h-0.5 flex-1 bg-primary" />
-            <h2 className="text-xl font-black text-foreground px-4 tracking-tight uppercase">Seus Prêmios</h2>
+            <h2 className="text-xl font-black text-foreground px-4 tracking-tight uppercase">Deine Prämien</h2>
             <div className="h-0.5 flex-1 bg-primary" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
-            {/* Camisa */}
-            <Card data-shirt-card className={`overflow-hidden border shadow-sm hover:shadow-md transition-shadow ${showSelectionError && (!selectedSize || !selectedColor) ? 'border-destructive' : 'border-border'}`}>
+            {/* Whey Protein */}
+            <Card data-shirt-card className={`overflow-hidden border shadow-sm hover:shadow-md transition-shadow ${showSelectionError && !selectedSize ? 'border-destructive' : 'border-border'}`}>
               <div className="relative bg-secondary p-6 flex items-center justify-center h-56">
                 <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                  Exclusivo
+                  Exklusiv
                 </span>
-                <img src={selectedColor === 'azul' ? camisaAzulImg : camisaAmarelaImg} alt="Camisa Brasil 2026" className="max-h-44 object-contain" loading="eager" fetchPriority="high" />
+                <div className="text-7xl">🥤</div>
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">Camisa Brasil 2026</h3>
-                <p className="text-muted-foreground text-xs mb-3">Seleção Brasileira - Edição Copa do Mundo</p>
+                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Designer Whey Protein</h3>
+                <p className="text-muted-foreground text-xs mb-3">Premium Whey Protein - 1kg Beutel</p>
                 
-                {/* Color selector */}
+                {/* Flavor selector */}
                 <div className="mb-3">
-                  <p className="text-xs font-bold text-foreground mb-2">Cor:</p>
+                  <p className="text-xs font-bold text-foreground mb-2">Geschmack:</p>
                   <div className="flex gap-3">
                     <button
                       onClick={() => { setSelectedColor('amarela'); setShowSelectionError(false); }}
@@ -530,8 +517,8 @@ export default function QuizHome() {
                           : 'bg-secondary text-foreground border-border hover:border-primary/50'
                       }`}
                     >
-                      <div className="w-5 h-5 rounded-full bg-yellow-400 border border-yellow-500" />
-                      Amarela
+                      <div className="w-5 h-5 rounded-full bg-amber-700 border border-amber-800" />
+                      Schokolade
                     </button>
                     <button
                       onClick={() => { setSelectedColor('azul'); setShowSelectionError(false); }}
@@ -541,68 +528,48 @@ export default function QuizHome() {
                           : 'bg-secondary text-foreground border-border hover:border-primary/50'
                       }`}
                     >
-                      <div className="w-5 h-5 rounded-full bg-blue-800 border border-blue-900" />
-                      Azul
+                      <div className="w-5 h-5 rounded-full bg-pink-300 border border-pink-400" />
+                      Vanille
                     </button>
                   </div>
-                  {showSelectionError && !selectedColor && <p className="text-destructive text-xs font-semibold mt-1.5">Selecione uma cor</p>}
+                  {showSelectionError && !selectedColor && <p className="text-destructive text-xs font-semibold mt-1.5">Bitte wähle einen Geschmack</p>}
                 </div>
 
-                {/* Size selector */}
-                <div className="mb-3">
-                  <p className="text-xs font-bold text-foreground mb-2">Tamanho:</p>
-                  <div className="flex gap-2">
-                    {['P', 'M', 'G', 'GG', 'XG', 'XXG'].map((size) => (
-                      <button
-                        key={size}
-                        onClick={() => { setSelectedSize(size); setShowSelectionError(false); }}
-                        className={`w-10 h-10 rounded-md text-xs font-black border-2 transition-all ${
-                          selectedSize === size
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-secondary text-foreground border-border hover:border-primary/50'
-                        }`}
-                      >
-                        {size}
-                      </button>
-                    ))}
-                  </div>
-                  {showSelectionError && !selectedSize && <p className="text-destructive text-xs font-semibold mt-1.5">Selecione um tamanho</p>}
-                </div>
                 <ul className="space-y-1.5 text-xs mb-4">
-                  {['Qualidade Premium', 'Bordado Oficial CBF'].map((item) => (
+                  {['Premium Qualität', '30g Protein pro Portion', 'Made in Germany'].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-foreground">
                       <CheckCircle size={12} className="text-centauro-green shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-2 pt-3 border-t border-border">
-                  <span className="text-muted-foreground line-through text-xs">R$ 249,90</span>
-                  <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRÁTIS</span>
+                  <span className="text-muted-foreground line-through text-xs">€49,90</span>
+                  <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRATIS</span>
                 </div>
               </div>
             </Card>
 
-            {/* Álbum */}
+            {/* Kreatin */}
             <Card className="overflow-hidden border border-border shadow-sm hover:shadow-md transition-shadow">
               <div className="relative bg-secondary p-6 flex items-center justify-center h-56">
                 <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider">
-                  Exclusivo
+                  Exklusiv
                 </span>
-                <img src={albumImg} alt="Álbum Copa 2026" className="max-h-44 object-contain" loading="eager" fetchPriority="high" />
+                <div className="text-7xl">💪</div>
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">Álbum Copa 2026</h3>
-                <p className="text-muted-foreground text-xs mb-3">Panini + 50 Pacotes de Figurinhas</p>
+                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Kreatin Monohydrat</h3>
+                <p className="text-muted-foreground text-xs mb-3">Creapure® Kreatin - 500g Dose</p>
                 <ul className="space-y-1.5 text-xs mb-4">
-                  {['140+ packs de figurinhas', 'Edição Limitada FIFA', 'Figurinhas Exclusivas'].map((item) => (
+                  {['Creapure® Qualität', 'Mikronisiert', 'Laborgeprüft'].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-foreground">
                       <CheckCircle size={12} className="text-centauro-green shrink-0" /> {item}
                     </li>
                   ))}
                 </ul>
                 <div className="flex items-center gap-2 pt-3 border-t border-border">
-                  <span className="text-muted-foreground line-through text-xs">R$ 189,90</span>
-                  <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRÁTIS</span>
+                  <span className="text-muted-foreground line-through text-xs">€34,90</span>
+                  <span className="bg-centauro-green/10 text-centauro-green font-black text-sm px-2 py-0.5 rounded">GRATIS</span>
                 </div>
               </div>
             </Card>
@@ -611,39 +578,39 @@ export default function QuizHome() {
           {/* Order Summary */}
           <Card className="p-6 mb-8 border border-border shadow-sm">
             <h3 className="text-lg font-black text-foreground mb-5 text-center uppercase tracking-tight">
-              Resumo do Pedido
+              Bestellübersicht
             </h3>
             <div className="space-y-3 mb-5">
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <img src={selectedColor === 'azul' ? camisaAzulImg : camisaAmarelaImg} alt={`Camisa Brasil 2026 ${selectedColor === 'azul' ? 'Azul' : 'Amarela'}`} className="w-16 h-16 object-contain rounded" />
+                <div className="w-16 h-16 flex items-center justify-center text-3xl">🥤</div>
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">Camisa Brasil 2026 {selectedColor === 'azul' ? '(Azul)' : selectedColor === 'amarela' ? '(Amarela)' : ''}</p>
-                  <p className="text-xs text-muted-foreground">Edição Copa do Mundo{selectedSize ? ` • Tam: ${selectedSize}` : ''}</p>
+                  <p className="font-bold text-foreground text-sm">ESN Designer Whey {selectedColor === 'azul' ? '(Vanille)' : selectedColor === 'amarela' ? '(Schokolade)' : ''}</p>
+                  <p className="text-xs text-muted-foreground">Premium Whey Protein - 1kg</p>
                 </div>
-                <p className="font-black text-centauro-green text-sm">GRÁTIS</p>
+                <p className="font-black text-centauro-green text-sm">GRATIS</p>
               </div>
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <img src={albumImg} alt="Álbum Copa 2026" className="w-16 h-16 object-contain rounded" />
+                <div className="w-16 h-16 flex items-center justify-center text-3xl">💪</div>
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">Álbum Copa 2026 + 50 Packs</p>
-                  <p className="text-xs text-muted-foreground">Panini Edição Limitada</p>
+                  <p className="font-bold text-foreground text-sm">ESN Kreatin Monohydrat 500g</p>
+                  <p className="text-xs text-muted-foreground">Creapure® Qualität</p>
                 </div>
-                <p className="font-black text-centauro-green text-sm">GRÁTIS</p>
+                <p className="font-black text-centauro-green text-sm">GRATIS</p>
               </div>
               <div className="border-t border-foreground/20" />
               <div className="flex items-center gap-4 p-3.5 bg-centauro-gold/10 rounded-md border border-centauro-gold/30">
-                <img src={ingressosVipImg} alt="Ingressos VIP Copa 2026" className="w-16 h-16 object-contain rounded flex-shrink-0" />
+                <div className="w-16 h-16 flex items-center justify-center text-3xl">🎁</div>
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">Concorrendo a 2 Ingressos VIP da Copa</p>
-                  <p className="text-xs text-muted-foreground">Passagem + Hotel + Ingressos VIP • Sorteio em 15/06/2026</p>
+                  <p className="font-bold text-foreground text-sm">Premium Supplement-Paket Verlosung</p>
+                  <p className="text-xs text-muted-foreground">ESN Paket im Wert von €500 • Verlosung am 15.06.2026</p>
                 </div>
-                <p className="font-black text-centauro-gold text-sm">INCLUSO</p>
+                <p className="font-black text-centauro-gold text-sm">INKLUSIVE</p>
               </div>
             </div>
             <div className="bg-secondary p-5 rounded-md text-center">
-              <p className="text-muted-foreground text-xs font-medium mb-1">Você economiza</p>
-              <p className="text-3xl font-black text-foreground mb-0.5 line-through decoration-destructive decoration-2">R$ 439,80</p>
-              <p className="text-sm font-bold text-centauro-green">em prêmios 100% gratuitos!</p>
+              <p className="text-muted-foreground text-xs font-medium mb-1">Du sparst</p>
+              <p className="text-3xl font-black text-foreground mb-0.5 line-through decoration-destructive decoration-2">€84,80</p>
+              <p className="text-sm font-bold text-centauro-green">an 100% kostenlosen Prämien!</p>
             </div>
           </Card>
 
@@ -655,17 +622,17 @@ export default function QuizHome() {
             <div className="relative z-10">
               <Gift className="w-10 h-10 text-primary-foreground mx-auto mb-3 opacity-80" />
               <p className="text-primary-foreground/60 text-xs font-bold tracking-[0.2em] uppercase mb-2">
-                Último Passo
+                Letzter Schritt
               </p>
               <h3 className="text-3xl md:text-4xl font-black text-primary-foreground mb-2 tracking-tight">
-                RESGATE SEUS PRÊMIOS AGORA
+                SICHERE DIR JETZT DEINE PRÄMIEN
               </h3>
               <p className="text-primary-foreground/70 text-xs font-semibold mb-6 max-w-sm mx-auto">
-                Resgate imediato da camisa e álbum + concorra ao <span className="text-centauro-gold font-black">sorteio de 2 ingressos VIP</span> para a Copa 2026! Sorteio: 15/06/2026
+                Sofortige Lieferung von Whey & Kreatin + nimm an der <span className="text-centauro-gold font-black">Verlosung des Premium Pakets</span> teil!
               </p>
               <Button
                 onClick={() => {
-                  if (!selectedSize || !selectedColor) {
+                  if (!selectedColor) {
                     setShowSelectionError(true);
                     const card = document.querySelector('[data-shirt-card]');
                     card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -681,16 +648,16 @@ export default function QuizHome() {
                 className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-6 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
-                GARANTIR MEUS PRÊMIOS
+                JETZT SICHERN
               </Button>
               <div className="flex items-center justify-center gap-1.5 mt-4">
-                <Ticket size={12} className="text-centauro-gold" />
+                <Gift size={12} className="text-centauro-gold" />
                 <p className="text-centauro-gold text-xs font-bold">
-                  + Sorteio de 2 Ingressos VIP Copa 2026 (Data: 15/06/2026)
+                  + Premium Paket Verlosung (€500 Wert)
                 </p>
               </div>
               <p className="text-primary-foreground/40 text-[10px] font-medium mt-2">
-                ⏰ Oferta válida por {formatTime(timeLeft)}
+                ⏰ Angebot gültig für {formatTime(timeLeft)}
               </p>
             </div>
           </div>
@@ -700,16 +667,16 @@ export default function QuizHome() {
              <DialogContent className="max-w-[calc(100%-2.5rem)] sm:max-w-md mx-auto rounded-2xl p-5 max-h-[85dvh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-center text-xl font-black text-foreground">
-                  {showCepInput ? `Olá, ${firstNameDisplay || 'Cliente'}! 👋` : 'Identificação'}
+                  {showCepInput ? `Hallo, ${firstNameDisplay || 'Kunde'}! 👋` : 'Identifikation'}
                 </DialogTitle>
               </DialogHeader>
 
               {!showCepInput ? (
                 <div className="space-y-4 pt-2">
                   <div className="bg-secondary p-4 rounded-lg text-center">
-                    <img src={centauroLogo} alt="Centauro" className="h-10 mx-auto mb-3 object-contain" />
-                    <p className="font-bold text-foreground text-sm mb-1">Já é cliente Centauro?</p>
-                    <p className="text-muted-foreground text-xs mb-3">Insira seu CPF para localizar seus dados</p>
+                    <img src={esnLogo} alt="ESN" className="h-10 mx-auto mb-3 object-contain" style={{ mixBlendMode: 'screen' }} />
+                    <p className="font-bold text-foreground text-sm mb-1">Bereits ESN Kunde?</p>
+                    <p className="text-muted-foreground text-xs mb-3">Gib deine E-Mail ein, um deine Daten zu finden</p>
                     <Input
                       placeholder="000.000.000-00"
                       value={cpfValue}
@@ -728,13 +695,13 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
                       className="w-full mt-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-5"
                       disabled={cpfValue.replace(/\D/g, '').length < 11 || cpfLoading}
                     >
-                      {cpfLoading ? 'Buscando...' : 'Buscar meus dados'}
+                      {cpfLoading ? 'Suche...' : 'Meine Daten suchen'}
                     </Button>
                   </div>
 
                   <div className="relative flex items-center gap-3">
                     <div className="flex-1 h-px bg-border" />
-                    <span className="text-muted-foreground text-xs font-semibold">ou</span>
+                    <span className="text-muted-foreground text-xs font-semibold">oder</span>
                     <div className="flex-1 h-px bg-border" />
                   </div>
 
@@ -747,7 +714,7 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
                     className="w-full py-5 font-bold text-sm"
                   >
                     <MapPin size={16} className="mr-2" />
-                    Inserir endereço manualmente
+                    Adresse manuell eingeben
                   </Button>
                 </div>
               ) : (
@@ -755,10 +722,10 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
                   <div className="bg-secondary p-4 rounded-lg text-center">
                     <Truck size={24} className="text-primary mx-auto mb-3" />
                     <p className="font-bold text-foreground text-sm mb-1">
-                      Dados encontrados com sucesso!
+                      Daten erfolgreich gefunden!
                     </p>
                     <p className="text-muted-foreground text-xs">
-                      Clique abaixo para prosseguir com o resgate
+                      Klicke unten, um fortzufahren
                     </p>
                   </div>
                   <Button
@@ -769,14 +736,14 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
                     className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-6 rounded-lg"
                     style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)' }}
                   >
-                    CONTINUAR
+                    WEITER
                   </Button>
                   <Button
                     onClick={() => setShowCepInput(false)}
                     variant="ghost"
                     className="w-full text-muted-foreground text-xs"
                   >
-                    ← Voltar
+                    ← Zurück
                   </Button>
                 </div>
               )}
@@ -786,9 +753,9 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-8">
             {[
-              { icon: CheckCircle, color: 'text-foreground', title: 'Resgate Imediato', desc: 'Camisa + Álbum' },
-              { icon: Truck, color: 'text-foreground', title: 'Entrega', desc: '3-5 dias úteis' },
-              { icon: Shield, color: 'text-foreground', title: 'Seguro', desc: 'Compra protegida' },
+              { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand', desc: 'Whey + Kreatin' },
+              { icon: Truck, color: 'text-foreground', title: 'Lieferung', desc: '3-5 Werktage' },
+              { icon: Shield, color: 'text-foreground', title: 'Sicher', desc: 'Geschützter Kauf' },
             ].map(({ icon: Icon, color, title, desc }) => (
               <div key={title} className="bg-card p-3.5 rounded-lg border border-border text-center">
                 <Icon className={`${color} mx-auto mb-1.5`} size={20} />
@@ -801,14 +768,14 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
           {/* FAQ */}
           <Card className="p-5 md:p-6 border border-border shadow-sm mb-8">
             <h3 className="text-base font-black text-foreground mb-4 text-center uppercase tracking-tight">
-              Perguntas Frequentes
+              Häufig gestellte Fragen
             </h3>
             <div className="space-y-2.5">
               {[
-                { q: 'Como funciona a entrega?', a: 'Após confirmar, você recebe um email com rastreamento. Entrega em 3-5 dias úteis.' },
-                { q: 'Posso devolver?', a: 'Sim! Garantia de 30 dias. Devolvemos seu dinheiro sem perguntas.' },
-                { q: 'Meus dados estão seguros?', a: '100% seguro! SSL 256-bit. Nunca compartilhamos seus dados.' },
-                { q: 'Preciso de suporte?', a: 'Suporte 24/7 via WhatsApp, Email e Chat.' },
+                { q: 'Wie funktioniert die Lieferung?', a: 'Nach Bestätigung erhältst du eine E-Mail mit Tracking-Nummer. Lieferung in 3-5 Werktagen.' },
+                { q: 'Kann ich zurückgeben?', a: 'Ja! 30 Tage Garantie. Geld-zurück ohne Fragen.' },
+                { q: 'Sind meine Daten sicher?', a: '100% sicher! SSL 256-bit. Wir teilen niemals deine Daten.' },
+                { q: 'Brauche ich Support?', a: '24/7 Support via WhatsApp, E-Mail und Chat.' },
               ].map((faq, i) => (
                 <div key={i} className="bg-secondary p-3.5 rounded-md">
                   <p className="font-bold text-foreground text-xs mb-0.5">{faq.q}</p>
@@ -824,46 +791,46 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
         <footer className="bg-centauro-black py-8 px-4">
           <div className="max-w-xl mx-auto text-white">
             <div className="mb-5">
-              <img src={centauroLogo} alt="Centauro" className="h-10 mb-4 brightness-0 invert" />
-              <h4 className="font-bold text-sm mb-2">Links Rápidos</h4>
-              <p className="text-xs opacity-80">Início</p>
+              <img src={esnLogo} alt="ESN" className="h-10 mb-4" style={{ mixBlendMode: 'screen' }} />
+              <h4 className="font-bold text-sm mb-2">Schnelllinks</h4>
+              <p className="text-xs opacity-80">Startseite</p>
             </div>
 
             <div className="mb-5">
-              <h4 className="font-bold text-sm mb-2">Contato</h4>
+              <h4 className="font-bold text-sm mb-2">Kontakt</h4>
               <div className="flex items-center gap-2 mb-1.5">
                 <Mail size={14} className="opacity-80" />
-                <span className="text-xs opacity-80">sac@centauro.com.br</span>
+                <span className="text-xs opacity-80">info@esn.com</span>
               </div>
               <div className="flex items-center gap-2 mb-1.5">
                 <Phone size={14} className="opacity-80" />
-                <span className="text-xs opacity-80">+55 (11) 3003-4916</span>
+                <span className="text-xs opacity-80">+49 (0) 5741 2389-0</span>
               </div>
               <div className="flex items-center gap-2">
                 <MapPinIcon size={14} className="opacity-80" />
-                <span className="text-xs opacity-80">São Paulo, SP - Brasil</span>
+                <span className="text-xs opacity-80">Lübbecke, Deutschland</span>
               </div>
             </div>
 
             <div className="mb-5">
-              <h4 className="font-bold text-sm mb-2">Informação Legal</h4>
-              <p className="text-xs opacity-80"><strong>CNPJ:</strong> 06.347.409/0001-90</p>
-              <p className="text-xs opacity-80"><strong>Razão Social:</strong> SBF Comércio de Produtos Esportivos S.A.</p>
+              <h4 className="font-bold text-sm mb-2">Rechtliche Informationen</h4>
+              <p className="text-xs opacity-80"><strong>USt-IdNr.:</strong> DE 123456789</p>
+              <p className="text-xs opacity-80"><strong>Firma:</strong> Fitmart GmbH & Co. KG</p>
             </div>
 
             <div className="border-t border-white/20 pt-4 mb-5">
-              <h4 className="font-bold text-sm mb-2">Segurança e Confiança</h4>
+              <h4 className="font-bold text-sm mb-2">Sicherheit & Vertrauen</h4>
               <div className="grid grid-cols-2 gap-1.5">
-                <span className="text-xs opacity-80">✓ SSL 256-bit Cifrado</span>
-                <span className="text-xs opacity-80">✓ Garantia de 30 dias</span>
-                <span className="text-xs opacity-80">✓ Suporte 24/7</span>
-                <span className="text-xs opacity-80">✓ Dados Protegidos</span>
+                <span className="text-xs opacity-80">✓ SSL 256-bit Verschlüsselung</span>
+                <span className="text-xs opacity-80">✓ 30 Tage Garantie</span>
+                <span className="text-xs opacity-80">✓ 24/7 Support</span>
+                <span className="text-xs opacity-80">✓ Daten geschützt</span>
               </div>
             </div>
 
             <div className="border-t border-white/20 pt-4 text-center">
-              <p className="text-[10px] opacity-60">© 2026 Centauro Esportes. Todos os direitos reservados.</p>
-              <p className="text-[10px] opacity-60 mt-1">Promoção válida enquanto durar o estoque.</p>
+              <p className="text-[10px] opacity-60">© 2026 ESN - Elite Sports Nutrition. Alle Rechte vorbehalten.</p>
+              <p className="text-[10px] opacity-60 mt-1">Aktion gültig solange der Vorrat reicht.</p>
             </div>
           </div>
         </footer>
@@ -884,9 +851,9 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
         {/* Header: Flag + Question counter + Timer */}
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🇧🇷</span>
+            <span className="text-2xl">🇩🇪</span>
             <span className="text-sm font-bold text-foreground">
-              Pergunta {currentQuestion + 1} de {quizQuestions.length}
+              Frage {currentQuestion + 1} von {quizQuestions.length}
             </span>
           </div>
           <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -899,7 +866,7 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
         <Card className="p-5 md:p-7 border border-border shadow-sm mb-5">
           {/* Difficulty badge */}
           <span className="inline-flex items-center gap-1 bg-centauro-green/15 text-centauro-green text-xs font-bold px-2.5 py-1 rounded-full mb-4">
-            ⚡ {currentQuestion < 4 ? 'Fácil' : currentQuestion < 7 ? 'Médio' : 'Difícil'}
+            ⚡ {currentQuestion < 4 ? 'Leicht' : currentQuestion < 7 ? 'Mittel' : 'Schwer'}
           </span>
 
           <h2 className="text-xl md:text-2xl font-black text-foreground mb-6 leading-tight">
@@ -960,56 +927,55 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
               ? 'bg-centauro-green/10 border-centauro-green text-centauro-green'
               : 'bg-destructive/10 border-destructive text-destructive'
           }`}>
-            {isCorrect ? '✓ Correto! Muito bem!' : '✗ Não foi dessa vez!'}
+            {isCorrect ? '✓ Richtig! Gut gemacht!' : '✗ Leider falsch!'}
           </div>
         )}
 
 
       </div>
 
-      {/* Footer vermelho */}
       <footer className="bg-primary mt-8 py-8 px-4">
         <div className="max-w-xl mx-auto text-primary-foreground">
           <div className="mb-5">
-            <h4 className="font-bold text-sm mb-2">Links Rápidos</h4>
-            <p className="text-xs opacity-80">Início</p>
+            <h4 className="font-bold text-sm mb-2">Schnelllinks</h4>
+            <p className="text-xs opacity-80">Startseite</p>
           </div>
 
           <div className="mb-5">
-            <h4 className="font-bold text-sm mb-2">Contato</h4>
+            <h4 className="font-bold text-sm mb-2">Kontakt</h4>
             <div className="flex items-center gap-2 mb-1.5">
               <Mail size={14} className="opacity-80" />
-              <span className="text-xs opacity-80">sac@centauro.com.br</span>
+              <span className="text-xs opacity-80">info@esn.com</span>
             </div>
             <div className="flex items-center gap-2 mb-1.5">
               <Phone size={14} className="opacity-80" />
-              <span className="text-xs opacity-80">+55 (11) 3003-4916</span>
+              <span className="text-xs opacity-80">+49 (0) 5741 2389-0</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPinIcon size={14} className="opacity-80" />
-              <span className="text-xs opacity-80">São Paulo, SP - Brasil</span>
+              <span className="text-xs opacity-80">Lübbecke, Deutschland</span>
             </div>
           </div>
 
           <div className="mb-5">
-            <h4 className="font-bold text-sm mb-2">Informação Legal</h4>
-            <p className="text-xs opacity-80"><strong>CNPJ:</strong> 06.347.409/0001-90</p>
-            <p className="text-xs opacity-80"><strong>Razão Social:</strong> SBF Comércio de Produtos Esportivos S.A.</p>
+            <h4 className="font-bold text-sm mb-2">Rechtliche Informationen</h4>
+            <p className="text-xs opacity-80"><strong>USt-IdNr.:</strong> DE 123456789</p>
+            <p className="text-xs opacity-80"><strong>Firma:</strong> Fitmart GmbH & Co. KG</p>
           </div>
 
           <div className="border-t border-primary-foreground/20 pt-4 mb-5">
-            <h4 className="font-bold text-sm mb-2">Segurança e Confiança</h4>
+            <h4 className="font-bold text-sm mb-2">Sicherheit & Vertrauen</h4>
             <div className="grid grid-cols-2 gap-1.5">
-              <span className="text-xs opacity-80">✓ SSL 256-bit Cifrado</span>
-              <span className="text-xs opacity-80">✓ Garantia de 30 dias</span>
-              <span className="text-xs opacity-80">✓ Suporte 24/7</span>
-              <span className="text-xs opacity-80">✓ Dados Protegidos</span>
+              <span className="text-xs opacity-80">✓ SSL 256-bit Verschlüsselung</span>
+              <span className="text-xs opacity-80">✓ 30 Tage Garantie</span>
+              <span className="text-xs opacity-80">✓ 24/7 Support</span>
+              <span className="text-xs opacity-80">✓ Daten geschützt</span>
             </div>
           </div>
 
           <div className="border-t border-primary-foreground/20 pt-4 text-center">
-            <p className="text-[10px] opacity-60">© 2026 Centauro Esportes. Todos os direitos reservados.</p>
-            <p className="text-[10px] opacity-60 mt-1">Promoção válida enquanto durar o estoque.</p>
+            <p className="text-[10px] opacity-60">© 2026 ESN - Elite Sports Nutrition. Alle Rechte vorbehalten.</p>
+            <p className="text-[10px] opacity-60 mt-1">Aktion gültig solange der Vorrat reicht.</p>
           </div>
         </div>
       </footer>

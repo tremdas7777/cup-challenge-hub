@@ -7,12 +7,11 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPaymentGatewayConfig } from '@/lib/paymentGateway';
 import { fireConversionEvent } from '@/lib/pixelManager';
-import legoTrofeu from '@/assets/lego-copa-trofeu.webp';
+import esnProductImg from '@/assets/esn-creatine.png';
 
 interface UpsellBuyer {
   nome: string;
   email: string;
-  cpf: string;
   telefone: string;
   cep?: string;
   endereco?: string;
@@ -30,8 +29,8 @@ interface UpsellPopupProps {
   buyer: UpsellBuyer;
 }
 
-const UPSELL_AMOUNT = 34.90;
-const UPSELL_DESCRIPTION = 'Réplica Taça LEGO Copa do Mundo 2026';
+const UPSELL_AMOUNT = 29.90;
+const UPSELL_DESCRIPTION = 'ESN Ultrapure Creatine Monohydrate (Special Offer)';
 
 export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: UpsellPopupProps) {
   const [stage, setStage] = useState<'offer' | 'pix'>('offer');
@@ -238,37 +237,36 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             <div className="bg-gradient-to-r from-centauro-gold to-yellow-500 px-4 py-2 flex items-center justify-center gap-2">
               <Sparkles size={14} className="text-primary" />
               <span className="text-[11px] font-black uppercase tracking-wider text-primary">
-                Oferta exclusiva — só nesta tela
+                Exklusives Angebot — nur auf dieser Seite
               </span>
             </div>
 
             <DialogHeader className="px-5 pt-5 pb-2">
               <DialogTitle className="text-lg font-black uppercase leading-tight">
-                Aproveite e leve a Taça LEGO Copa 2026
+                Sichere dir jetzt die ESN BCAA Giga Caps
               </DialogTitle>
               <DialogDescription className="text-xs">
-                Réplica oficial em peças LEGO da taça da Copa do Mundo. Edição limitada.
+                Hochdosierte BCAA Kapseln für optimale Regeneration. Limitiertes Angebot.
               </DialogDescription>
             </DialogHeader>
 
             <div className="px-5 pb-5 space-y-4">
               {/* Product image */}
-              <div className="bg-secondary rounded-xl p-4 flex items-center justify-center">
-                <img
-                  src={legoTrofeu}
-                  alt="Réplica Taça LEGO Copa 2026"
-                  className="h-48 object-contain drop-shadow-lg"
-                />
+              <div className="relative w-full aspect-square bg-white rounded-xl flex items-center justify-center p-6 border-2 border-primary/5 shadow-inner">
+                <img src={esnProductImg} alt="ESN Product" className="max-w-full max-h-full object-contain drop-shadow-xl" style={{ mixBlendMode: 'multiply' }} />
+                <div className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-black px-2 py-1 rounded shadow-sm animate-pulse">
+                  NUR JETZT!
+                </div>
               </div>
 
               {/* Price block */}
               <div className="text-center space-y-1">
-                <p className="text-[11px] text-muted-foreground line-through">De R$ 199,90</p>
+                <p className="text-[11px] text-muted-foreground line-through">Statt €49,90</p>
                 <p className="text-3xl font-black text-centauro-green">
-                  R$ 34<span className="text-xl">,90</span>
+                  €29<span className="text-xl">,90</span>
                 </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
-                  Adicionar ao seu pedido • Envio junto com o kit
+                  Zur Bestellung hinzufügen • Gemeinsamer Versand
                 </p>
               </div>
 
@@ -276,15 +274,15 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
               <ul className="space-y-1.5 text-xs text-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle size={14} className="text-centauro-green mt-0.5 flex-shrink-0" />
-                  <span>Peça colecionável oficial — produto licenciado</span>
+                  <span>Hochdosierte BCAA Formel — 2:1:1 Verhältnis</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle size={14} className="text-centauro-green mt-0.5 flex-shrink-0" />
-                  <span>Envio em conjunto com seu pedido — sem frete extra</span>
+                  <span>Gemeinsamer Versand — keine extra Versandkosten</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle size={14} className="text-centauro-green mt-0.5 flex-shrink-0" />
-                  <span>Pagamento via PIX em segundos</span>
+                  <span>Zahlung per PIX in Sekunden</span>
                 </li>
               </ul>
 
@@ -300,22 +298,22 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
                   className="w-full h-12 text-sm font-black uppercase tracking-wider bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground rounded-xl shadow-lg"
                 >
                   {loading ? (
-                    <><Loader2 size={16} className="mr-2 animate-spin" /> Gerando PIX...</>
+                    <><Loader2 size={16} className="mr-2 animate-spin" /> PIX wird generiert...</>
                   ) : (
-                    <>Sim, quero adicionar — R$ 34,90</>
+                    <>Ja, hinzufügen — €29,90</>
                   )}
                 </Button>
                 <button
                   onClick={handleDecline}
                   className="w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5 underline-offset-2 hover:underline"
                 >
-                  Não, obrigado. Continuar para meu pedido
+                  Nein danke. Weiter zu meiner Bestellung
                 </button>
               </div>
 
               <div className="flex items-center justify-center gap-1.5 text-muted-foreground pt-1">
                 <ShieldCheck size={11} />
-                <span className="text-[10px] uppercase tracking-wider">Compra 100% segura</span>
+                <span className="text-[10px] uppercase tracking-wider">100% sicherer Kauf</span>
               </div>
             </div>
           </div>
@@ -326,17 +324,17 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             <DialogHeader className="mb-3">
               <DialogTitle className="flex items-center gap-2 text-base font-black">
                 <QrCode size={20} className="text-centauro-green" />
-                Pague o adicional via PIX
+                Zusatz per PIX bezahlen
               </DialogTitle>
               <DialogDescription className="text-xs">
-                Após o pagamento, sua taça LEGO será adicionada automaticamente ao envio.
+                Nach der Zahlung werden die BCAA Caps automatisch zu deiner Sendung hinzugefügt.
               </DialogDescription>
             </DialogHeader>
 
             <div className="space-y-4">
               <div className="text-center bg-secondary rounded-lg p-3">
-                <p className="text-xs text-muted-foreground">Valor a pagar</p>
-                <p className="text-2xl font-black text-foreground">R$ 34,90</p>
+                <p className="text-xs text-muted-foreground">Zu zahlender Betrag</p>
+                <p className="text-2xl font-black text-foreground">€29,90</p>
               </div>
 
               {pixCode ? (
@@ -360,7 +358,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
               {pixCode && (
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Código PIX (Copia e Cola)
+                    PIX Code (Kopieren & Einfügen)
                   </label>
                   <div className="bg-secondary rounded-lg p-3 break-all">
                     <p className="text-[11px] font-mono text-foreground leading-relaxed max-h-20 overflow-y-auto">
@@ -372,16 +370,16 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
                     className="w-full font-bold text-sm py-5 bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground"
                   >
                     {copied ? (
-                      <><CheckCircle size={16} className="mr-2" /> Código Copiado!</>
+                      <><CheckCircle size={16} className="mr-2" /> Code kopiert!</>
                     ) : (
-                      <><Copy size={16} className="mr-2" /> Copiar Código PIX</>
+                      <><Copy size={16} className="mr-2" /> PIX Code kopieren</>
                     )}
                   </Button>
                 </div>
               )}
 
               <p className="text-[10px] text-center text-muted-foreground">
-                Confirmação automática em até 5 minutos. Você pode fechar esta janela e seguirá para a confirmação.
+                Automatische Bestätigung in bis zu 5 Minuten. Du kannst dieses Fenster schließen.
               </p>
 
               <button
@@ -389,7 +387,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
                 className="w-full text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1.5"
               >
                 <X size={11} className="inline mr-1" />
-                Pular oferta e continuar
+                Angebot überspringen und fortfahren
               </button>
             </div>
           </div>

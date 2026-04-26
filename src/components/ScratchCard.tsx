@@ -1,14 +1,13 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Gift, Star, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import centauroLogo from '@/assets/centauro-logo.webp';
-import cbfLogo from '@/assets/cbf-logo.webp';
-import camisaImg from '@/assets/camisa-brasil-hero.webp';
-import albumImg from '@/assets/album-copa-hero.webp';
-import bolaImg from '@/assets/bola-copa-2026.webp';
-import valeImg from '@/assets/cartao-presente-centauro.png';
-import chuteiraImg from '@/assets/chuteira-copa.png';
-import caixaImg from '@/assets/caixa-surpresa-centauro.png';
+import esnLogo from '@/assets/esn-logo.png';
+import giftCardImg from '@/assets/esn-gift-card.png';
+import creatineImg from '@/assets/esn-creatine.png';
+import isoclearImg from '@/assets/esn-isoclear.png';
+import designerWheyImg from '@/assets/esn-designer-whey.png';
+import comboImg from '@/assets/esn-combo-pack.png';
+import proteinBarImg from '@/assets/esn-protein-bar.png';
 
 interface ScratchItem {
   id: string;
@@ -18,12 +17,12 @@ interface ScratchItem {
 }
 
 const ALL_ITEMS: ScratchItem[] = [
-  { id: 'bola', label: 'Bola', emoji: '⚽', image: bolaImg },
-  { id: 'caixa', label: 'Caixa Surpresa', emoji: '🎁', image: caixaImg },
-  { id: 'chuteira', label: 'Chuteira', emoji: '👟', image: chuteiraImg },
-  { id: 'vale', label: 'Vale Compras R$1000', emoji: '💳', image: valeImg },
-  { id: 'album', label: 'Álbum Copa 2026', emoji: '📖', image: albumImg },
-  { id: 'camisa', label: 'Camisa Oficial', emoji: '👕', image: camisaImg },
+  { id: 'giftcard', label: 'Gutschein €150', emoji: '💳', image: giftCardImg },
+  { id: 'creatine', label: 'Ultrapure Creatine', emoji: '💪', image: creatineImg },
+  { id: 'isoclear', label: 'Isoclear Isolate', emoji: '🥤', image: isoclearImg },
+  { id: 'whey', label: 'Designer Whey', emoji: '🥇', image: designerWheyImg },
+  { id: 'combo', label: 'ESN Combo (8 Produkte)', emoji: '🎁', image: comboImg },
+  { id: 'bar', label: 'Designer Protein Bar', emoji: '🍫', image: proteinBarImg },
 ];
 
 function generateLosingGrid(): ScratchItem[] {
@@ -72,9 +71,9 @@ function generateWinningGrid(winnerId: string): ScratchItem[] {
 }
 
 const ROUND_CONFIGS = [
-  { type: 'lose' as const, winnerId: null, title: 'Tente a sorte!' },
-  { type: 'win' as const, winnerId: 'album', title: 'Segunda chance!' },
-  { type: 'win' as const, winnerId: 'camisa', title: 'Última chance!' },
+  { type: 'lose' as const, winnerId: null, title: 'Versuch dein Glück!' },
+  { type: 'win' as const, winnerId: 'combo', title: 'Zweite Chance!' },
+  { type: 'win' as const, winnerId: 'giftcard', title: 'Letzte Chance!' },
 ];
 
 // Single unified canvas scratch card with 9 cells
@@ -243,20 +242,20 @@ function ScratchGrid({
       ctx.drawImage(offscreen, cx - logoW / 2, cy - totalH * 0.16 - logoH / 2, logoW, logoH);
       ctx.globalAlpha = 1;
     };
-    // "RASPE AQUI!" text
+    // "HIER RUBBELN!" text
     ctx.fillStyle = '#FFFFFF';
     const titleSize = Math.min(totalW * 0.1, 32);
     ctx.font = `900 ${titleSize}px Inter, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('RASPE AQUI!', cx, cy + totalH * 0.02);
+    ctx.fillText('HIER RUBBELN!', cx, cy + totalH * 0.02);
 
     // Subtitle
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     const subSize = Math.min(totalW * 0.04, 13);
     ctx.font = `600 ${subSize}px Inter, sans-serif`;
-    ctx.fillText('Raspe os 9 quadradinhos, encontre', cx, cy + totalH * 0.12);
-    ctx.fillText('3 símbolos iguais e ganhe o prêmio!', cx, cy + totalH * 0.17);
+    ctx.fillText('Rubbel alle 9 Felder frei,', cx, cy + totalH * 0.12);
+    ctx.fillText('finde 3 gleiche und gewinne!', cx, cy + totalH * 0.17);
 
   }, [getCellSize]);
 
@@ -388,7 +387,7 @@ function ScratchGrid({
       {/* Progress bar */}
       <div className="mb-3">
         <div className="flex justify-between text-[10px] font-bold text-primary-foreground/40 mb-1">
-          <span>Campos raspados</span>
+          <span>Freigerubbelte Felder</span>
           <span>{revealedCount}/9</span>
         </div>
         <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
@@ -413,7 +412,7 @@ function ScratchGrid({
             >
               {item.image ? (
                 <>
-                  <img src={item.image} alt={item.label} className="w-3/4 h-3/4 object-contain" />
+                  <img src={item.image} alt={item.label} className="w-3/4 h-3/4 object-contain" style={{ mixBlendMode: 'multiply' }} />
                   <span className="text-[8px] md:text-[10px] font-bold text-foreground/70">{item.label}</span>
                 </>
               ) : (
@@ -498,10 +497,8 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
     <div className="min-h-[100dvh] bg-foreground flex flex-col">
       {/* Logo bar */}
       <div className="bg-primary py-4 px-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-center -translate-x-2">
-          <img src={centauroLogo} alt="Centauro" className="h-14 md:h-20 object-contain brightness-0 invert" />
-          <div className="w-px h-8 bg-primary-foreground/30 ml-2 mr-4" />
-          <img src={cbfLogo} alt="CBF" className="h-14 md:h-20 object-contain" />
+        <div className="max-w-4xl mx-auto flex items-center justify-center">
+          <img src={esnLogo} alt="ESN" className="h-14 md:h-20 object-contain" style={{ mixBlendMode: 'screen' }} />
         </div>
       </div>
 
@@ -534,7 +531,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
           ))}
         </div>
         <p className="text-center text-primary-foreground/60 text-xs font-bold mt-2">
-          Chance {currentRound + 1} de {totalRounds}
+          Chance {currentRound + 1} von {totalRounds}
         </p>
       </div>
 
@@ -544,27 +541,27 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
           {/* Round title */}
           <div className="text-center mb-4">
             <h2 className="text-xl font-black text-primary-foreground mb-1">
-              {roundResult === 'win' ? '🎉 VOCÊ GANHOU!' : config.title}
+              {roundResult === 'win' ? '🎉 DU HAST GEWONNEN!' : config.title}
             </h2>
             <p className="text-primary-foreground/50 text-xs font-semibold">
               {roundResult === 'pending'
-                ? 'Raspe todos os campos! 3 iguais = prêmio'
+                ? 'Rubbel alle Felder frei! 3 gleiche = Gewinn'
                 : roundResult === 'win'
-                ? `Parabéns! Você ganhou ${wonPrizes[wonPrizes.length - 1]?.label}!`
-                : 'Raspe todos os campos!'
+                ? `Glückwunsch! Du hast ${wonPrizes[wonPrizes.length - 1]?.label} gewonnen!`
+                : 'Rubbel alle Felder frei!'
               }
             </p>
           </div>
 
           {/* Scratch Grid */}
           <div key={currentRound} className="animate-scale-in">
-            <ScratchGrid grid={grid} onAllRevealed={handleAllRevealed} logoSrc={centauroLogo} />
+            <ScratchGrid grid={grid} onAllRevealed={handleAllRevealed} logoSrc={esnLogo} />
           </div>
 
           {/* Legend */}
           <div className="mt-3 text-center">
             <p className="text-[10px] text-primary-foreground/30 font-semibold">
-              Encontre 3 iguais para ganhar o prêmio correspondente
+              Finde 3 gleiche Symbole, um den Preis zu gewinnen
             </p>
           </div>
 
@@ -577,12 +574,12 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
               >
                 {currentRound < totalRounds - 1 ? (
                   <>
-                    Próxima chance
+                    Nächste Chance
                     <ChevronRight size={20} />
                   </>
                 ) : (
                   <>
-                    Resgatar prêmios
+                    Preise einlösen
                   </>
                 )}
               </Button>
@@ -593,7 +590,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
           {wonPrizes.length > 0 && (
             <div className="mt-4 space-y-2 animate-fade-in">
               <p className="text-primary-foreground/40 text-[10px] font-bold text-center uppercase tracking-wider">
-                Prêmios ganhos
+                Gewonnene Preise
               </p>
               <div className="flex justify-center gap-2 flex-wrap">
                 {wonPrizes.map((prize, i) => (
@@ -615,15 +612,15 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
       {showLosePopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 animate-fade-in">
           <div className="flex flex-col items-center gap-5 px-8 py-10 max-w-sm w-full bg-foreground/70 backdrop-blur-md rounded-2xl mx-4 border border-muted/30 shadow-2xl">
-            <img src={centauroLogo} alt="Centauro" className="h-16 object-contain brightness-0 invert" />
+            <img src={esnLogo} alt="ESN" className="h-16 object-contain" style={{ mixBlendMode: 'screen' }} />
             <span className="text-6xl">😔</span>
             <h2 className="text-2xl font-black text-primary-foreground text-center">
-              Não foi dessa vez...
+              Diesmal leider nicht...
             </h2>
             <p className="text-primary-foreground/60 text-sm font-semibold text-center">
               {currentRound < totalRounds - 1
-                ? `Mas calma! Você ainda tem mais ${totalRounds - currentRound - 1} chance${totalRounds - currentRound - 1 > 1 ? 's' : ''}! 🍀`
-                : 'Tente novamente!'
+                ? `Aber keine Sorge! Du hast noch ${totalRounds - currentRound - 1} Chance${totalRounds - currentRound - 1 > 1 ? 'n' : ''}! 🍀`
+                : 'Versuche es noch einmal!'
               }
             </p>
             <Button
@@ -636,12 +633,12 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
             >
               {currentRound < totalRounds - 1 ? (
                 <>
-                  Tentar novamente
+                  Nochmal versuchen
                   <ChevronRight size={20} />
                 </>
               ) : (
                 <>
-                  Continuar
+                  Weiter
                   <ChevronRight size={20} />
                 </>
               )}
@@ -671,16 +668,19 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
             ))}
 
             <p className="text-centauro-gold text-lg font-black tracking-wider uppercase">
-              🎉 Você Ganhou!
+              🎉 Du hast gewonnen!
             </p>
 
             {/* Big prize display */}
             {wonPrizes.length > 0 && wonPrizes[wonPrizes.length - 1]?.image ? (
-              <img
-                src={wonPrizes[wonPrizes.length - 1].image}
-                alt={wonPrizes[wonPrizes.length - 1].label}
-                className="w-48 h-48 object-contain drop-shadow-2xl animate-scale-in"
-              />
+              <div className="bg-white rounded-2xl p-4 shadow-2xl animate-scale-in">
+                <img
+                  src={wonPrizes[wonPrizes.length - 1].image}
+                  alt={wonPrizes[wonPrizes.length - 1].label}
+                  className="w-44 h-44 object-contain"
+                  style={{ mixBlendMode: 'multiply' }}
+                />
+              </div>
             ) : wonPrizes.length > 0 ? (
               <span className="text-8xl animate-scale-in">
                 {wonPrizes[wonPrizes.length - 1]?.emoji}
@@ -692,7 +692,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
             </h2>
 
             <p className="text-primary-foreground/60 text-sm font-semibold text-center">
-              Parabéns, você ganhou {wonPrizes[wonPrizes.length - 1]?.label}!
+              Glückwunsch, du hast {wonPrizes[wonPrizes.length - 1]?.label} gewonnen!
             </p>
 
             <Button
@@ -705,12 +705,12 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
             >
               {currentRound < totalRounds - 1 ? (
                 <>
-                  Próxima chance
+                  Nächste Chance
                   <ChevronRight size={20} />
                 </>
               ) : (
                 <>
-                  Resgatar prêmios
+                  Preise einlösen
                 </>
               )}
             </Button>

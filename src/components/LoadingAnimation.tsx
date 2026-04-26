@@ -12,7 +12,7 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    const color = showSuccess ? '#E30613' : '#E30613';
+    const color = '#1A1A1A';
     const themeTags = document.querySelectorAll('meta[name="theme-color"]');
 
     themeTags.forEach((tag) => tag.setAttribute('content', color));
@@ -20,8 +20,8 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
     document.body.style.backgroundColor = color;
 
     return () => {
-      document.documentElement.style.backgroundColor = '#212121';
-      document.body.style.backgroundColor = '#212121';
+      document.documentElement.style.backgroundColor = '#121212';
+      document.body.style.backgroundColor = '#121212';
     };
   }, [showSuccess]);
 
@@ -56,11 +56,11 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
           <>
             <div>
               <div className="mb-10 text-8xl" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
-                ⚽
+                💪
               </div>
 
               <h2 className="text-3xl md:text-4xl font-black text-primary-foreground mb-8 tracking-tight">
-                VERIFICANDO RESULTADO
+                ERGEBNIS WIRD GEPRÜFT
               </h2>
 
               <div className="max-w-sm mx-auto">
@@ -75,7 +75,7 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
                   </div>
                 </div>
                 <p className="text-primary-foreground/80 font-bold text-sm">
-                  {progress < 33 ? 'Processando...' : progress < 66 ? 'Validando...' : 'Finalizando...'}
+                  {progress < 33 ? 'Verarbeitung...' : progress < 66 ? 'Validierung...' : 'Abschluss...'}
                 </p>
               </div>
             </div>
@@ -104,20 +104,20 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
                 <CheckCircle className="w-24 h-24 text-primary-foreground mx-auto mb-5" />
               </div>
               <h1 className="text-5xl md:text-6xl font-black text-primary-foreground mb-3 tracking-tight">
-                APTO!
+                BESTANDEN!
               </h1>
               <p className="text-2xl md:text-3xl font-black text-centauro-gold mb-2">
-                VOCÊ PODE JOGAR A RASPADINHA
+                DU KANNST DIE RUBBELKARTE SPIELEN
               </p>
               <p className="text-lg font-semibold text-primary-foreground/80">
-                🎰 3 chances para ganhar prêmios incríveis!
+                🎰 3 Chancen auf tolle Preise!
               </p>
               <Button
                 onClick={onComplete}
                 className="mt-8 bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-black text-lg px-10 py-6 rounded-xl uppercase tracking-wider"
                 style={{ animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
-                COMEÇAR RASPADINHA 🎰
+                RUBBELKARTE STARTEN 🎰
               </Button>
             </div>
           </>

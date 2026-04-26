@@ -15,6 +15,8 @@ import { fireSaleWebhook } from '@/lib/webhookManager';
 import esnLogo from '@/assets/esn-logo.png';
 import quizBannerPreload from '@/assets/esn-quiz-banner.png';
 import gymHero from '@/assets/esn-hero-banner.jpg';
+import comboPackImg from '@/assets/esn-combo-pack.png';
+import giftCardImg from '@/assets/esn-gift-card.png';
 import { Mail, Phone, MapPin as MapPinIcon } from 'lucide-react';
 import { playCorrectSound, playWrongSound, playRevealSound, unlockAudio } from '@/lib/quizSounds';
 

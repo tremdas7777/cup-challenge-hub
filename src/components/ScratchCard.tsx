@@ -394,8 +394,8 @@ function ScratchGrid({
             >
               {item.image ? (
                 <>
-                  <img src={item.image} alt={item.label} className="w-3/4 h-3/4 object-contain" style={{ mixBlendMode: 'multiply' }} />
-                  <span className="text-[8px] md:text-[10px] font-bold text-foreground/70">{item.label}</span>
+                  <img src={item.image} alt={item.label} className="w-3/4 h-3/4 object-contain" />
+                  <span className="text-[8px] md:text-[10px] font-bold text-foreground/70 text-center px-1 leading-tight">{item.label}</span>
                 </>
               ) : (
                 <>

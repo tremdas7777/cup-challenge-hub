@@ -224,24 +224,6 @@ function ScratchGrid({
       drawStar(sx, sy, sz, sa);
     }
 
-    // Draw Centauro logo in center
-    const logoImg = new Image();
-    logoImg.src = logoSrc;
-    logoImg.onload = () => {
-      const logoH = Math.min(totalH * 0.3, 80);
-      const logoW = logoH * (logoImg.naturalWidth / logoImg.naturalHeight);
-      const offscreen = document.createElement('canvas');
-      offscreen.width = logoImg.naturalWidth;
-      offscreen.height = logoImg.naturalHeight;
-      const offCtx = offscreen.getContext('2d')!;
-      offCtx.drawImage(logoImg, 0, 0);
-      offCtx.globalCompositeOperation = 'source-in';
-      offCtx.fillStyle = '#FFFFFF';
-      offCtx.fillRect(0, 0, offscreen.width, offscreen.height);
-      ctx.globalAlpha = 0.45;
-      ctx.drawImage(offscreen, cx - logoW / 2, cy - totalH * 0.16 - logoH / 2, logoW, logoH);
-      ctx.globalAlpha = 1;
-    };
     // "HIER RUBBELN!" text
     ctx.fillStyle = '#FFFFFF';
     const titleSize = Math.min(totalW * 0.1, 32);

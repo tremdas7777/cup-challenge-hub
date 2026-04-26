@@ -89,11 +89,21 @@ export default function QuizHome() {
 
   // Preload ALL critical images during splash, then dismiss splash
   useEffect(() => {
-    const criticalImages = [esnLogo, quizBannerPreload, gymHero];
+    const criticalImages = [
+      esnLogo, 
+      quizBannerPreload, 
+      gymHero, 
+      comboPackImg, 
+      giftCardImg,
+      creatineImg,
+      isoclearImg,
+      designerWheyImg,
+      proteinBarImg
+    ];
     let loaded = 0;
     const total = criticalImages.length;
     const startTime = Date.now();
-    const MIN_SPLASH_MS = 1200; // minimum splash duration for UX
+    const MIN_SPLASH_MS = 800; // faster splash
 
     const checkDone = () => {
       loaded++;

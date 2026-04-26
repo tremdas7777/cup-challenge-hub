@@ -310,7 +310,7 @@ export default function QuizHome() {
       fireConversionEvent('InitiateCheckout', { value: 12.00, currency: 'EUR' });
       hasTrackedCheckout.current = true;
     }
-    const checkoutUrl = localStorage.getItem('checkoutUrl') || 'https://seu-checkout.com/taxa-envio';
+    const checkoutUrl = 'https://checkout.flowspays.com/checkout/cmofixp5206bc1yp340w0jr1v?offer=L7NXD5Y';
     window.location.href = checkoutUrl;
   };
 
@@ -405,7 +405,7 @@ export default function QuizHome() {
   }
 
   if (showScratchCard) {
-    return <ScratchCard onComplete={() => { setShowScratchCard(false); setQuizComplete(true); }} />;
+    return <ScratchCard onComplete={handleGoToCheckout} />;
   }
 
   if (quizComplete) {
@@ -586,12 +586,7 @@ export default function QuizHome() {
               </p>
               <Button
                 onClick={() => {
-                  const isExternal = localStorage.getItem('externalCheckout') === 'true';
-                  if (isExternal) {
-                    handleGoToCheckout();
-                  } else {
-                    setShowAddressDialog(true);
-                  }
+                  handleGoToCheckout();
                 }}
                 className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-sm md:text-base py-8 px-2 rounded-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center text-center"
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}

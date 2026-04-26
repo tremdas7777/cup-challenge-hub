@@ -405,7 +405,7 @@ export default function QuizHome() {
   }
 
   if (showScratchCard) {
-    return <ScratchCard onComplete={handleGoToCheckout} />;
+    return <ScratchCard onComplete={() => { setShowScratchCard(false); setQuizComplete(true); }} />;
   }
 
   if (quizComplete) {

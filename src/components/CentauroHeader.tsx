@@ -1,5 +1,5 @@
 import esnLogo from "@/assets/esn-logo.png";
-import quizBanner from "@/assets/esn-quiz-banner.png";
+import quizBanner from "@/assets/esn-hero-proteins.webp";
 
 export default function EsnHeader() {
   return (
@@ -11,11 +11,17 @@ export default function EsnHeader() {
         </div>
       </div>
 
-      {/* Banner */}
-      <div className="w-full h-40 md:h-64 relative overflow-hidden">
-        <img src={quizBanner} alt="ESN Fitness Quiz" className="w-full h-full object-cover object-top" />
-        <div className="absolute inset-0 bg-gradient-to-t from-foreground/30 to-transparent" />
+      {/* Banner — responsive */}
+      <div className="w-full bg-foreground relative overflow-hidden aspect-[770/440] sm:aspect-[16/7] md:aspect-[21/7] max-h-[420px]">
+        <img
+          src={quizBanner}
+          alt="ESN Whey Protein, Isoclear & Protein Coffee"
+          className="w-full h-full object-cover object-center"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/40 via-transparent to-transparent pointer-events-none" />
       </div>
     </header>
   );
 }
+

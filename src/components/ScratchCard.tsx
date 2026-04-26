@@ -689,7 +689,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
                 </>
               ) : (
                 <>
-                  JETZT SICHERN — NUR €12 VERSAND
+                  JETZT SICHERN
                 </>
               )}
             </Button>

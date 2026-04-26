@@ -48,9 +48,12 @@ if (typeof window !== 'undefined') {
 function playTone(frequency: number, duration: number, type: OscillatorType = 'sine', volume = 0.3) {
   try {
     const audioCtx = getAudioContext();
+    
+    // Crucial: Resume context if suspended (common on iOS/Chrome)
     if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
+
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.type = type;

@@ -384,7 +384,13 @@ export default function QuizHome() {
             </p>
 
             <Button
-              onClick={() => { if (!bannerLoaded) return; if (!hasTrackedQuizStart.current) { trackEvent('quiz_started'); hasTrackedQuizStart.current = true; } setHomeExiting(true); setTimeout(() => setShowHome(false), 500); }}
+              onClick={() => { 
+                unlockAudio();
+                if (!bannerLoaded) return; 
+                if (!hasTrackedQuizStart.current) { trackEvent('quiz_started'); hasTrackedQuizStart.current = true; } 
+                setHomeExiting(true); 
+                setTimeout(() => setShowHome(false), 500); 
+              }}
               className="relative overflow-hidden bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg md:text-xl px-14 py-7 rounded-lg active:scale-95 uppercase tracking-wider w-full max-w-sm border-2 border-centauro-green/50"
               style={{ animation: 'pulse-glow-green 2s ease-in-out infinite' }}
             >
@@ -808,7 +814,6 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
         {/* Header: Flag + Question counter + Timer */}
         <div className="flex justify-between items-center mb-5">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">🇩🇪</span>
             <span className="text-sm font-bold text-foreground">
               Frage {currentQuestion + 1} von {quizQuestions.length}
             </span>

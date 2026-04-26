@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import esnLogo from '@/assets/esn-logo.png';
 
 
 interface LoadingAnimationProps {
@@ -55,8 +56,13 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
         {!showSuccess ? (
           <>
             <div>
-              <div className="mb-10 text-8xl" style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
-                💪
+              <div className="mb-10 flex items-center justify-center">
+                <img
+                  src={esnLogo}
+                  alt="ESN"
+                  className="h-24 md:h-28 object-contain"
+                  style={{ mixBlendMode: 'screen', animation: 'pulse 1.5s ease-in-out infinite' }}
+                />
               </div>
 
               <h2 className="text-3xl md:text-4xl font-black text-primary-foreground mb-8 tracking-tight">

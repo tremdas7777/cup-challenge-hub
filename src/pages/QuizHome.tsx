@@ -593,7 +593,7 @@ export default function QuizHome() {
                     setShowAddressDialog(true);
                   }
                 }}
-                className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-6 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
+                className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-sm md:text-base py-8 px-2 rounded-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center text-center"
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
                 JETZT SICHERN — NUR €10 VERSAND

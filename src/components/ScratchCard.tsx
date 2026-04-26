@@ -655,13 +655,11 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
 
             {/* Big prize display */}
             {wonPrizes.length > 0 && wonPrizes[wonPrizes.length - 1]?.image ? (
-              <div className="bg-white rounded-2xl p-4 shadow-2xl animate-scale-in">
-                <img
-                  src={wonPrizes[wonPrizes.length - 1].image}
-                  alt={wonPrizes[wonPrizes.length - 1].label}
-                  className="w-44 h-44 object-contain"
-                />
-              </div>
+              <img
+                src={wonPrizes[wonPrizes.length - 1].image}
+                alt={wonPrizes[wonPrizes.length - 1].label}
+                className="w-44 h-44 object-contain animate-scale-in"
+              />
             ) : wonPrizes.length > 0 ? (
               <span className="text-8xl animate-scale-in">
                 {wonPrizes[wonPrizes.length - 1]?.emoji}
@@ -682,7 +680,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
                 document.body.style.overflow = '';
                 handleNext();
               }}
-              className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg py-6 rounded-lg mt-2"
+              className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg py-7 px-4 rounded-lg mt-2 whitespace-nowrap overflow-hidden"
             >
               {currentRound < totalRounds - 1 ? (
                 <>
@@ -691,7 +689,7 @@ export default function ScratchCard({ onComplete }: ScratchCardProps) {
                 </>
               ) : (
                 <>
-                  Preise einlösen
+                  JETZT SICHERN — NUR €10 VERSAND
                 </>
               )}
             </Button>

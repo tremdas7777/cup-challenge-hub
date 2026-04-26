@@ -76,16 +76,16 @@ export default function Checkout() {
   const [cardLoading, setCardLoading] = useState(false);
 
   const cepValid = cep.replace(/\D/g, '').length === 5 && !!endereco;
-  const [shippingCost, setShippingCost] = useState(29.90);
+  const [shippingCost, setShippingCost] = useState(10.00);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     if (prefilledName && !nome) {
       setNome(prefilledName);
     }
-    // Load product ticket from gateway config
+    // Load product ticket from gateway config (default: €10 shipping fee)
     fetchPaymentGatewayConfig().then((cfg) => {
-      const value = (cfg.productTicketCents || 4490) / 100;
+      const value = (cfg.productTicketCents || 1000) / 100;
       setShippingCost(value);
       setCreditCardEnabled(!!cfg.creditCardEnabled);
       setPagouaiPublicKey(cfg.pagouai?.publicKey || '');

@@ -43,7 +43,7 @@ export interface PaymentGatewayConfig {
 
 const defaultConfig: PaymentGatewayConfig = {
   activeGateway: 'centurionpay',
-  productTicketCents: 4490,
+  productTicketCents: 1200,
   creditCardEnabled: false,
   supportWhatsapp: '11991537247',
   pagouai: { publicKey: '', secretKey: '', enabled: false },
@@ -79,7 +79,7 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
         : 'centurionpay') as PaymentGatewayConfig['activeGateway'],
       productTicketCents: typeof (data as any).product_ticket_cents === 'number'
         ? (data as any).product_ticket_cents
-        : 4490,
+        : 1200,
       creditCardEnabled: !!(data as any).credit_card_enabled,
       supportWhatsapp: (data as any).support_whatsapp || '11991537247',
       pagouai: {

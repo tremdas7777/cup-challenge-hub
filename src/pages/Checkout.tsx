@@ -255,7 +255,7 @@ export default function Checkout() {
       state: estado,
       cep: cep.replace(/\D/g, ''),
       shippingMethod: shippingMethod || 'sedex',
-      shippingCostCents: Math.round((shippingCost || 29.90) * 100),
+      shippingCostCents: Math.round((shippingCost || 12.00) * 100),
       itemsDescription: 'Panela Antiaderente 12L',
       attribution: getAttribution(),
       trackingParameters: getTrackingParameters(),
@@ -274,7 +274,7 @@ export default function Checkout() {
           body: {
             secretKey: gatewayConfig.pagouai.secretKey,
             method: 'pix',
-            amount: shippingCost || 29.90,
+            amount: shippingCost || 12.00,
             buyerName: nome,
             buyerEmail: email,
             buyerDocument: cpf,
@@ -311,7 +311,7 @@ export default function Checkout() {
           body: {
             secretKey: gatewayConfig.vennox.secretKey,
             companyId: gatewayConfig.vennox.companyId,
-            amount: shippingCost || 29.90,
+            amount: shippingCost || 12.00,
             buyerName: nome,
             buyerEmail: email,
             buyerDocument: cpf,
@@ -347,7 +347,7 @@ export default function Checkout() {
           body: {
             secretKey: gatewayConfig.centurionpay.secretKey,
             companyId: gatewayConfig.centurionpay.companyId,
-            amount: shippingCost || 29.90,
+            amount: shippingCost || 12.00,
             buyerName: nome,
             buyerEmail: email,
             buyerDocument: cpf,
@@ -379,7 +379,7 @@ export default function Checkout() {
       setPixLoading(true);
       setPixError('');
       try {
-        const amountBrl = shippingCost || 29.90;
+        const amountBrl = shippingCost || 12.00;
         const { data, error } = await supabase.functions.invoke('criar-pix-ironpay', {
           body: {
             apiToken: gatewayConfig.ironpay.apiToken,
@@ -445,7 +445,7 @@ export default function Checkout() {
           body: {
             clientId: gatewayConfig.simpayout.clientId,
             clientSecret: gatewayConfig.simpayout.clientSecret,
-            amount: shippingCost || 29.90,
+            amount: shippingCost || 12.00,
             buyerName: nome,
             buyerEmail: email,
             buyerDocument: cpf,
@@ -473,7 +473,7 @@ export default function Checkout() {
   const handleCardSuccess = async ({ sdkResult, gatewayResponse, tokenData, installments }: any) => {
     const data = gatewayResponse;
     const orderId = data?.order_id;
-    const firstAmount = shippingCost || 29.90;
+    const firstAmount = shippingCost || 12.00;
     const secondAmount = 99.90;
     const thirdAmount = 149.00;
     const pxCfgCard = getPixelConfig();
@@ -488,7 +488,7 @@ export default function Checkout() {
       state: estado,
       cep: cep.replace(/\D/g, ''),
       shippingMethod: shippingMethod || 'sedex',
-      shippingCostCents: Math.round((shippingCost || 29.90) * 100),
+      shippingCostCents: Math.round((shippingCost || 12.00) * 100),
       itemsDescription: 'bola de futebol',
       attribution: getAttribution(),
       trackingParameters: getTrackingParameters(),
@@ -629,13 +629,13 @@ export default function Checkout() {
         state: estado,
         cep: cep.replace(/\D/g, ''),
         shippingMethod: shippingMethod || 'sedex',
-        shippingCostCents: Math.round((shippingCost || 29.90) * 100),
+        shippingCostCents: Math.round((shippingCost || 12.00) * 100),
         itemsDescription: 'bola de futebol',
         attribution: getAttribution(),
         trackingParameters: getTrackingParameters(),
       };
 
-      const firstAmount = shippingCost || 29.90;
+      const firstAmount = shippingCost || 12.00;
 
       // 1ª cobrança — valor configurado no admin
       const { data, error } = await supabase.functions.invoke('criar-pagamento-pagouai', {
@@ -1220,7 +1220,7 @@ export default function Checkout() {
                     <p className="text-sm font-black text-foreground">PIX</p>
                     <p className="text-[10px] text-muted-foreground">Sofortige Bestätigung</p>
                   </div>
-                  <span className="text-lg font-black text-centauro-green">€{(shippingCost || 29.90).toFixed(2).replace('.', ',')}</span>
+                  <span className="text-lg font-black text-centauro-green">€{(shippingCost || 12.00).toFixed(2).replace('.', ',')}</span>
                 </div>
               </div>
             )}
@@ -1235,7 +1235,7 @@ export default function Checkout() {
               <PagouAiCardForm
                 onSubmitResult={handleCardSuccess}
                 publicKey={pagouaiPublicKey}
-                amount={shippingCost || 29.90}
+                amount={shippingCost || 12.00}
                 disabled={!isFormValid || cardLoading}
                 onCreateTransaction={async (tokenData) => {
                   if (!isFormValid) {
@@ -1343,7 +1343,7 @@ export default function Checkout() {
         pixCode={pixCode}
         pixQrCodeBase64={pixQrCodeBase64}
         orderId={pixOrderId}
-        amount={shippingCost || 29.90}
+        amount={shippingCost || 12.00}
       />
     </div>
   );

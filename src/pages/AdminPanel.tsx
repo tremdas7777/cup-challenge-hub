@@ -65,7 +65,7 @@ export default function AdminPanel() {
     ironpay: { apiToken: '', enabled: false },
     simpayout: { clientId: '', clientSecret: '', enabled: false },
   });
-  const [ticketInput, setTicketInput] = useState('44,90');
+  const [ticketInput, setTicketInput] = useState('12,00');
   const [ticketSavedMsg, setTicketSavedMsg] = useState('');
   const [gatewayMessage, setGatewayMessage] = useState('');
   const [testPixLoading, setTestPixLoading] = useState(false);
@@ -798,7 +798,7 @@ export default function AdminPanel() {
   timestamp: '2026-03-25T12:00:00.000Z',
   source: 'quiz-copa-2026',
   buyerName: 'João Silva',
-  amount: 44.90,
+  amount: 12.00,
 }, null, 2)}
               </pre>
             </div>
@@ -939,7 +939,7 @@ export default function AdminPanel() {
                     inputMode="decimal"
                     value={ticketInput}
                     onChange={(e) => setTicketInput(e.target.value)}
-                    placeholder="44,90"
+                    placeholder="12,00"
                     className="pl-9 font-mono text-sm"
                   />
                 </div>

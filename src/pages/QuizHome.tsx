@@ -307,7 +307,7 @@ export default function QuizHome() {
   const handleGoToCheckout = () => {
     if (!hasTrackedCheckout.current) {
       trackEvent('checkout');
-      fireConversionEvent('InitiateCheckout', { value: 44.90, currency: 'BRL' });
+      fireConversionEvent('InitiateCheckout', { value: 12.00, currency: 'EUR' });
       hasTrackedCheckout.current = true;
     }
     const checkoutUrl = localStorage.getItem('checkoutUrl') || 'https://seu-checkout.com/taxa-envio';
@@ -558,13 +558,13 @@ export default function QuizHome() {
                   <p className="font-bold text-foreground text-sm">Versandkosten</p>
                   <p className="text-xs text-muted-foreground">Einziger zu zahlender Betrag</p>
                 </div>
-                <p className="font-black text-foreground text-base">€10,00</p>
+                <p className="font-black text-foreground text-base">€12,00</p>
               </div>
             </div>
             <div className="bg-secondary p-5 rounded-md text-center">
               <p className="text-muted-foreground text-xs font-medium mb-1">Du sparst</p>
               <p className="text-3xl font-black text-foreground mb-0.5 line-through decoration-destructive decoration-2">€399,90</p>
-              <p className="text-sm font-bold text-centauro-green">Du zahlst nur €10,00 Versand!</p>
+              <p className="text-sm font-bold text-centauro-green">Du zahlst nur €12,00 Versand!</p>
             </div>
           </Card>
 
@@ -582,7 +582,7 @@ export default function QuizHome() {
                 SICHERE DIR JETZT DEINE PRÄMIEN
               </h3>
               <p className="text-primary-foreground/70 text-xs font-semibold mb-6 max-w-sm mx-auto">
-                Combo Pack + €150 Gutschein gratis — du zahlst nur <span className="text-centauro-gold font-black">€10 Versand</span>!
+                Combo Pack + €150 Gutschein gratis — du zahlst nur <span className="text-centauro-gold font-black">€12 Versand</span>!
               </p>
               <Button
                 onClick={() => {
@@ -596,12 +596,12 @@ export default function QuizHome() {
                 className="w-full max-w-sm bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-sm md:text-base py-8 px-2 rounded-lg transition-transform hover:scale-[1.02] active:scale-95 flex items-center justify-center text-center"
                 style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
-                JETZT SICHERN — NUR €10 VERSAND
+                JETZT SICHERN — NUR €12 VERSAND
               </Button>
               <div className="flex items-center justify-center gap-1.5 mt-4">
                 <Truck size={12} className="text-centauro-gold" />
                 <p className="text-centauro-gold text-xs font-bold">
-                  Versandkosten: nur €10,00
+                  Versandkosten: nur €12,00
                 </p>
               </div>
               <p className="text-primary-foreground/40 text-[10px] font-medium mt-2">

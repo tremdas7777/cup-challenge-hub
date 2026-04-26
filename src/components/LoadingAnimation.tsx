@@ -116,14 +116,14 @@ export default function LoadingAnimation({ onComplete }: LoadingAnimationProps) 
                 DU KANNST DIE RUBBELKARTE SPIELEN
               </p>
               <p className="text-lg font-semibold text-primary-foreground/80">
-                🎰 3 Chancen auf tolle Preise!
+                3 Chancen auf tolle Preise!
               </p>
               <Button
                 onClick={onComplete}
                 className="mt-8 bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-black text-lg px-10 py-6 rounded-xl uppercase tracking-wider"
                 style={{ animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
-                RUBBELKARTE STARTEN 🎰
+                RUBBELKARTE STARTEN
               </Button>
             </div>
           </>

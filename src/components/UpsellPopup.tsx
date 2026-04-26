@@ -13,6 +13,7 @@ interface UpsellBuyer {
   nome: string;
   email: string;
   telefone: string;
+  cpf?: string;
   cep?: string;
   endereco?: string;
   numero?: string;

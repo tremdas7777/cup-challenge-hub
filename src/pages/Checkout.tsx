@@ -875,29 +875,29 @@ export default function Checkout() {
         <Card className="p-4 mb-6 border border-border">
           <h3 className="text-sm font-black text-foreground mb-3 uppercase tracking-tight">Bestellübersicht</h3>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 flex items-center justify-center text-2xl">🥤</div>
+            <img src={comboPackImg} alt="ESN Combo" className="w-12 h-12 object-contain" />
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">ESN Designer Whey {colorLabel}</p>
-              <p className="text-[10px] text-muted-foreground">Premium Whey Protein</p>
+              <p className="text-xs font-bold text-foreground">ESN Supplement Combo Pack</p>
+              <p className="text-[10px] text-muted-foreground">8 Premium Produkte</p>
             </div>
             <span className="text-xs font-black text-centauro-green">GRATIS</span>
           </div>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 flex items-center justify-center text-2xl">💪</div>
+            <img src={giftCardImg} alt="ESN Gutschein" className="w-12 h-12 object-contain" />
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">ESN Kreatin Monohydrat 500g</p>
-              <p className="text-[10px] text-muted-foreground">Creapure® Qualität</p>
+              <p className="text-xs font-bold text-foreground">ESN Gutschein €150</p>
+              <p className="text-[10px] text-muted-foreground">Einlösbar im ESN Shop</p>
             </div>
             <span className="text-xs font-black text-centauro-green">GRATIS</span>
           </div>
           <div className="border-t border-foreground/10 my-2" />
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 flex items-center justify-center text-2xl">🎁</div>
+            <div className="w-12 h-12 flex items-center justify-center text-2xl">🚚</div>
             <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">Premium Supplement-Paket Verlosung</p>
-              <p className="text-[10px] text-muted-foreground">ESN Paket €500 Wert • Verlosung 15.06.2026</p>
+              <p className="text-xs font-bold text-foreground">Versandkosten</p>
+              <p className="text-[10px] text-muted-foreground">Einziger zu zahlender Betrag</p>
             </div>
-            <span className="text-xs font-black text-centauro-gold">INKLUSIVE</span>
+            <span className="text-xs font-black text-foreground">€{shippingCost.toFixed(2).replace('.', ',')}</span>
           </div>
         </Card>
 

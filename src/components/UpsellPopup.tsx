@@ -13,7 +13,6 @@ interface UpsellBuyer {
   nome: string;
   email: string;
   telefone: string;
-  cpf?: string;
   cep?: string;
   endereco?: string;
   numero?: string;
@@ -63,7 +62,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       const { data } = await supabase.from('orders').select('status').eq('id', orderId).single();
       if (data?.status === 'paid' && !hasFiredPaid.current) {
         hasFiredPaid.current = true;
-        fireConversionEvent('Purchase', { value: UPSELL_AMOUNT, currency: 'BRL', content_name: UPSELL_DESCRIPTION }, orderId);
+        fireConversionEvent('Purchase', { value: UPSELL_AMOUNT, currency: 'EUR', content_name: UPSELL_DESCRIPTION }, orderId);
         clearInterval(interval);
         onPaid();
         onOpenChange(false);
@@ -104,7 +103,6 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             amount: UPSELL_AMOUNT,
             buyerName: buyer.nome,
             buyerEmail: buyer.email,
-            buyerDocument: buyer.cpf,
             buyerPhone: buyer.telefone,
             metadata,
           },
@@ -117,7 +115,6 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             amount: UPSELL_AMOUNT,
             buyerName: buyer.nome,
             buyerEmail: buyer.email,
-            buyerDocument: buyer.cpf,
             buyerPhone: buyer.telefone,
             metadata,
           },
@@ -130,7 +127,6 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             amount: UPSELL_AMOUNT,
             buyerName: buyer.nome,
             buyerEmail: buyer.email,
-            buyerDocument: buyer.cpf,
             buyerPhone: buyer.telefone,
             metadata,
           },
@@ -142,7 +138,6 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             amount: UPSELL_AMOUNT,
             buyerName: buyer.nome,
             buyerEmail: buyer.email,
-            buyerDocument: buyer.cpf,
             buyerPhone: buyer.telefone,
             itemsDescription: UPSELL_DESCRIPTION,
             externalRef: `upsell-${Date.now()}`,
@@ -163,7 +158,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
               items_description: UPSELL_DESCRIPTION,
               buyer_name: buyer.nome,
               buyer_email: buyer.email,
-              buyer_document: buyer.cpf,
+              buyer_document: '',
               buyer_phone: buyer.telefone,
               pix_code: data.pixCode || '',
               pix_qr_code_base64: data.qrCodeBase64 || '',
@@ -184,7 +179,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             amount: UPSELL_AMOUNT,
             buyerName: buyer.nome,
             buyerEmail: buyer.email,
-            buyerDocument: buyer.cpf,
+            buyerDocument: '',
             buyerPhone: buyer.telefone,
             metadata,
           },

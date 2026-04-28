@@ -181,91 +181,9 @@ export default function QuizHome() {
   const [selectedColor, setSelectedColor] = useState<'amarela' | 'azul' | ''>('');
   const [showSelectionError, setShowSelectionError] = useState(false);
   const [viewersCount] = useState(Math.floor(Math.random() * 30) + 38);
-  const [showAddressDialog, setShowAddressDialog] = useState(false);
-  const [cpfValue, setCpfValue] = useState('');
-  const [cpfError, setCpfError] = useState('');
 
-  const formatCpf = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 11);
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
-    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
-    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-  };
-
-  const validateCpf = (cpf: string): boolean => {
-    const digits = cpf.replace(/\D/g, '');
-    if (digits.length !== 11) return false;
-    if (/^(\d)\1{10}$/.test(digits)) return false;
-    let sum = 0;
-    for (let i = 0; i < 9; i++) sum += parseInt(digits[i]) * (10 - i);
-    let rest = (sum * 10) % 11;
-    if (rest === 10) rest = 0;
-    if (rest !== parseInt(digits[9])) return false;
-    sum = 0;
-    for (let i = 0; i < 10; i++) sum += parseInt(digits[i]) * (11 - i);
-    rest = (sum * 10) % 11;
-    if (rest === 10) rest = 0;
-    return rest === parseInt(digits[10]);
-  };
-
-  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCpf(e.target.value);
-    setCpfValue(formatted);
-    setCpfError('');
-  };
-
-  const [cpfLoading, setCpfLoading] = useState(false);
-
-  const handleCpfSubmit = async () => {
-    if (!validateCpf(cpfValue)) {
-      setCpfError('CPF inválido. Verifique e tente novamente.');
-      return;
-    }
-    setCpfError('');
-    setCpfLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('consulta-cpf', {
-        body: { cpf: cpfValue },
-      });
-      if (error) throw error;
-      const fullName = data?.nome || '';
-      setClientName(fullName);
-      // Show first name only in popup greeting
-      const firstName = fullName.split(' ')[0] || 'Cliente';
-      setFirstNameDisplay(firstName);
-    } catch (err) {
-      console.error('Erro ao consultar CPF:', err);
-      setClientName('');
-      setFirstNameDisplay('Cliente');
-    } finally {
-      setCpfLoading(false);
-    }
-    setShowCepInput(true);
-  };
-  const [showCepInput, setShowCepInput] = useState(false);
-  const [cepValue, setCepValue] = useState('');
-  const [cepError, setCepError] = useState('');
-  const [freteRevealed, setFreteRevealed] = useState(false);
   const [clientName, setClientName] = useState('');
   const [firstNameDisplay, setFirstNameDisplay] = useState('');
-
-  const formatCep = (value: string) => {
-    const digits = value.replace(/\D/g, '').slice(0, 8);
-    if (digits.length <= 5) return digits;
-    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-  };
-
-  const validateCep = (cep: string): boolean => {
-    const digits = cep.replace(/\D/g, '');
-    return digits.length === 8;
-  };
-
-  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCep(e.target.value);
-    setCepValue(formatted);
-    setCepError('');
-  };
   const hasTrackedVisitor = useRef(false);
   const hasTrackedQuizStart = useRef(false);
   const hasTrackedQuizComplete = useRef(false);
@@ -489,7 +407,7 @@ export default function QuizHome() {
                   ESN BUNDLE + €150 GUTSCHEIN
                 </h3>
                 <p className="text-sm font-semibold opacity-80">
-                  Du hast in der Rubbelkarte das <strong>ESN Bundle</strong> und einen <strong>€150 ESN Gutschein</strong> gewonnen — gratis, du zahlst nur den Versand.
+                  Du hast in der Rubbelkarte das <strong>nutrition supplements guide eBook</strong> und einen <strong>€150 ESN Gutschein</strong> gewonnen — gratis, du zahlst nur den Versand.
                 </p>
               </div>
             </div>
@@ -511,10 +429,10 @@ export default function QuizHome() {
                 <span className="absolute top-3 left-3 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded uppercase tracking-wider z-10">
                   Exklusiv
                 </span>
-                <img src={comboPackImg} alt="ESN Bundle" className="max-h-full max-w-full object-contain" />
+                <img src={comboPackImg} alt="nutrition supplements guide eBook" className="max-h-full max-w-full object-contain" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-black text-foreground mb-0.5">ESN Bundle</h3>
+                <h3 className="text-lg font-black text-foreground mb-0.5">nutrition supplements guide eBook</h3>
                 <p className="text-muted-foreground text-xs mb-3">8 Premium ESN Produkte im Set</p>
                 <ul className="space-y-1.5 text-xs mb-4">
                   {['Whey Protein, Creatine, Isoclear', 'Pre-Workout, Daily Vitamins, Protein Bar', 'Magnesium, Ashwagandha'].map((item) => (
@@ -563,10 +481,10 @@ export default function QuizHome() {
             </h3>
             <div className="space-y-3 mb-5">
               <div className="flex items-center gap-4 p-3.5 bg-secondary rounded-md">
-                <img src={comboPackImg} alt="ESN Bundle" className="w-16 h-16 object-contain" />
+                <img src={comboPackImg} alt="nutrition supplements guide eBook" className="w-16 h-16 object-contain" />
                 <div className="flex-1">
-                  <p className="font-bold text-foreground text-sm">ESN Bundle</p>
-                  <p className="text-xs text-muted-foreground">8 Premium Produkte</p>
+                  <p className="font-bold text-foreground text-sm">nutrition supplements guide eBook</p>
+                  <p className="text-xs text-muted-foreground">Digitaler Leitfaden</p>
                 </div>
                 <p className="font-black text-centauro-green text-sm">GRATIS</p>
               </div>
@@ -632,94 +550,6 @@ export default function QuizHome() {
             </div>
           </div>
 
-          {/* Address / CPF Dialog */}
-          <Dialog open={showAddressDialog} onOpenChange={setShowAddressDialog}>
-             <DialogContent className="max-w-[calc(100%-2.5rem)] sm:max-w-md mx-auto rounded-2xl p-5 max-h-[85dvh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-center text-xl font-black text-foreground">
-                  {showCepInput ? `Hallo, ${firstNameDisplay || 'Kunde'}! 👋` : 'Identifikation'}
-                </DialogTitle>
-              </DialogHeader>
-
-              {!showCepInput ? (
-                <div className="space-y-4 pt-2">
-                  <div className="bg-secondary p-4 rounded-lg text-center">
-                    <img src={esnLogo} alt="ESN" className="h-10 mx-auto mb-3 object-contain" style={{ mixBlendMode: 'screen' }} />
-                    <p className="font-bold text-foreground text-sm mb-1">Bereits ESN Kunde?</p>
-                    <p className="text-muted-foreground text-xs mb-3">Gib deine E-Mail ein, um deine Daten zu finden</p>
-                    <Input
-                      placeholder="000.000.000-00"
-                      value={cpfValue}
-                      onChange={handleCpfChange}
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive' : ''}`}
-                      style={{ fontFamily: "'Rubik', sans-serif" }}
-                      maxLength={14}
-                    />
-                    {cpfError && (
-                      <p className="text-destructive text-xs font-semibold mt-2">{cpfError}</p>
-                    )}
-                    <Button
-                      onClick={handleCpfSubmit}
-                      className="w-full mt-3 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-5"
-                      disabled={cpfValue.replace(/\D/g, '').length < 11 || cpfLoading}
-                    >
-                      {cpfLoading ? 'Suche...' : 'Meine Daten suchen'}
-                    </Button>
-                  </div>
-
-                  <div className="relative flex items-center gap-3">
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-muted-foreground text-xs font-semibold">oder</span>
-                    <div className="flex-1 h-px bg-border" />
-                  </div>
-
-                  <Button
-                    onClick={() => {
-                      setShowAddressDialog(false);
-                      navigate(`/checkout?cor=${selectedColor}&tamanho=${selectedSize}`);
-                    }}
-                    variant="outline"
-                    className="w-full py-5 font-bold text-sm"
-                  >
-                    <MapPin size={16} className="mr-2" />
-                    Adresse manuell eingeben
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4 pt-2">
-                  <div className="bg-secondary p-4 rounded-lg text-center">
-                    <Truck size={24} className="text-primary mx-auto mb-3" />
-                    <p className="font-bold text-foreground text-sm mb-1">
-                      Daten erfolgreich gefunden!
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      Klicke unten, um fortzufahren
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => {
-                      setShowAddressDialog(false);
-                      navigate(`/checkout?nome=${encodeURIComponent(clientName)}&cpf=${encodeURIComponent(cpfValue)}&cor=${selectedColor}&tamanho=${selectedSize}`);
-                    }}
-                    className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-6 rounded-lg"
-                    style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)' }}
-                  >
-                    WEITER
-                  </Button>
-                  <Button
-                    onClick={() => setShowCepInput(false)}
-                    variant="ghost"
-                    className="w-full text-muted-foreground text-xs"
-                  >
-                    ← Zurück
-                  </Button>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
-
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3 mb-8">
             {[
@@ -757,7 +587,7 @@ className={`text-center text-lg tracking-widest ${cpfError ? 'border-destructive
 
         </div>
 
-        {/* Footer preto */}
+        {/* Footer */}
         <footer className="bg-centauro-black py-8 px-4">
           <div className="max-w-xl mx-auto text-white">
             <div className="mb-5">

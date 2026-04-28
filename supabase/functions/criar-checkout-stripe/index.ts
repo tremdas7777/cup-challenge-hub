@@ -15,7 +15,7 @@ interface RequestBody {
   amount: number; // em reais/euros
   buyerName: string;
   buyerEmail: string;
-  buyerDocument: string;
+  buyerDocument?: string;
   buyerPhone?: string;
   itemsDescription?: string;
   metadata?: Record<string, any>;
@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
       customer_email: body.buyerEmail,
       metadata: {
         buyerName: body.buyerName,
-        buyerDocument: body.buyerDocument,
+        buyerDocument: body.buyerDocument || '',
         buyerPhone: body.buyerPhone || '',
         ...body.metadata,
       },
@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
         items_description: productName,
         buyer_name: body.buyerName,
         buyer_email: body.buyerEmail,
-        buyer_document: body.buyerDocument.replace(/\D/g, ''),
+        buyer_document: (body.buyerDocument || '').replace(/\D/g, ''),
         buyer_phone: body.buyerPhone || null,
         buyer_cep: meta.cep || null,
         buyer_address: meta.address || null,

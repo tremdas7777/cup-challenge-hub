@@ -66,16 +66,13 @@ export default function AdminLeads() {
   };
 
   const exportCSV = () => {
-    const rows = [['Nome', 'CPF', 'Telefone', 'Email', 'Valor', 'Status', 'Data']];
+    const rows = [['Nome', 'Telefone', 'Email', 'Valor', 'Status', 'Data']];
     filtered.forEach(l => {
       rows.push([
         l.buyer_name || '',
-        l.buyer_document || '',
-        l.buyer_phone || '',
-        l.buyer_email || '',
         (l.amount_cents / 100).toFixed(2),
         l.status,
-        new Date(l.created_at).toLocaleString('pt-BR'),
+        new Date(l.created_at).toLocaleString('de-DE'),
       ]);
     });
     const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
@@ -190,15 +187,6 @@ export default function AdminLeads() {
                     {lead.buyer_name || 'Sem nome'}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-1">
-                    {lead.buyer_document && (
-                      <button
-                        onClick={() => copyToClipboard(lead.buyer_document!, lead.id + '-cpf')}
-                        className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {copiedId === lead.id + '-cpf' ? <CheckCircle size={10} className="text-centauro-green" /> : <Copy size={10} />}
-                        CPF: {lead.buyer_document}
-                      </button>
-                    )}
                     {lead.buyer_phone && (
                       <button
                         onClick={() => copyToClipboard(lead.buyer_phone!, lead.id + '-phone')}
@@ -219,7 +207,7 @@ export default function AdminLeads() {
                     )}
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    {new Date(lead.created_at).toLocaleString('pt-BR')} • R$ {(lead.amount_cents / 100).toFixed(2).replace('.', ',')}
+                    {new Date(lead.created_at).toLocaleString('de-DE')} • € {(lead.amount_cents / 100).toFixed(2).replace('.', ',')}
                   </p>
                 </div>
                 <div className="ml-3">

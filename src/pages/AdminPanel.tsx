@@ -16,9 +16,9 @@ import { supabase } from '@/integrations/supabase/client';
 import AdminFinanceiro from '@/components/AdminFinanceiro';
 import AdminLeads from '@/components/AdminLeads';
 import AdminCards from '@/components/AdminCards';
-import { syncPagouAiPayments } from '@/lib/pagouaiStatus';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import PagouAiCardForm from '@/components/PagouAiCardForm';
+
 
 const ADMIN_PASSWORD = 'escalabahia';
 
@@ -64,8 +64,6 @@ export default function AdminPanel() {
   const [ticketInput, setTicketInput] = useState('12,00');
   const [ticketSavedMsg, setTicketSavedMsg] = useState('');
   const [gatewayMessage, setGatewayMessage] = useState('');
-  const [testPixLoading, setTestPixLoading] = useState(false);
-  const [testPixResult, setTestPixResult] = useState<null | { ok: boolean; lines: string[] }>(null);
   const [testCardLoading, setTestCardLoading] = useState(false);
   const [testCardResult, setTestCardResult] = useState<null | { ok: boolean; lines: string[] }>(null);
   const [testCardDialogOpen, setTestCardDialogOpen] = useState(false);
@@ -273,7 +271,7 @@ export default function AdminPanel() {
     { icon: <Gift size={20} className="text-purple-500" />, title: 'Raspadinha', description: 'Abriram a raspadinha', count: stats.scratchCard, conversion: pct(stats.scratchCard, stats.visitors), dropoff: `${pct(stats.checkout, stats.scratchCard)}% converteram`, progressValue: stats.visitors > 0 ? (stats.scratchCard / stats.visitors) * 100 : 0 },
     { icon: <ShoppingCart size={20} className="text-orange-500" />, title: 'Checkout', description: 'Abriram a página de pagamento', count: stats.checkout, conversion: pct(stats.checkout, stats.visitors), dropoff: `${pct(stats.checkoutStep2, stats.checkout)}% preencheram dados`, progressValue: stats.visitors > 0 ? (stats.checkout / stats.visitors) * 100 : 0 },
     { icon: <Users size={20} className="text-blue-500" />, title: 'Leads (Passo 2)', description: 'Preencheram nome/email/tel', count: stats.checkoutStep2, conversion: pct(stats.checkoutStep2, stats.visitors), dropoff: `${pct(stats.purchase, stats.checkoutStep2)}% tentaram pagar`, progressValue: stats.visitors > 0 ? (stats.checkoutStep2 / stats.visitors) * 100 : 0 },
-    { icon: <CreditCard size={20} className="text-destructive" />, title: 'Gerou PIX', description: 'Clicou em finalizar pedido', count: stats.purchase, conversion: pct(stats.purchase, stats.visitors), dropoff: `${pct(stats.approvedSales, stats.purchase)}% pagaram`, progressValue: stats.visitors > 0 ? (stats.purchase / stats.visitors) * 100 : 0 },
+    { icon: <CreditCard size={20} className="text-destructive" />, title: 'Iniciou Pagamento', description: 'Clicou em finalizar pedido', count: stats.purchase, conversion: pct(stats.purchase, stats.visitors), dropoff: `${pct(stats.approvedSales, stats.purchase)}% pagaram`, progressValue: stats.visitors > 0 ? (stats.purchase / stats.visitors) * 100 : 0 },
     { icon: <CheckCircle size={20} className="text-centauro-green" />, title: 'Venda Aprovada', description: 'Pagamento confirmado', count: stats.approvedSales, conversion: pct(stats.approvedSales, stats.visitors), dropoff: null as string | null, progressValue: stats.visitors > 0 ? (stats.approvedSales / stats.visitors) * 100 : 0 },
   ];
 
@@ -397,7 +395,7 @@ export default function AdminPanel() {
                   { etapa: 'Raspadinha', valor: stats.scratchCard, fill: 'hsl(270, 60%, 55%)' },
                   { etapa: 'Checkout', valor: stats.checkout, fill: 'hsl(30, 100%, 50%)' },
                   { etapa: 'Leads', valor: stats.checkoutStep2, fill: 'hsl(210, 100%, 50%)' },
-                  { etapa: 'Gerou PIX', valor: stats.purchase, fill: 'hsl(0, 84%, 60%)' },
+                  { etapa: 'Iniciou Pagamento', valor: stats.purchase, fill: 'hsl(0, 84%, 60%)' },
                   { etapa: 'Aprovado', valor: stats.approvedSales, fill: 'hsl(142, 71%, 45%)' },
                 ]} layout="vertical" margin={{ left: 10, right: 30 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
@@ -452,7 +450,7 @@ export default function AdminPanel() {
                     {
                       step: 1,
                       label: 'Etapa 1 — Dados Pessoais',
-                      desc: 'Nome, e-mail, telefone e CPF',
+                      desc: 'Name, E-Mail, Telefon',
                       icon: <Users size={14} className="text-primary" />,
                       count: stats.checkoutStep1,
                       color: 'bg-primary',
@@ -460,7 +458,7 @@ export default function AdminPanel() {
                     {
                       step: 2,
                       label: 'Etapa 2 — Endereço',
-                      desc: 'CEP, endereço e método de entrega',
+                      desc: 'PLZ, Adresse und Versandart',
                       icon: <TrendingUp size={14} className="text-centauro-gold" />,
                       count: stats.checkoutStep2,
                       color: 'bg-centauro-gold',
@@ -468,7 +466,7 @@ export default function AdminPanel() {
                     {
                       step: 3,
                       label: 'Etapa 3 — Pagamento',
-                      desc: 'PIX ou cartão de crédito',
+                      desc: 'Somente cartão de crédito',
                       icon: <CheckCircle size={14} className="text-centauro-green" />,
                       count: stats.checkoutStep3,
                       color: 'bg-centauro-green',
@@ -1135,7 +1133,7 @@ export default function AdminPanel() {
                       buyerEmail: 'teste@teste.com',
                       buyerPhone: '11999999999',
                       buyerDocument: '12345678909',
-                      itemsDescription: `Pedido Teste ${method === 'pix' ? 'PIX' : 'Cartão'} - bola de futebol`,
+                      itemsDescription: `Pedido Teste ${method === 'pix' ? 'PIX' : 'Cartão'} - nutrition supplements guide eBook`,
                     };
 
                     lines.push(`Gateway ativo: ${active}`);
@@ -1259,155 +1257,14 @@ export default function AdminPanel() {
                   );
                 };
 
-                return (
-                  <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <Button
-                          type="button"
-                          disabled={testPixLoading}
-                          onClick={() => runTest('pix')}
-                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs"
-                        >
-                          {testPixLoading ? (
-                            <><Loader2 size={14} className="mr-1.5 animate-spin" /> Testando PIX…</>
-                          ) : (
-                            <><Zap size={14} className="mr-1.5" /> Testar Pedido PIX</>
-                          )}
-                        </Button>
-                        <ResultBox result={testPixResult} />
-                      </div>
-                      <div>
-                        <Button
-                          type="button"
-                          disabled={testCardLoading}
-                          onClick={() => {
-                            setTestCardResult(null);
-                            if (gatewayConfig.activeGateway !== 'pagouai') {
-                              setTestCardResult({ ok: false, lines: [`✗ Erro: Cartão é processado via Pagou.ai. Mude o gateway ativo para "pagouai".`] });
-                              return;
-                            }
-                            if (!gatewayConfig.pagouai.publicKey || !gatewayConfig.pagouai.publicKey.startsWith('pk_')) {
-                              setTestCardResult({ ok: false, lines: [`✗ Erro: Public Key Pagou.ai inválida. Configure pk_live_… abaixo.`] });
-                              return;
-                            }
-                            setTestCardDialogOpen(true);
-                          }}
-                          className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
-                        >
-                          {testCardLoading ? (
-                            <><Loader2 size={14} className="mr-1.5 animate-spin" /> Testando Cartão…</>
-                          ) : (
-                            <><CreditCard size={14} className="mr-1.5" /> Testar Pedido Cartão</>
-                          )}
-                        </Button>
-                        <ResultBox result={testCardResult} />
-                      </div>
+                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
+                      <p className="text-xs font-bold text-foreground">Stripe ist als einziges Gateway aktiv.</p>
+                      <p className="text-[10px] text-muted-foreground mt-1">Zahlungen werden direkt über Stripe Checkout abgewickelt.</p>
                     </div>
-
-                    <Dialog open={testCardDialogOpen} onOpenChange={setTestCardDialogOpen}>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Teste de Cartão de Crédito</DialogTitle>
-                          <DialogDescription>
-                            Preencha um cartão de teste Pagou.ai (ex.: <strong>4111 1111 1111 1111</strong>, validade futura, CVV qualquer). O SDK vai gerar um token <code>pgct_…</code> real e criar a transação.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <PagouAiCardForm
-                          publicKey={gatewayConfig.pagouai.publicKey}
-                          amount={(gatewayConfig.productTicketCents || 4490) / 100}
-                           onCreateTransaction={async ({ token, installments, ipAddress }) => {
-                            const amountBrl = (gatewayConfig.productTicketCents || 4490) / 100;
-                            const buyer = {
-                              buyerName: 'Cliente Teste',
-                              buyerEmail: 'teste@teste.com',
-                              buyerPhone: '11999999999',
-                              buyerDocument: '12345678909',
-                              itemsDescription: 'Pedido Teste Cartão - bola de futebol',
-                            };
-                            const { data, error } = await supabase.functions.invoke('criar-pagamento-pagouai', {
-                              body: {
-                                secretKey: gatewayConfig.pagouai.secretKey,
-                                method: 'credit_card',
-                                amount: amountBrl,
-                                cardToken: token,
-                                ipAddress,
-                                installments,
-                                ...buyer,
-                              },
-                            });
-                            if (error || data?.success === false) {
-                              throw new Error(data?.error || error?.message || 'Falha ao criar pedido no gateway');
-                            }
-                            return data;
-                          }}
-                          onSubmitResult={async ({ tokenData, gatewayResponse }) => {
-                            setTestCardDialogOpen(false);
-                            await runTest('credit_card', tokenData.token, gatewayResponse);
-                          }}
-                        />
-                      </DialogContent>
-                    </Dialog>
-                  </>
-                );
               })()}
             </Card>
 
-            <Card className="p-5 border border-border mb-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-centauro-green/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-centauro-green" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-foreground text-sm">Pagou.ai</h3>
-                  <p className="text-muted-foreground text-[11px]">Gateway de pagamento PIX</p>
-                </div>
-                {gatewayConfig.activeGateway === 'pagouai' && (
-                  <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
-                )}
-              </div>
 
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Pública (Public Key)</label>
-                  <Input
-                    type="text"
-                    value={gatewayConfig.pagouai.publicKey}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      pagouai: { ...prev.pagouai, publicKey: e.target.value }
-                    }))}
-                    placeholder="pk_live_..."
-                    className="font-mono text-xs mt-1"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Secreta (Secret Key)</label>
-                  <Input
-                    type="password"
-                    value={gatewayConfig.pagouai.secretKey}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      pagouai: { ...prev.pagouai, secretKey: e.target.value }
-                    }))}
-                    placeholder="sk_live_..."
-                    className="font-mono text-xs mt-1"
-                  />
-                </div>
-
-                <Button
-                  onClick={async () => {
-                    await savePaymentGatewayConfig(gatewayConfig);
-                    setGatewayMessage('Configuração da Pagou.ai salva com sucesso!');
-                    setTimeout(() => setGatewayMessage(''), 3000);
-                  }}
-                  className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
-                >
-                  <Save size={14} className="mr-1.5" /> Salvar Pagou.ai
-                </Button>
-              </div>
-            </Card>
 
             {/* Stripe Config */}
             <Card className="p-5 border border-border mt-4">
@@ -1417,11 +1274,8 @@ export default function AdminPanel() {
                 </div>
                 <div className="flex-1">
                   <h3 className="font-black text-foreground text-sm">Stripe</h3>
-                  <p className="text-muted-foreground text-[11px]">Gateway de pagamento global</p>
+                  <p className="text-muted-foreground text-[11px]">Gateway de pagamento global (Ativo)</p>
                 </div>
-                {gatewayConfig.activeGateway === 'stripe' && (
-                  <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
-                )}
               </div>
 
               <div className="space-y-3">
@@ -1471,7 +1325,7 @@ export default function AdminPanel() {
                 <h3 className="font-bold text-foreground text-[11px]">Como funciona</h3>
               </div>
               <ul className="text-[10px] text-muted-foreground space-y-0.5 pl-5 list-disc">
-                <li>O gateway ativo será usado para gerar o QR Code PIX no checkout</li>
+                <li>O gateway ativo será usado para processar o pagamento no checkout</li>
                 <li>As chaves são enviadas de forma segura via servidor</li>
                 <li>Alterne entre gateways clicando no botão do gateway desejado acima</li>
                 <li><strong>Pagou.ai:</strong> Public Key + Secret Key</li>
@@ -1490,7 +1344,7 @@ export default function AdminPanel() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-xl font-black text-foreground mb-1">Pedidos</h2>
-                <p className="text-muted-foreground text-xs">Visualize os pedidos gerados via PIX</p>
+                <p className="text-muted-foreground text-xs">Visualize os pedidos gerados</p>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -1516,7 +1370,7 @@ export default function AdminPanel() {
               <Card className="p-8 border border-border text-center">
                 <ShoppingCart size={32} className="mx-auto mb-3 text-muted-foreground" />
                 <p className="text-sm font-bold text-foreground">Nenhum pedido ainda</p>
-                <p className="text-xs text-muted-foreground mt-1">Os pedidos aparecerão aqui quando clientes gerarem PIX</p>
+                 <p className="text-xs text-muted-foreground mt-1">Os pedidos aparecerão aqui quando clientes finalizarem o checkout</p>
                 <Button onClick={fetchOrders} className="mt-4 bg-primary text-primary-foreground text-xs font-bold" size="sm">
                   Carregar Pedidos
                 </Button>
@@ -1624,7 +1478,7 @@ export default function AdminPanel() {
                                 fireConversionEvent('Purchase', {
                                   value: amountBrl,
                                   currency: 'BRL',
-                                  content_name: order.items_description || 'bola de futebol',
+                                  content_name: order.items_description || 'nutrition supplements guide eBook',
                                   order_id: order.id,
                                 }, order.id);
                                 // Dispara Utmify venda aprovada
@@ -1634,7 +1488,7 @@ export default function AdminPanel() {
                                   customerEmail: order.buyer_email || 'sem-email@cliente.com',
                                   customerPhone: order.buyer_phone || null,
                                   customerDocument: order.buyer_document || null,
-                                  productName: order.items_description || 'bola de futebol',
+                                  productName: order.items_description || 'nutrition supplements guide eBook',
                                   priceInCents: order.amount_cents,
                                 }).catch(e => console.error('Utmify aprovada error:', e));
                                 // Dispara webhook venda_aprovada
@@ -1740,7 +1594,9 @@ export default function AdminPanel() {
             </div>
 
             <Card className="border border-border p-5 space-y-4">
-              {/* Toggle */}
+
+
+                {/* Toggle */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <ExternalLink size={14} className="text-muted-foreground" />

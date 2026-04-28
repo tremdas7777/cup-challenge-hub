@@ -7,7 +7,6 @@ import UpsellPopup from '@/components/UpsellPopup';
 interface UpsellBuyer {
   nome: string;
   email: string;
-  cpf: string;
   telefone: string;
   cep?: string;
   endereco?: string;
@@ -47,31 +46,20 @@ export default function ThankYou() {
       if (raw) parsed = JSON.parse(raw);
     } catch {}
 
-    // Fallback for preview/testing: if user landed on /obrigado without going
-    // through checkout, still show the upsell with placeholder buyer data so
-    // the flow can be previewed.
+    // Fallback for preview/testing
     if (!parsed) {
       parsed = {
-        nome: 'Cliente Teste',
-        email: 'cliente@teste.com',
-        cpf: '00000000000',
-        telefone: '11999999999',
+        nome: 'Testkunde',
+        email: 'kunde@test.de',
+        telefone: '+490000000',
       };
     }
 
     setBuyer(parsed);
-    const openTimer = setTimeout(() => setShowUpsell(true), 100);
     return () => {
       clearTimeout(timer);
-      clearTimeout(openTimer);
     };
   }, []);
-
-  const handleUpsellClosed = () => {
-    sessionStorage.setItem(UPSELL_FLAG_KEY, '1');
-    setUpsellDone(true);
-    window.scrollTo(0, 0);
-  };
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Rubik', 'Inter', system-ui, sans-serif" }}>
@@ -87,7 +75,7 @@ export default function ThankYou() {
         <div className="max-w-lg mx-auto flex items-center justify-center gap-2 text-primary-foreground">
           <ShieldCheck size={20} />
           <span className="text-sm font-bold tracking-wide uppercase">
-            {upsellDone ? 'Bestellung abgeschlossen' : 'Zahlung bestätigt'}
+            Bestellung abgeschlossen
           </span>
         </div>
       </div>
@@ -116,12 +104,10 @@ export default function ThankYou() {
             <CheckCircle className="text-centauro-green" size={48} strokeWidth={2.5} />
           </div>
           <h1 className="text-2xl font-black text-foreground text-center uppercase tracking-tight">
-            {upsellDone ? 'Alles erledigt! Bestellung abgeschlossen' : 'Vielen Dank für deinen Kauf!'}
+            Vielen Dank für deinen Kauf!
           </h1>
           <p className="text-muted-foreground text-center mt-2 text-sm leading-relaxed max-w-xs">
-            {upsellDone
-              ? 'Deine Bestellung wurde erfolgreich abgeschlossen. Du erhältst in Kürze den Tracking-Code per E-Mail.'
-              : 'Deine Bestellung wurde bestätigt. Du erhältst die Details per E-Mail.'}
+            Deine Bestellung wurde bestätigt. Du erhältst die Details per E-Mail.
           </p>
         </div>
 
@@ -190,17 +176,7 @@ export default function ThankYou() {
             Alle deine Daten sind mit Ende-zu-Ende-Verschlüsselung geschützt.
           </p>
         </div>
-      </div>
-
-      {/* Upsell popup */}
-      {buyer && (
-        <UpsellPopup
-          open={showUpsell}
-          onOpenChange={setShowUpsell}
-          onPaid={handleUpsellClosed}
-          buyer={buyer}
-        />
-      )}
+    </div>
     </div>
   );
 }

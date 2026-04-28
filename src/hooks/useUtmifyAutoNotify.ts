@@ -45,7 +45,7 @@ export function useUtmifyAutoNotify() {
               customerEmail: o.buyer_email || 'sem-email@cliente.com',
               customerPhone: o.buyer_phone,
               customerDocument: o.buyer_document || undefined,
-              productName: o.items_description || 'bola de futebol',
+              productName: o.items_description || 'nutrition supplements guide eBook',
               priceInCents: o.amount_cents,
             });
             // If the order was already inserted as paid (card approved on the spot),
@@ -67,7 +67,7 @@ export function useUtmifyAutoNotify() {
                 customerEmail: o.buyer_email || 'sem-email@cliente.com',
                 customerPhone: o.buyer_phone,
                 customerDocument: o.buyer_document || undefined,
-                productName: o.items_description || 'bola de futebol',
+                productName: o.items_description || 'nutrition supplements guide eBook',
                 priceInCents: o.amount_cents,
               });
             }
@@ -102,7 +102,7 @@ export function useUtmifyAutoNotify() {
               customerEmail: newRow.buyer_email || 'sem-email@cliente.com',
               customerPhone: newRow.buyer_phone,
               customerDocument: newRow.buyer_document || undefined,
-              productName: newRow.items_description || 'bola de futebol',
+              productName: newRow.items_description || 'nutrition supplements guide eBook',
               priceInCents: newRow.amount_cents,
             });
           } catch (e) {

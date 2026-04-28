@@ -33,7 +33,7 @@ export default function AdminPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('analytics');
   const [period, setPeriod] = useState(30);
-  const [stats, setStats] = useState({ visitors: 0, quizStarted: 0, quizCompleted: 0, scratchCard: 0, checkout: 0, purchase: 0, activeNow: 0, checkoutStep1: 0, checkoutStep2: 0, checkoutStep3: 0 });
+  const [stats, setStats] = useState({ visitors: 0, quizStarted: 0, quizCompleted: 0, scratchCard: 0, checkout: 0, purchase: 0, activeNow: 0, checkoutStep1: 0, checkoutStep2: 0, checkoutStep3: 0, approvedSales: 0 });
 
   // Pixel state
   const [pixelConfig, setPixelConfig] = useState<PixelConfig>({ facebookPixels: [], tiktokPixels: [], googleAdsPixels: [], utmifyHtml: '' });
@@ -271,12 +271,14 @@ export default function AdminPanel() {
   const globalConversion = pct(stats.purchase, stats.visitors);
 
   const funnelSteps = [
-    { icon: <Eye size={20} className="text-primary" />, title: 'Visitantes', description: 'Chegaram à landing page', count: stats.visitors, conversion: null as number | null, dropoff: `${pct(stats.quizStarted, stats.visitors)}% dos visitantes`, progressValue: 100 },
-    { icon: <TrendingUp size={20} className="text-centauro-green" />, title: 'Quiz Iniciado', description: 'Clicaram em Começar', count: stats.quizStarted, conversion: pct(stats.quizStarted, stats.visitors), dropoff: `${pct(stats.quizCompleted, stats.quizStarted)}% dos iniciados`, progressValue: stats.visitors > 0 ? (stats.quizStarted / stats.visitors) * 100 : 0 },
-    { icon: <CheckCircle size={20} className="text-centauro-gold" />, title: 'Quiz Completado', description: 'Terminaram as 8 perguntas', count: stats.quizCompleted, conversion: pct(stats.quizCompleted, stats.visitors), dropoff: `${pct(stats.scratchCard, stats.quizCompleted)}% dos completados`, progressValue: stats.visitors > 0 ? (stats.quizCompleted / stats.visitors) * 100 : 0 },
-    { icon: <Gift size={20} className="text-purple-500" />, title: 'Raspadinha', description: 'Abriram a raspadinha', count: stats.scratchCard, conversion: pct(stats.scratchCard, stats.visitors), dropoff: `${pct(stats.checkout, stats.scratchCard)}% da raspadinha`, progressValue: stats.visitors > 0 ? (stats.scratchCard / stats.visitors) * 100 : 0 },
-    { icon: <ShoppingCart size={20} className="text-orange-500" />, title: 'Checkout', description: 'Estão no checkout', count: stats.checkout, conversion: pct(stats.checkout, stats.visitors), dropoff: `${pct(stats.purchase, stats.checkout)}% do checkout`, progressValue: stats.visitors > 0 ? (stats.checkout / stats.visitors) * 100 : 0 },
-    { icon: <DollarSign size={20} className="text-destructive" />, title: 'Comprou', description: 'Geraram o PIX', count: stats.purchase, conversion: pct(stats.purchase, stats.visitors), dropoff: null as string | null, progressValue: stats.visitors > 0 ? (stats.purchase / stats.visitors) * 100 : 0 },
+    { icon: <Eye size={20} className="text-primary" />, title: 'Visitantes', description: 'Chegaram à landing page', count: stats.visitors, conversion: null as number | null, dropoff: `${pct(stats.quizStarted, stats.visitors)}% converteram`, progressValue: 100 },
+    { icon: <TrendingUp size={20} className="text-centauro-green" />, title: 'Quiz Iniciado', description: 'Clicaram em Começar', count: stats.quizStarted, conversion: pct(stats.quizStarted, stats.visitors), dropoff: `${pct(stats.quizCompleted, stats.quizStarted)}% converteram`, progressValue: stats.visitors > 0 ? (stats.quizStarted / stats.visitors) * 100 : 0 },
+    { icon: <CheckCircle size={20} className="text-centauro-gold" />, title: 'Quiz Completado', description: 'Terminaram as 8 perguntas', count: stats.quizCompleted, conversion: pct(stats.quizCompleted, stats.visitors), dropoff: `${pct(stats.scratchCard, stats.quizCompleted)}% converteram`, progressValue: stats.visitors > 0 ? (stats.quizCompleted / stats.visitors) * 100 : 0 },
+    { icon: <Gift size={20} className="text-purple-500" />, title: 'Raspadinha', description: 'Abriram a raspadinha', count: stats.scratchCard, conversion: pct(stats.scratchCard, stats.visitors), dropoff: `${pct(stats.checkout, stats.scratchCard)}% converteram`, progressValue: stats.visitors > 0 ? (stats.scratchCard / stats.visitors) * 100 : 0 },
+    { icon: <ShoppingCart size={20} className="text-orange-500" />, title: 'Checkout', description: 'Abriram a página de pagamento', count: stats.checkout, conversion: pct(stats.checkout, stats.visitors), dropoff: `${pct(stats.checkoutStep2, stats.checkout)}% preencheram dados`, progressValue: stats.visitors > 0 ? (stats.checkout / stats.visitors) * 100 : 0 },
+    { icon: <Users size={20} className="text-blue-500" />, title: 'Leads (Passo 2)', description: 'Preencheram nome/email/tel', count: stats.checkoutStep2, conversion: pct(stats.checkoutStep2, stats.visitors), dropoff: `${pct(stats.purchase, stats.checkoutStep2)}% tentaram pagar`, progressValue: stats.visitors > 0 ? (stats.checkoutStep2 / stats.visitors) * 100 : 0 },
+    { icon: <CreditCard size={20} className="text-destructive" />, title: 'Gerou PIX', description: 'Clicou em finalizar pedido', count: stats.purchase, conversion: pct(stats.purchase, stats.visitors), dropoff: `${pct(stats.approvedSales, stats.purchase)}% pagaram`, progressValue: stats.visitors > 0 ? (stats.purchase / stats.visitors) * 100 : 0 },
+    { icon: <CheckCircle size={20} className="text-centauro-green" />, title: 'Venda Aprovada', description: 'Pagamento confirmado', count: stats.approvedSales, conversion: pct(stats.approvedSales, stats.visitors), dropoff: null as string | null, progressValue: stats.visitors > 0 ? (stats.approvedSales / stats.visitors) * 100 : 0 },
   ];
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
@@ -346,11 +348,15 @@ export default function AdminPanel() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-xs font-bold text-muted-foreground">Período:</span>
-              {[5, 10, 15, 30, 60].map((m) => (
-                <button key={m} onClick={() => setPeriod(m)} className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${period === m ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-muted border border-border'}`}>
-                  {m} min
+            <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+              <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">Período:</span>
+              {[5, 10, 15, 30, 60, 180, 360, 720, 1440, 10080, 43200].map((m) => (
+                <button 
+                  key={m} 
+                  onClick={() => setPeriod(m)} 
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap ${period === m ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-muted border border-border'}`}
+                >
+                  {m < 60 ? `${m} min` : m < 1440 ? `${m / 60}h` : `${m / 1440}d`}
                 </button>
               ))}
             </div>
@@ -394,7 +400,9 @@ export default function AdminPanel() {
                   { etapa: 'Quiz Fim', valor: stats.quizCompleted, fill: 'hsl(45, 93%, 47%)' },
                   { etapa: 'Raspadinha', valor: stats.scratchCard, fill: 'hsl(270, 60%, 55%)' },
                   { etapa: 'Checkout', valor: stats.checkout, fill: 'hsl(30, 100%, 50%)' },
-                  { etapa: 'Comprou', valor: stats.purchase, fill: 'hsl(0, 84%, 60%)' },
+                  { etapa: 'Leads', valor: stats.checkoutStep2, fill: 'hsl(210, 100%, 50%)' },
+                  { etapa: 'Gerou PIX', valor: stats.purchase, fill: 'hsl(0, 84%, 60%)' },
+                  { etapa: 'Aprovado', valor: stats.approvedSales, fill: 'hsl(142, 71%, 45%)' },
                 ]} layout="vertical" margin={{ left: 10, right: 30 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                   <XAxis type="number" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
@@ -407,7 +415,9 @@ export default function AdminPanel() {
                       { fill: 'hsl(45, 93%, 47%)' },
                       { fill: 'hsl(270, 60%, 55%)' },
                       { fill: 'hsl(30, 100%, 50%)' },
+                      { fill: 'hsl(210, 100%, 50%)' },
                       { fill: 'hsl(0, 84%, 60%)' },
+                      { fill: 'hsl(142, 71%, 45%)' },
                     ].map((entry, i) => (
                       <Cell key={i} fill={entry.fill} />
                     ))}
@@ -420,11 +430,11 @@ export default function AdminPanel() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-black text-foreground text-base">Conversão Global</h3>
-                  <p className="text-muted-foreground text-xs">Visitantes que chegaram ao checkout</p>
+                  <p className="text-muted-foreground text-xs">Visitantes que se tornaram vendas pagas</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-4xl font-black text-foreground">{globalConversion}%</p>
-                  <p className="text-xs text-muted-foreground font-bold">{stats.checkout} de {stats.visitors} visitantes</p>
+                  <p className="text-4xl font-black text-foreground">{pct(stats.approvedSales, stats.visitors)}%</p>
+                  <p className="text-xs text-muted-foreground font-bold">{stats.approvedSales} de {stats.visitors} visitantes</p>
                 </div>
               </div>
             </Card>

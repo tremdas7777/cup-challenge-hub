@@ -41,21 +41,31 @@ export async function getFunnelStats(periodMinutes: number) {
   const cutoff = new Date(Date.now() - periodMinutes * 60 * 1000).toISOString();
   const activeNowCutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
 
-  const { data, error } = await supabase
-    .from('funnel_events')
-    .select('event, created_at')
-    .gte('created_at', cutoff);
+  const [{ data: eventData, error: eventError }, { data: orderData, error: orderError }] = await Promise.all([
+    supabase
+      .from('funnel_events')
+      .select('event, created_at')
+      .gte('created_at', cutoff),
+    supabase
+      .from('orders')
+      .select('status, created_at')
+      .gte('created_at', cutoff)
+      .eq('status', 'paid')
+  ]);
 
-  if (error) {
-    console.warn('Failed to fetch funnel stats:', error);
+  if (eventError || orderError) {
+    console.warn('Failed to fetch funnel stats:', eventError || orderError);
     return {
       visitors: 0, quizStarted: 0, quizCompleted: 0, scratchCard: 0,
       checkout: 0, purchase: 0, activeNow: 0,
       checkoutStep1: 0, checkoutStep2: 0, checkoutStep3: 0,
+      approvedSales: 0,
     };
   }
 
-  const events = data || [];
+  const events = eventData || [];
+  const orders = orderData || [];
+  
   const visitors = events.filter(e => e.event === 'visitor').length;
   const quizStarted = events.filter(e => e.event === 'quiz_started').length;
   const quizCompleted = events.filter(e => e.event === 'quiz_completed').length;
@@ -66,8 +76,14 @@ export async function getFunnelStats(periodMinutes: number) {
   const checkoutStep1 = events.filter(e => e.event === 'checkout_step_1').length;
   const checkoutStep2 = events.filter(e => e.event === 'checkout_step_2').length;
   const checkoutStep3 = events.filter(e => e.event === 'checkout_step_3').length;
+  const approvedSales = orders.length;
 
-  return { visitors, quizStarted, quizCompleted, scratchCard, checkout, purchase, activeNow, checkoutStep1, checkoutStep2, checkoutStep3 };
+  return { 
+    visitors, quizStarted, quizCompleted, scratchCard, 
+    checkout, purchase, activeNow, 
+    checkoutStep1, checkoutStep2, checkoutStep3,
+    approvedSales
+  };
 }
 
 export async function clearFunnelEvents() {

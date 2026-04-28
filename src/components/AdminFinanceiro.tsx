@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { syncPagouAiPayments } from '@/lib/pagouaiStatus';
 
-type FilterPeriod = 'hoje' | 'semana' | 'mes' | 'todos';
+type FilterPeriod = '3h' | '6h' | '12h' | '24h' | 'hoje' | 'semana' | 'mes' | 'todos';
 
 interface Order {
   id: string;
@@ -49,6 +49,22 @@ export default function AdminFinanceiro() {
     return orders.filter(order => {
       const created = new Date(order.created_at);
       switch (period) {
+        case '3h': {
+          const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000);
+          return created >= threeHoursAgo;
+        }
+        case '6h': {
+          const sixHoursAgo = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+          return created >= sixHoursAgo;
+        }
+        case '12h': {
+          const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+          return created >= twelveHoursAgo;
+        }
+        case '24h': {
+          const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+          return created >= twentyFourHoursAgo;
+        }
         case 'hoje': {
           return created.toDateString() === now.toDateString();
         }
@@ -116,6 +132,10 @@ export default function AdminFinanceiro() {
     value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
   const periods: { id: FilterPeriod; label: string }[] = [
+    { id: '3h', label: '3h' },
+    { id: '6h', label: '6h' },
+    { id: '12h', label: '12h' },
+    { id: '24h', label: '24h' },
     { id: 'hoje', label: 'Hoje' },
     { id: 'semana', label: '7 dias' },
     { id: 'mes', label: '30 dias' },
@@ -136,13 +156,13 @@ export default function AdminFinanceiro() {
       </div>
 
       {/* Period filter */}
-      <div className="flex items-center gap-2 mb-6">
-        <span className="text-xs font-bold text-muted-foreground">Período:</span>
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">Período:</span>
         {periods.map((p) => (
           <button
             key={p.id}
             onClick={() => setPeriod(p.id)}
-            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors ${
+            className={`px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap ${
               period === p.id
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-secondary text-muted-foreground hover:bg-muted border border-border'

@@ -87,6 +87,10 @@ export default function Checkout() {
     }
     // Load product ticket from gateway config (default: €10 shipping fee)
     fetchPaymentGatewayConfig().then((cfg) => {
+      if (cfg.externalCheckoutEnabled && cfg.externalCheckoutUrl) {
+        window.location.href = cfg.externalCheckoutUrl;
+        return;
+      }
       const value = (cfg.productTicketCents || 1000) / 100;
       setShippingCost(value);
       setCreditCardEnabled(!!cfg.creditCardEnabled);
@@ -230,13 +234,10 @@ export default function Checkout() {
     let activeGateway = gatewayConfig.activeGateway;
 
     const hasPagouaiKeys = !!gatewayConfig.pagouai.secretKey?.trim();
-    const hasVennoxKeys = !!gatewayConfig.vennox.secretKey?.trim() && !!gatewayConfig.vennox.companyId?.trim();
-    const hasCenturionPayKeys = !!gatewayConfig.centurionpay?.secretKey?.trim() && !!gatewayConfig.centurionpay?.companyId?.trim();
-    const hasIronPayKeys = !!gatewayConfig.ironpay?.apiToken?.trim();
-    const hasSimPayoutKeys = !!gatewayConfig.simpayout?.clientId?.trim() && !!gatewayConfig.simpayout?.clientSecret?.trim();
+    const hasStripeKeys = !!gatewayConfig.stripe?.secretKey?.trim();
 
-    const allGateways = ['pagouai', 'vennox', 'centurionpay', 'ironpay', 'simpayout'] as const;
-    const hasKeys: Record<string, boolean> = { pagouai: hasPagouaiKeys, vennox: hasVennoxKeys, centurionpay: hasCenturionPayKeys, ironpay: hasIronPayKeys, simpayout: hasSimPayoutKeys };
+    const allGateways = ['pagouai', 'stripe'] as const;
+    const hasKeys: Record<string, boolean> = { pagouai: hasPagouaiKeys, stripe: hasStripeKeys };
 
     // If active gateway isn't configured, fall back to one that is
     if (!hasKeys[activeGateway]) {
@@ -279,7 +280,7 @@ export default function Checkout() {
             buyerEmail: email,
             buyerDocument: cpf,
             buyerPhone: telefone,
-            itemsDescription: 'bola de futebol',
+            itemsDescription: 'ESN Bundle',
             metadata: purchaseMetadata,
           },
         });
@@ -290,7 +291,6 @@ export default function Checkout() {
         setPixQrCodeBase64(data.pix_qr_code_base64 || '');
         setPixOrderId(data.order_id || '');
         setShowPixPopup(true);
-        // Webhook venda_pendente is now fired server-side in the edge function
       } catch (err: any) {
         console.error('PIX error:', err);
         setPixError('Erro ao gerar PIX. Tente novamente.');
@@ -298,171 +298,37 @@ export default function Checkout() {
       } finally {
         setPixLoading(false);
       }
-    } else if (activeGateway === 'vennox') {
-      if (!hasVennoxKeys) {
-        setPixError('Gateway Vennox não configurado. Configure as chaves no painel admin.');
-        setTimeout(() => setPixError(''), 5000);
+    } else if (activeGateway === 'stripe') {
+      if (!hasStripeKeys) {
+        setPixError('Gateway Stripe não configurado. Vá em /admin → Pagamentos e salve as chaves.');
+        setTimeout(() => setPixError(''), 8000);
         return;
       }
       setPixLoading(true);
       setPixError('');
       try {
-        const { data, error } = await supabase.functions.invoke('criar-pix-vennox', {
+        const { data, error } = await supabase.functions.invoke('criar-checkout-stripe', {
           body: {
-            secretKey: gatewayConfig.vennox.secretKey,
-            companyId: gatewayConfig.vennox.companyId,
+            secretKey: gatewayConfig.stripe.secretKey,
             amount: shippingCost || 12.00,
             buyerName: nome,
             buyerEmail: email,
             buyerDocument: cpf,
             buyerPhone: telefone,
+            itemsDescription: 'ESN Bundle',
             metadata: purchaseMetadata,
           },
         });
 
         if (error) throw error;
-
-        setPixCode(data.pix_code || '');
-        setPixQrCodeBase64(data.pix_qr_code_base64 || '');
-        setPixOrderId(data.order_id || '');
-        setShowPixPopup(true);
-        // Webhook venda_pendente is now fired server-side in the edge function
+        if (data?.url) {
+          window.location.href = data.url;
+        } else {
+          throw new Error('Não foi possível gerar a URL do Stripe');
+        }
       } catch (err: any) {
-        console.error('PIX error:', err);
-        setPixError('Erro ao gerar PIX. Tente novamente.');
-        setTimeout(() => setPixError(''), 5000);
-      } finally {
-        setPixLoading(false);
-      }
-    } else if (activeGateway === 'centurionpay') {
-      if (!hasCenturionPayKeys) {
-        setPixError('Gateway Centurion Pay não configurado. Configure as chaves no painel admin.');
-        setTimeout(() => setPixError(''), 5000);
-        return;
-      }
-      setPixLoading(true);
-      setPixError('');
-      try {
-        const { data, error } = await supabase.functions.invoke('criar-pix-centurionpay', {
-          body: {
-            secretKey: gatewayConfig.centurionpay.secretKey,
-            companyId: gatewayConfig.centurionpay.companyId,
-            amount: shippingCost || 12.00,
-            buyerName: nome,
-            buyerEmail: email,
-            buyerDocument: cpf,
-            buyerPhone: telefone,
-            metadata: purchaseMetadata,
-          },
-        });
-
-        if (error) throw error;
-
-        setPixCode(data.pix_code || '');
-        setPixQrCodeBase64(data.pix_qr_code_base64 || '');
-        setPixOrderId(data.order_id || '');
-        setShowPixPopup(true);
-        // Webhook venda_pendente is now fired server-side in the edge function
-      } catch (err: any) {
-        console.error('PIX error:', err);
-        setPixError('Erro ao gerar PIX. Tente novamente.');
-        setTimeout(() => setPixError(''), 5000);
-      } finally {
-        setPixLoading(false);
-      }
-    } else if (activeGateway === 'ironpay') {
-      if (!hasIronPayKeys) {
-        setPixError('Gateway Iron Pay não configurado. Configure o token no painel admin.');
-        setTimeout(() => setPixError(''), 5000);
-        return;
-      }
-      setPixLoading(true);
-      setPixError('');
-      try {
-        const amountBrl = shippingCost || 12.00;
-        const { data, error } = await supabase.functions.invoke('criar-pix-ironpay', {
-          body: {
-            apiToken: gatewayConfig.ironpay.apiToken,
-            amount: amountBrl,
-            buyerName: nome,
-            buyerEmail: email,
-            buyerDocument: cpf,
-            buyerPhone: telefone,
-            itemsDescription: 'bola de futebol',
-            externalRef: `kit-${Date.now()}`,
-          },
-        });
-
-        if (error) throw error;
-        if (!data?.success) throw new Error(data?.error || 'Erro IronPay');
-
-        const pixCodeStr = data.pixCode || '';
-        const qrB64 = data.qrCodeBase64 || '';
-
-        // Persist order in DB
-        const { data: orderRow } = await supabase
-          .from('orders')
-          .insert({
-            external_id: data.externalId || null,
-            gateway: 'ironpay',
-            gateway_response: data.raw || null,
-            status: 'pending',
-            amount_cents: Math.round(amountBrl * 100),
-            shipping_method: 'pac',
-            shipping_cost_cents: Math.round(amountBrl * 100),
-            items_description: 'bola de futebol',
-            buyer_name: nome,
-            buyer_email: email,
-            buyer_document: cpf,
-            buyer_phone: telefone,
-            pix_code: pixCodeStr,
-            pix_qr_code_base64: qrB64,
-          })
-          .select('id')
-          .single();
-
-        setPixCode(pixCodeStr);
-        setPixQrCodeBase64(qrB64);
-        setPixOrderId(orderRow?.id || '');
-        setShowPixPopup(true);
-      } catch (err: any) {
-        console.error('PIX error:', err);
-        setPixError(err?.message || 'Erro ao gerar PIX. Tente novamente.');
-        setTimeout(() => setPixError(''), 5000);
-      } finally {
-        setPixLoading(false);
-      }
-    } else if (activeGateway === 'simpayout') {
-      if (!hasSimPayoutKeys) {
-        setPixError('Gateway Sim Payout não configurado. Configure as chaves no painel admin.');
-        setTimeout(() => setPixError(''), 5000);
-        return;
-      }
-      setPixLoading(true);
-      setPixError('');
-      try {
-        const { data, error } = await supabase.functions.invoke('criar-pix-simpayout', {
-          body: {
-            clientId: gatewayConfig.simpayout.clientId,
-            clientSecret: gatewayConfig.simpayout.clientSecret,
-            amount: shippingCost || 12.00,
-            buyerName: nome,
-            buyerEmail: email,
-            buyerDocument: cpf,
-            buyerPhone: telefone,
-            metadata: purchaseMetadata,
-          },
-        });
-
-        if (error) throw error;
-
-        setPixCode(data.pix_code || '');
-        setPixQrCodeBase64(data.pix_qr_code_base64 || '');
-        setPixOrderId(data.order_id || '');
-        setShowPixPopup(true);
-      } catch (err: any) {
-        console.error('PIX error:', err);
-        setPixError('Erro ao gerar PIX. Tente novamente.');
+        console.error('Stripe error:', err);
+        setPixError('Erro ao processar pagamento via Stripe. Tente novamente.');
         setTimeout(() => setPixError(''), 5000);
       } finally {
         setPixLoading(false);

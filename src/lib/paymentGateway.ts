@@ -6,51 +6,32 @@ export interface PagouAiConfig {
   enabled: boolean;
 }
 
-export interface VennoxConfig {
+export interface StripeConfig {
+  publicKey: string;
   secretKey: string;
-  companyId: string;
-  enabled: boolean;
-}
-
-export interface CenturionPayConfig {
-  secretKey: string;
-  companyId: string;
-  enabled: boolean;
-}
-
-export interface IronPayConfig {
-  apiToken: string;
-  enabled: boolean;
-}
-
-export interface SimPayoutConfig {
-  clientId: string;
-  clientSecret: string;
   enabled: boolean;
 }
 
 export interface PaymentGatewayConfig {
-  activeGateway: 'pagouai' | 'vennox' | 'centurionpay' | 'ironpay' | 'simpayout';
+  activeGateway: 'pagouai' | 'stripe';
   productTicketCents: number;
   creditCardEnabled: boolean;
   supportWhatsapp: string;
+  externalCheckoutEnabled: boolean;
+  externalCheckoutUrl: string;
   pagouai: PagouAiConfig;
-  vennox: VennoxConfig;
-  centurionpay: CenturionPayConfig;
-  ironpay: IronPayConfig;
-  simpayout: SimPayoutConfig;
+  stripe: StripeConfig;
 }
 
 const defaultConfig: PaymentGatewayConfig = {
-  activeGateway: 'centurionpay',
+  activeGateway: 'pagouai',
   productTicketCents: 1200,
   creditCardEnabled: false,
   supportWhatsapp: '11991537247',
+  externalCheckoutEnabled: false,
+  externalCheckoutUrl: '',
   pagouai: { publicKey: '', secretKey: '', enabled: false },
-  vennox: { secretKey: '', companyId: '', enabled: false },
-  centurionpay: { secretKey: '', companyId: '', enabled: false },
-  ironpay: { apiToken: '', enabled: false },
-  simpayout: { clientId: '', clientSecret: '', enabled: false },
+  stripe: { publicKey: '', secretKey: '', enabled: false },
 };
 
 // In-memory cache to avoid repeated DB calls within the same page
@@ -74,37 +55,25 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
     }
 
     const config: PaymentGatewayConfig = {
-      activeGateway: (['pagouai', 'vennox', 'centurionpay', 'ironpay', 'simpayout'].includes(data.active_gateway)
+      activeGateway: (['pagouai', 'stripe'].includes(data.active_gateway)
         ? data.active_gateway
-        : 'centurionpay') as PaymentGatewayConfig['activeGateway'],
+        : 'pagouai') as PaymentGatewayConfig['activeGateway'],
       productTicketCents: typeof (data as any).product_ticket_cents === 'number'
         ? (data as any).product_ticket_cents
         : 1200,
       creditCardEnabled: !!(data as any).credit_card_enabled,
       supportWhatsapp: (data as any).support_whatsapp || '11991537247',
+      externalCheckoutEnabled: !!(data as any).external_checkout_enabled,
+      externalCheckoutUrl: (data as any).external_checkout_url || '',
       pagouai: {
         publicKey: data.pagouai_public_key || '',
         secretKey: data.pagouai_secret_key || '',
         enabled: !!(data.pagouai_secret_key),
       },
-      vennox: {
-        secretKey: data.vennox_secret_key || '',
-        companyId: data.vennox_company_id || '',
-        enabled: !!(data.vennox_secret_key && data.vennox_company_id),
-      },
-      centurionpay: {
-        secretKey: data.centurionpay_secret_key || '',
-        companyId: data.centurionpay_company_id || '',
-        enabled: !!(data.centurionpay_secret_key && data.centurionpay_company_id),
-      },
-      ironpay: {
-        apiToken: (data as any).ironpay_api_token || '',
-        enabled: !!((data as any).ironpay_api_token),
-      },
-      simpayout: {
-        clientId: (data as any).simpayout_client_id || '',
-        clientSecret: (data as any).simpayout_client_secret || '',
-        enabled: !!((data as any).simpayout_client_id && (data as any).simpayout_client_secret),
+      stripe: {
+        publicKey: (data as any).stripe_public_key || '',
+        secretKey: (data as any).stripe_secret_key || '',
+        enabled: !!((data as any).stripe_secret_key),
       },
     };
 
@@ -130,15 +99,12 @@ export async function savePaymentGatewayConfig(config: PaymentGatewayConfig): Pr
       product_ticket_cents: config.productTicketCents,
       credit_card_enabled: config.creditCardEnabled,
       support_whatsapp: config.supportWhatsapp,
+      external_checkout_enabled: config.externalCheckoutEnabled,
+      external_checkout_url: config.externalCheckoutUrl,
       pagouai_public_key: config.pagouai.publicKey,
       pagouai_secret_key: config.pagouai.secretKey,
-      vennox_secret_key: config.vennox.secretKey,
-      vennox_company_id: config.vennox.companyId,
-      centurionpay_secret_key: config.centurionpay.secretKey,
-      centurionpay_company_id: config.centurionpay.companyId,
-      ironpay_api_token: config.ironpay.apiToken,
-      simpayout_client_id: config.simpayout.clientId,
-      simpayout_client_secret: config.simpayout.clientSecret,
+      stripe_public_key: config.stripe.publicKey,
+      stripe_secret_key: config.stripe.secretKey,
       updated_at: new Date().toISOString(),
     };
 
@@ -163,7 +129,6 @@ export async function savePaymentGatewayConfig(config: PaymentGatewayConfig): Pr
   }
 }
 
-// Legacy support - keep getPaymentGatewayConfig for sync access (uses cache)
 export function getPaymentGatewayConfig(): PaymentGatewayConfig {
   return cachedConfig || defaultConfig;
 }

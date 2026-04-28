@@ -12,6 +12,7 @@ import { CheckCircle, Trophy, Truck, Shield, Clock, Users, Gift, ShoppingCart, S
 import { trackEvent } from '@/lib/funnelTracking';
 import { fireConversionEvent } from '@/lib/pixelManager';
 import { fireSaleWebhook } from '@/lib/webhookManager';
+import { fetchPaymentGatewayConfig } from '@/lib/paymentGateway';
 import esnLogo from '@/assets/esn-logo.png';
 import quizBannerPreload from '@/assets/esn-quiz-banner.png';
 import gymHero from '@/assets/esn-hero-banner.jpg';
@@ -270,8 +271,10 @@ export default function QuizHome() {
   const hasTrackedQuizComplete = useRef(false);
   const hasTrackedCheckout = useRef(false);
 
-  // Track visitor on mount
+  const [gatewayConfig, setGatewayConfig] = useState<any>(null);
+
   useEffect(() => {
+    fetchPaymentGatewayConfig().then(setGatewayConfig);
     if (!hasTrackedVisitor.current) {
       trackEvent('visitor');
       hasTrackedVisitor.current = true;
@@ -324,8 +327,12 @@ export default function QuizHome() {
       fireConversionEvent('InitiateCheckout', { value: 12.00, currency: 'EUR' });
       hasTrackedCheckout.current = true;
     }
-    const checkoutUrl = 'https://checkout.flowspays.com/checkout/cmofixp5206bc1yp340w0jr1v?offer=L7NXD5Y';
-    window.location.href = checkoutUrl;
+
+    if (gatewayConfig?.externalCheckoutEnabled && gatewayConfig?.externalCheckoutUrl) {
+      window.location.href = gatewayConfig.externalCheckoutUrl;
+    } else {
+      navigate('/checkout');
+    }
   };
 
   // SPLASH SCREEN

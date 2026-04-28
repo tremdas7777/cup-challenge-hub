@@ -27,8 +27,6 @@ type Tab = 'analytics' | 'financeiro' | 'leads' | 'pixels' | 'webhooks' | 'utmif
 export default function AdminPanel() {
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState('');
-  const [newCheckoutUrl, setNewCheckoutUrl] = useState('');
   const [message, setMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('analytics');
@@ -39,8 +37,7 @@ export default function AdminPanel() {
   const [pixelConfig, setPixelConfig] = useState<PixelConfig>({ facebookPixels: [], tiktokPixels: [], googleAdsPixels: [], utmifyHtml: '' });
   const [pixelMessage, setPixelMessage] = useState('');
 
-  // External checkout toggle
-  const [externalCheckout, setExternalCheckout] = useState(false);
+
 
   // Webhook state
   const [webhookConfig, setWebhookConfig] = useState<WebhookConfig>(getWebhookConfig());
@@ -55,15 +52,14 @@ export default function AdminPanel() {
 
   // Payment gateway state
   const [gatewayConfig, setGatewayConfig] = useState<PaymentGatewayConfig>({
-    activeGateway: 'centurionpay',
+    activeGateway: 'pagouai',
     productTicketCents: 4490,
     creditCardEnabled: false,
     supportWhatsapp: '11991537247',
+    externalCheckoutEnabled: false,
+    externalCheckoutUrl: '',
     pagouai: { publicKey: '', secretKey: '', enabled: false },
-    vennox: { secretKey: '', companyId: '', enabled: false },
-    centurionpay: { secretKey: '', companyId: '', enabled: false },
-    ironpay: { apiToken: '', enabled: false },
-    simpayout: { clientId: '', clientSecret: '', enabled: false },
+    stripe: { publicKey: '', secretKey: '', enabled: false },
   });
   const [ticketInput, setTicketInput] = useState('12,00');
   const [ticketSavedMsg, setTicketSavedMsg] = useState('');
@@ -90,9 +86,6 @@ export default function AdminPanel() {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('checkoutUrl');
-    if (saved) { setCheckoutUrl(saved); setNewCheckoutUrl(saved); }
-    setExternalCheckout(localStorage.getItem('externalCheckout') === 'true');
     setPixelConfig(getPixelConfig());
     loadWebhooksFromDb().then(config => {
       setWebhookConfig(config);
@@ -137,12 +130,15 @@ export default function AdminPanel() {
     }
   };
 
-  const handleSave = () => {
-    if (!newCheckoutUrl.trim()) { setMessage('URL não pode estar vazia!'); return; }
+  const handleSaveCheckout = async () => {
+    if (!gatewayConfig.externalCheckoutUrl.trim()) { setMessage('URL não pode estar vazia!'); return; }
     try {
-      localStorage.setItem('checkoutUrl', newCheckoutUrl);
-      setCheckoutUrl(newCheckoutUrl);
-      setMessage('Link salvo com sucesso!');
+      const ok = await savePaymentGatewayConfig(gatewayConfig);
+      if (ok) {
+        setMessage('Configurações de checkout salvas com sucesso!');
+      } else {
+        setMessage('Erro ao salvar no banco de dados!');
+      }
       setTimeout(() => setMessage(''), 3000);
     } catch { setMessage('Erro ao salvar!'); }
   };
@@ -985,14 +981,14 @@ export default function AdminPanel() {
                 <span className="font-black text-foreground text-sm">Gateway Ativo</span>
               </div>
               <div className="flex gap-2 flex-wrap">
-                {(['pagouai', 'vennox', 'centurionpay', 'ironpay', 'simpayout'] as const).map((gw) => (
+                {(['pagouai', 'stripe'] as const).map((gw) => (
                   <button
                     key={gw}
                     onClick={async () => {
                       const updated = { ...gatewayConfig, activeGateway: gw };
                       setGatewayConfig(updated);
                       await savePaymentGatewayConfig(updated);
-                      const names: Record<string, string> = { pagouai: 'Pagou.ai', vennox: 'Vennox', centurionpay: 'Centurion Pay', ironpay: 'Iron Pay', simpayout: 'Sim Payout' };
+                      const names: Record<string, string> = { pagouai: 'Pagou.ai', stripe: 'Stripe' };
                       setGatewayMessage(`Gateway ativo: ${names[gw]}`);
                       setTimeout(() => setGatewayMessage(''), 3000);
                     }}
@@ -1002,7 +998,7 @@ export default function AdminPanel() {
                         : 'border-border text-muted-foreground hover:border-muted-foreground/30'
                     }`}
                   >
-                    {gw === 'pagouai' ? 'Pagou.ai' : gw === 'vennox' ? 'Vennox' : gw === 'centurionpay' ? 'Centurion Pay' : gw === 'ironpay' ? 'Iron Pay' : 'Sim Payout'}
+                    {gw === 'pagouai' ? 'Pagou.ai' : 'Stripe'}
                   </button>
                 ))}
               </div>
@@ -1413,203 +1409,43 @@ export default function AdminPanel() {
               </div>
             </Card>
 
-            {/* Vennox Config */}
-            <Card className="p-5 border border-border">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-foreground text-sm">Vennox</h3>
-                  <p className="text-muted-foreground text-[11px]">VennoxPay - Gateway PIX</p>
-                </div>
-                {gatewayConfig.activeGateway === 'vennox' && (
-                  <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Secret Key</label>
-                  <Input
-                    type="password"
-                    value={gatewayConfig.vennox.secretKey}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      vennox: { ...prev.vennox, secretKey: e.target.value }
-                    }))}
-                    placeholder="sua_secret_key_aqui"
-                    className="font-mono text-xs mt-1"
-                  />
-                  <p className="text-[9px] text-muted-foreground mt-1">Vennox → Integrações → Chaves de API → Secret Key</p>
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Company ID</label>
-                  <Input
-                    type="text"
-                    value={gatewayConfig.vennox.companyId}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      vennox: { ...prev.vennox, companyId: e.target.value }
-                    }))}
-                    placeholder="seu_company_id_aqui"
-                    className="font-mono text-xs mt-1"
-                  />
-                  <p className="text-[9px] text-muted-foreground mt-1">Vennox → Integrações → Chaves de API → Company ID</p>
-                </div>
-
-                <Button
-                  onClick={async () => {
-                    await savePaymentGatewayConfig(gatewayConfig);
-                    setGatewayMessage('Configuração da Vennox salva com sucesso!');
-                    setTimeout(() => setGatewayMessage(''), 3000);
-                  }}
-                  className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
-                >
-                  <Save size={14} className="mr-1.5" /> Salvar Vennox
-                </Button>
-              </div>
-            </Card>
-
-            {/* Centurion Pay Config */}
+            {/* Stripe Config */}
             <Card className="p-5 border border-border mt-4">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-primary" />
+                <div className="w-10 h-10 rounded-lg bg-[#635BFF]/10 flex items-center justify-center">
+                  <CreditCard size={20} className="text-[#635BFF]" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-black text-foreground text-sm">Centurion Pay</h3>
-                  <p className="text-muted-foreground text-[11px]">CenturionPay - Gateway PIX</p>
+                  <h3 className="font-black text-foreground text-sm">Stripe</h3>
+                  <p className="text-muted-foreground text-[11px]">Gateway de pagamento global</p>
                 </div>
-                {gatewayConfig.activeGateway === 'centurionpay' && (
+                {gatewayConfig.activeGateway === 'stripe' && (
                   <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
                 )}
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Company ID</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Pública (Publishable Key)</label>
                   <Input
                     type="text"
-                    value={gatewayConfig.centurionpay?.companyId || ''}
+                    value={gatewayConfig.stripe?.publicKey || ''}
                     onChange={(e) => setGatewayConfig(prev => ({
                       ...prev,
-                      centurionpay: { ...prev.centurionpay, companyId: e.target.value }
-                    }))}
-                    placeholder="2499a6bb-42e6-44c6-bab0-d9bd6aa3c503"
-                    className="font-mono text-xs mt-1"
-                  />
-                  <p className="text-[9px] text-muted-foreground mt-1">Centurion Pay → Integrações → Company ID</p>
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Secreta (Secret Key)</label>
-                  <Input
-                    type="password"
-                    value={gatewayConfig.centurionpay?.secretKey || ''}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      centurionpay: { ...prev.centurionpay, secretKey: e.target.value }
-                    }))}
-                    placeholder="sk_live_..."
-                    className="font-mono text-xs mt-1"
-                  />
-                  <p className="text-[9px] text-muted-foreground mt-1">Centurion Pay → Integrações → Chave Secreta</p>
-                </div>
-
-                <Button
-                  onClick={async () => {
-                    await savePaymentGatewayConfig(gatewayConfig);
-                    setGatewayMessage('Configuração da Centurion Pay salva com sucesso!');
-                    setTimeout(() => setGatewayMessage(''), 3000);
-                  }}
-                  className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
-                >
-                  <Save size={14} className="mr-1.5" /> Salvar Centurion Pay
-                </Button>
-              </div>
-            </Card>
-
-            {/* Iron Pay Config */}
-            <Card className="p-5 border border-border mt-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-centauro-gold/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-centauro-gold" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-foreground text-sm">Iron Pay</h3>
-                  <p className="text-muted-foreground text-[11px]">IronPay - Gateway PIX</p>
-                </div>
-                {gatewayConfig.activeGateway === 'ironpay' && (
-                  <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Token da API Pública</label>
-                  <Input
-                    type="password"
-                    value={gatewayConfig.ironpay.apiToken}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      ironpay: { ...prev.ironpay, apiToken: e.target.value }
-                    }))}
-                    placeholder="RUOkOpSr6bO7jIo6yAJk..."
-                    className="font-mono text-xs mt-1"
-                  />
-                  <p className="text-[9px] text-muted-foreground mt-1">IronPay → Configurações de API → Token de Acesso</p>
-                </div>
-
-                <Button
-                  onClick={async () => {
-                    await savePaymentGatewayConfig(gatewayConfig);
-                    setGatewayMessage('Configuração da Iron Pay salva com sucesso!');
-                    setTimeout(() => setGatewayMessage(''), 3000);
-                  }}
-                  className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
-                >
-                  <Save size={14} className="mr-1.5" /> Salvar Iron Pay
-                </Button>
-              </div>
-            </Card>
-
-            {/* Sim Payout Config */}
-            <Card className="p-5 border border-border mt-4">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CreditCard size={20} className="text-primary" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-black text-foreground text-sm">Sim Payout</h3>
-                  <p className="text-muted-foreground text-[11px]">SimPay - Gateway PIX</p>
-                </div>
-                {gatewayConfig.activeGateway === 'simpayout' && (
-                  <Badge className="bg-centauro-green/10 text-centauro-green border-centauro-green/30 text-[10px]">Ativo</Badge>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Pública (Client ID)</label>
-                  <Input
-                    type="text"
-                    value={gatewayConfig.simpayout.clientId}
-                    onChange={(e) => setGatewayConfig(prev => ({
-                      ...prev,
-                      simpayout: { ...prev.simpayout, clientId: e.target.value }
+                      stripe: { ...prev.stripe, publicKey: e.target.value }
                     }))}
                     placeholder="pk_live_..."
                     className="font-mono text-xs mt-1"
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Secreta (Client Secret)</label>
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Chave Secreta (Secret Key)</label>
                   <Input
                     type="password"
-                    value={gatewayConfig.simpayout.clientSecret}
+                    value={gatewayConfig.stripe?.secretKey || ''}
                     onChange={(e) => setGatewayConfig(prev => ({
                       ...prev,
-                      simpayout: { ...prev.simpayout, clientSecret: e.target.value }
+                      stripe: { ...prev.stripe, secretKey: e.target.value }
                     }))}
                     placeholder="sk_live_..."
                     className="font-mono text-xs mt-1"
@@ -1619,12 +1455,12 @@ export default function AdminPanel() {
                 <Button
                   onClick={async () => {
                     await savePaymentGatewayConfig(gatewayConfig);
-                    setGatewayMessage('Configuração da Sim Payout salva com sucesso!');
+                    setGatewayMessage('Configuração da Stripe salva com sucesso!');
                     setTimeout(() => setGatewayMessage(''), 3000);
                   }}
                   className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs"
                 >
-                  <Save size={14} className="mr-1.5" /> Salvar Sim Payout
+                  <Save size={14} className="mr-1.5" /> Salvar Stripe
                 </Button>
               </div>
             </Card>
@@ -1905,42 +1741,41 @@ export default function AdminPanel() {
 
             <Card className="border border-border p-5 space-y-4">
               {/* Toggle */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ExternalLink size={14} className="text-muted-foreground" />
-                  <span className="font-bold text-foreground text-xs">Usar checkout externo</span>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ExternalLink size={14} className="text-muted-foreground" />
+                    <span className="font-bold text-foreground text-xs">Usar checkout externo</span>
+                  </div>
+                  <Switch
+                    checked={gatewayConfig.externalCheckoutEnabled}
+                    onCheckedChange={(checked) => {
+                      setGatewayConfig(prev => ({ ...prev, externalCheckoutEnabled: checked }));
+                    }}
+                  />
                 </div>
-                <Switch
-                  checked={externalCheckout}
-                  onCheckedChange={(checked) => {
-                    setExternalCheckout(checked);
-                    localStorage.setItem('externalCheckout', String(checked));
-                  }}
-                />
-              </div>
 
-              {/* URL field */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Link do checkout externo</label>
-                <Input
-                  type="url"
-                  value={newCheckoutUrl}
-                  onChange={(e) => setNewCheckoutUrl(e.target.value)}
-                  placeholder="https://seu-checkout.com/pagamento"
-                  className="font-mono text-xs"
-                />
-                <Button onClick={handleSave} className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs" size="sm">
-                  <Save size={14} className="mr-1.5" /> Salvar Link
-                </Button>
-                <StatusMessage msg={message} />
-              </div>
+                {/* URL field */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Link do checkout externo</label>
+                  <Input
+                    type="url"
+                    value={gatewayConfig.externalCheckoutUrl}
+                    onChange={(e) => setGatewayConfig(prev => ({ ...prev, externalCheckoutUrl: e.target.value }))}
+                    placeholder="https://seu-checkout.com/pagamento"
+                    className="font-mono text-xs"
+                  />
+                  <Button onClick={handleSaveCheckout} className="w-full bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-bold text-xs" size="sm">
+                    <Save size={14} className="mr-1.5" /> Salvar Configurações
+                  </Button>
+                  <StatusMessage msg={message} />
+                </div>
 
-              {/* Status info */}
-              <p className="text-[10px] text-muted-foreground">
-                {externalCheckout
-                  ? checkoutUrl ? `Redirecionando para: ${checkoutUrl}` : 'Nenhum link configurado ainda'
-                  : 'Usando o checkout interno do quiz (CPF → endereço → pagamento)'}
-              </p>
+                {/* Status info */}
+                <p className="text-[10px] text-muted-foreground">
+                  {gatewayConfig.externalCheckoutEnabled
+                    ? gatewayConfig.externalCheckoutUrl ? `Redirecionando para: ${gatewayConfig.externalCheckoutUrl}` : 'Nenhum link configurado ainda'
+                    : 'Usando o checkout interno do quiz (identificação → endereço → pagamento)'}
+                </p>
             </Card>
           </div>
         )}

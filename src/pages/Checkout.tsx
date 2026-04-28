@@ -184,8 +184,9 @@ export default function Checkout() {
         }
       } catch (err: any) {
         console.error('Stripe error:', err);
-        setCardError('Fehler bei der Stripe-Zahlung. Bitte erneut versuchen.');
-        setTimeout(() => setCardError(''), 5000);
+        const errorMsg = err.message || 'Fehler bei der Stripe-Zahlung. Bitte erneut versuchen.';
+        setCardError(`Stripe Fehler: ${errorMsg}`);
+        setTimeout(() => setCardError(''), 10000);
       } finally {
         setCardLoading(false);
       }

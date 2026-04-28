@@ -56,8 +56,15 @@ export default function ThankYou() {
     }
 
     setBuyer(parsed);
+
+    // Show upsell after a brief delay
+    const upsellTimer = setTimeout(() => {
+      if (!alreadyDone) setShowUpsell(true);
+    }, 1500);
+
     return () => {
       clearTimeout(timer);
+      clearTimeout(upsellTimer);
     };
   }, []);
 
@@ -156,12 +163,17 @@ export default function ThankYou() {
 
         {/* CTA */}
         <div className="space-y-3">
+          {window.location.search.includes('upsell_success=1') && (
+            <div className="bg-centauro-green/10 border border-centauro-green p-3 rounded-lg mb-2 text-center">
+              <p className="text-xs font-bold text-centauro-green">✓ Creatine wurde erfolgreich hinzugefügt!</p>
+            </div>
+          )}
           <Button
             className="w-full h-14 text-base font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg"
-            onClick={() => window.location.href = '/'}
+            onClick={() => window.location.href = 'https://www.esn.com/'}
           >
             <ArrowRight size={18} className="mr-2" />
-            Zurück zur Startseite
+            ZUM OFFIZIELLEN SHOP
           </Button>
         </div>
 
@@ -172,10 +184,22 @@ export default function ThankYou() {
             <span className="text-[11px] font-medium uppercase tracking-wider">100% sicherer Kauf</span>
           </div>
           <p className="text-center text-[10px] text-muted-foreground/70 leading-relaxed">
-            Dies ist eine offizielle ESN Aktion. 
+            Dies ist uma offizielle ESN Aktion. 
             Alle deine Daten sind mit Ende-zu-Ende-Verschlüsselung geschützt.
           </p>
         </div>
+
+        {buyer && (
+          <UpsellPopup
+            open={showUpsell}
+            onOpenChange={setShowUpsell}
+            onPaid={() => {
+              setUpsellDone(true);
+              sessionStorage.setItem(UPSELL_FLAG_KEY, '1');
+            }}
+            buyer={buyer}
+          />
+        )}
     </div>
     </div>
   );

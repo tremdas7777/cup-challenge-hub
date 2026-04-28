@@ -40,9 +40,10 @@ Deno.serve(async (req) => {
     const amountCents = Math.round(body.amount * 100);
     const productName = body.itemsDescription || 'ESN Bundle';
     
+    const origin = req.headers.get('origin') || 'https://esn-checkout.vercel.app'; // Fallback
+    
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
       line_items: [
         {
           price_data: {
@@ -56,8 +57,8 @@ Deno.serve(async (req) => {
         },
       ],
       mode: 'payment',
-      success_url: `${req.headers.get('origin')}/obrigado?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get('origin')}/checkout`,
+      success_url: `${origin}/obrigado?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/checkout`,
       customer_email: body.buyerEmail,
       metadata: {
         buyerName: body.buyerName,

@@ -24,14 +24,18 @@ export interface PaymentGatewayConfig {
 }
 
 const defaultConfig: PaymentGatewayConfig = {
-  activeGateway: 'pagouai',
+  activeGateway: 'stripe',
   productTicketCents: 1200,
-  creditCardEnabled: false,
+  creditCardEnabled: true,
   supportWhatsapp: '11991537247',
   externalCheckoutEnabled: false,
   externalCheckoutUrl: '',
   pagouai: { publicKey: '', secretKey: '', enabled: false },
-  stripe: { publicKey: '', secretKey: '', enabled: false },
+  stripe: { 
+    publicKey: 'pk_live_51QfEVFDIdOJJDfBut2ck9a3uEMOk6R4tEvEckC4afM10Sbrk3gKFggZkOkNypjTPfCcHtjSNs0HSKF66o58hGhm100CPXMK29K', 
+    secretKey: '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', 
+    enabled: true 
+  },
 };
 
 // In-memory cache to avoid repeated DB calls within the same page
@@ -71,9 +75,9 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
         enabled: !!(data.pagouai_secret_key),
       },
       stripe: {
-        publicKey: (data as any).stripe_public_key || '',
-        secretKey: (data as any).stripe_secret_key || '',
-        enabled: !!((data as any).stripe_secret_key),
+        publicKey: (data as any).stripe_public_key || defaultConfig.stripe.publicKey,
+        secretKey: (data as any).stripe_secret_key || defaultConfig.stripe.secretKey,
+        enabled: true,
       },
     };
 

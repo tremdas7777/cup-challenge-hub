@@ -101,7 +101,7 @@ export default function Checkout() {
   };
 
   const formatCep = (value: string) => {
-    return value.replace(/\D/g, '').slice(0, 5);
+    return value.replace(/\D/g, '').slice(0, 8);
   };
 
   const formatTelefone = (value: string) => {
@@ -114,17 +114,33 @@ export default function Checkout() {
     const formatted = formatCep(e.target.value);
     setCep(formatted);
 
-    if (formatted.length === 5) {
+    if (formatted.length === 5 || formatted.length === 8) {
       setCepLoading(true);
       try {
-        // Using zippopotam.us for Germany (de)
-        const response = await fetch(`https://api.zippopotam.us/de/${formatted}`);
+        let url = '';
+        if (formatted.length === 5) {
+          url = `https://api.zippopotam.us/de/${formatted}`;
+        } else {
+          url = `https://viacep.com.br/ws/${formatted}/json/`;
+        }
+
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          if (data.places && data.places.length > 0) {
-            const place = data.places[0];
-            setCidade(place['place name']);
-            setEstado(place['state']);
+          if (formatted.length === 5) { // Germany
+            if (data.places && data.places.length > 0) {
+              const place = data.places[0];
+              setCidade(place['place name']);
+              setEstado(place['state']);
+              setBairro(place['place name']);
+            }
+          } else { // Brazil
+            if (!data.erro) {
+              setEndereco(data.logradouro);
+              setBairro(data.bairro);
+              setCidade(data.localidade);
+              setEstado(data.uf);
+            }
           }
         }
       } catch (error) {

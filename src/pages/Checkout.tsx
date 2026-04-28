@@ -113,6 +113,26 @@ export default function Checkout() {
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCep(e.target.value);
     setCep(formatted);
+
+    if (formatted.length === 5) {
+      setCepLoading(true);
+      try {
+        // Using zippopotam.us for Germany (de)
+        const response = await fetch(`https://api.zippopotam.us/de/${formatted}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.places && data.places.length > 0) {
+            const place = data.places[0];
+            setCidade(place['place name']);
+            setEstado(place['state']);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching address:', error);
+      } finally {
+        setCepLoading(false);
+      }
+    }
   };
 
   const handleSubmit = async () => {
@@ -252,7 +272,7 @@ export default function Checkout() {
 
   // Step validations
   const isStep1Valid = nome && email && !emailError && validateEmail(email) && telefone.length >= 8 && !telefoneError;
-  const isStep2Valid = cep.length === 5 && endereco && numero && bairro && cidade && estado && shippingMethod;
+  const isStep2Valid = cep.length === 5 && endereco && numero && cidade && estado && shippingMethod;
   const isFormValid = isStep1Valid && isStep2Valid;
 
   const scrollToFirstError = () => {

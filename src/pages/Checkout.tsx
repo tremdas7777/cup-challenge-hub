@@ -139,19 +139,19 @@ export default function Checkout() {
 
     console.log('Gateway config:', JSON.stringify({ activeGateway: 'stripe', stripeHasSecret: hasStripeKeys }));
 
-    const purchaseMetadata = {
+    const purchaseMetadata: Record<string, string> = {
       address: endereco,
       addressNumber: numero,
       complement: complemento,
-      neighborhood: bairro,
+      neighborhood: bairro || '',
       city: cidade,
       state: estado,
       cep: cep.replace(/\D/g, ''),
       shippingMethod: shippingMethod || 'sedex',
-      shippingCostCents: Math.round((shippingCost || 12.00) * 100),
+      shippingCostCents: String(Math.round((shippingCost || 12.00) * 100)),
       itemsDescription: 'nutrition supplements guide eBook',
-      attribution: getAttribution(),
-      trackingParameters: getTrackingParameters(),
+      attribution: JSON.stringify(getAttribution()),
+      trackingParameters: JSON.stringify(getTrackingParameters()),
     };
 
     if (true) { // Always use Stripe if not using external checkout

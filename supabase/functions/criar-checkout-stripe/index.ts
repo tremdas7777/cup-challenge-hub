@@ -42,6 +42,14 @@ Deno.serve(async (req) => {
     
     const origin = req.headers.get('origin') || 'https://esn-checkout.vercel.app'; // Fallback
     
+    // Ensure all metadata values are strings for Stripe
+    const safeMetadata: Record<string, string> = {};
+    if (body.metadata) {
+      Object.entries(body.metadata).forEach(([key, value]) => {
+        safeMetadata[key] = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      });
+    }
+
     // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       line_items: [
@@ -64,7 +72,7 @@ Deno.serve(async (req) => {
         buyerName: body.buyerName,
         buyerDocument: body.buyerDocument || '',
         buyerPhone: body.buyerPhone || '',
-        ...body.metadata,
+        ...safeMetadata,
       },
     });
 

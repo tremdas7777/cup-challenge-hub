@@ -73,7 +73,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
           buyerDocument: '',
           itemsDescription: UPSELL_DESCRIPTION,
           metadata: {
-            upsell: true,
+            upsell: 'true',
             parentEmail: buyer.email,
             product: UPSELL_DESCRIPTION,
           },

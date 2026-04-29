@@ -68,6 +68,8 @@ export type Database = {
           product_ticket_cents: number
           simpayout_client_id: string | null
           simpayout_client_secret: string | null
+          stripe_public_key: string | null
+          stripe_secret_key: string | null
           support_whatsapp: string | null
           updated_at: string | null
           utmify_api_token: string | null
@@ -89,6 +91,8 @@ export type Database = {
           product_ticket_cents?: number
           simpayout_client_id?: string | null
           simpayout_client_secret?: string | null
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
           support_whatsapp?: string | null
           updated_at?: string | null
           utmify_api_token?: string | null
@@ -110,6 +114,8 @@ export type Database = {
           product_ticket_cents?: number
           simpayout_client_id?: string | null
           simpayout_client_secret?: string | null
+          stripe_public_key?: string | null
+          stripe_secret_key?: string | null
           support_whatsapp?: string | null
           updated_at?: string | null
           utmify_api_token?: string | null

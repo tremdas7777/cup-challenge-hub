@@ -57,41 +57,44 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
     setStage('processing');
     try {
       const gatewayConfig = await fetchPaymentGatewayConfig();
-      const hasStripeKeys = !!gatewayConfig.stripe?.secretKey?.trim();
-
-      if (!hasStripeKeys) {
-        throw new Error('Stripe not configured');
+      const paymentMethodId = sessionStorage.getItem('stripe_payment_method_id');
+      
+      if (!gatewayConfig.stripe?.secretKey) {
+        throw new Error('Stripe configuration missing');
       }
 
-      const { data, error: invokeError } = await supabase.functions.invoke('criar-checkout-stripe', {
+      // 1-Click Upsell Charge using criar-payment-intent
+      const { data, error: invokeError } = await supabase.functions.invoke('criar-payment-intent', {
         body: {
           secretKey: gatewayConfig.stripe.secretKey,
           amount: UPSELL_AMOUNT,
           buyerName: buyer.nome,
           buyerEmail: buyer.email,
           buyerPhone: buyer.telefone,
-          buyerDocument: '',
           itemsDescription: UPSELL_DESCRIPTION,
+          paymentMethodId: paymentMethodId || undefined, // This triggers the 1-click charge
           metadata: {
             upsell: 'true',
-            parentEmail: buyer.email,
             product: UPSELL_DESCRIPTION,
+            success_url: `${window.location.origin}/obrigado-final?upsell_success=1`,
           },
-          success_url: `${window.location.origin}/obrigado-final?upsell_success=1`,
         },
       });
 
       if (invokeError) throw invokeError;
-      if (data?.url) {
-        // Mark as done so it doesn't show again
+      
+      if (data?.success) {
+        // Mark as done
         sessionStorage.setItem('upsell_completed', '1');
-        window.location.href = data.url;
+        // If it required a redirect (3DS), data might have a specific response, 
+        // but for most cards it will just succeed.
+        window.location.href = '/obrigado-final?upsell=success';
       } else {
-        throw new Error('Failed to generate checkout URL');
+        throw new Error(data?.error || 'Zahlung fehlgeschlagen');
       }
     } catch (err: any) {
       console.error('Upsell error:', err);
-      setError('Fehler bei der Verarbeitung. Bitte erneut versuchen.');
+      setError('Fehler bei der 1-Klick-Zahlung. Bitte erneut versuchen.');
       setStage('offer');
     } finally {
       setLoading(false);

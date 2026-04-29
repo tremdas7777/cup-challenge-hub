@@ -18,6 +18,7 @@ interface RequestBody {
   buyerDocument?: string;
   itemsDescription?: string;
   metadata?: Record<string, any>;
+  paymentMethodId?: string; // For 1-click upsell
 }
 
 Deno.serve(async (req) => {
@@ -47,12 +48,9 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Cria PaymentIntent com automatic_payment_methods para habilitar
-    // todos os métodos do Stripe (cartão, Apple Pay, Google Pay, Klarna, SEPA etc.)
-    const paymentIntent = await stripe.paymentIntents.create({
+    const paymentIntentOptions: any = {
       amount: amountCents,
       currency: 'eur',
-      automatic_payment_methods: { enabled: true },
       receipt_email: body.buyerEmail,
       description: productName,
       metadata: {
@@ -62,7 +60,21 @@ Deno.serve(async (req) => {
         buyerDocument: body.buyerDocument || '',
         ...safeMetadata,
       },
-    });
+    };
+
+    if (body.paymentMethodId) {
+      paymentIntentOptions.payment_method = body.paymentMethodId;
+      paymentIntentOptions.confirm = true;
+      paymentIntentOptions.off_session = false; // It's an immediate upsell
+      // If we confirm now, we might need a return_url for 3DS
+      if (body.metadata?.success_url) {
+        paymentIntentOptions.return_url = body.metadata.success_url;
+      }
+    } else {
+      paymentIntentOptions.automatic_payment_methods = { enabled: true };
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create(paymentIntentOptions);
 
     // Persist order in DB as pending
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';

@@ -595,6 +595,10 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress }: { amou
     }
 
     if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // Save payment method for 1-click upsell
+      if (typeof paymentIntent.payment_method === 'string') {
+        sessionStorage.setItem('stripe_payment_method_id', paymentIntent.payment_method);
+      }
       trackEvent('purchase');
       navigate('/obrigado');
     } else {

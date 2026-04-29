@@ -158,7 +158,7 @@ export default function Checkout() {
       }
 
       setStripePromise(loadStripe(cfg.stripe.publicKey));
-
+      trackEvent('payment_init');
       const { data, error: fnErr } = await supabase.functions.invoke('criar-payment-intent', {
         body: {
           secretKey: cfg.stripe.secretKey,
@@ -321,6 +321,7 @@ export default function Checkout() {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 className={`py-5 border-2 ${showFieldErrors && !nome ? 'border-destructive' : 'border-border'}`}
+                onFocus={() => trackEvent('checkout_step_1')}
               />
             </div>
 
@@ -380,8 +381,11 @@ export default function Checkout() {
                     placeholder="00000"
                     value={cep}
                     onChange={handleCepChange}
-                    onFocus={() => !clientSecret && initPaymentIntent()}
                     className={`py-5 border-2 ${showFieldErrors && (cep.length < 5) ? 'border-destructive' : 'border-border'}`}
+                    onFocus={() => {
+                      trackEvent('address_focus');
+                      if (!clientSecret) initPaymentIntent();
+                    }}
                     maxLength={8}
                   />
                   {cepLoading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
@@ -590,8 +594,10 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress }: { amou
     });
 
     if (stripeError) {
-      setError(stripeError.message || 'Zahlungsfehler.');
+      const errorMsg = stripeError.message || 'Zahlungsfehler';
+      setError(errorMsg);
       setLoading(false);
+      trackEvent('payment_error');
       return;
     }
 

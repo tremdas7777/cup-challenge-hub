@@ -7,12 +7,24 @@ import { supabase } from '@/integrations/supabase/client';
 export type FunnelEvent =
   | 'visitor'
   | 'quiz_started'
+  | 'quiz_q1'
+  | 'quiz_q2'
+  | 'quiz_q3'
+  | 'quiz_q4'
+  | 'quiz_q5'
   | 'quiz_completed'
+  | 'loading_results'
   | 'scratch_card'
   | 'checkout'
   | 'checkout_step_1'
   | 'checkout_step_2'
   | 'checkout_step_3'
+  | 'address_focus'
+  | 'payment_init'
+  | 'payment_error'
+  | 'upsell_view'
+  | 'upsell_accepted'
+  | 'upsell_declined'
   | 'purchase';
 
 const SESSION_KEY = 'funnel_session_id';
@@ -66,24 +78,35 @@ export async function getFunnelStats(periodMinutes: number) {
   const events = eventData || [];
   const orders = orderData || [];
   
-  const visitors = events.filter(e => e.event === 'visitor').length;
-  const quizStarted = events.filter(e => e.event === 'quiz_started').length;
-  const quizCompleted = events.filter(e => e.event === 'quiz_completed').length;
-  const scratchCard = events.filter(e => e.event === 'scratch_card').length;
-  const checkout = events.filter(e => e.event === 'checkout').length;
-  const purchase = events.filter(e => e.event === 'purchase').length;
-  const activeNow = events.filter(e => e.created_at >= activeNowCutoff).length;
-  const checkoutStep1 = events.filter(e => e.event === 'checkout_step_1').length;
-  const checkoutStep2 = events.filter(e => e.event === 'checkout_step_2').length;
-  const checkoutStep3 = events.filter(e => e.event === 'checkout_step_3').length;
-  const approvedSales = orders.length;
+  const getCount = (name: FunnelEvent) => events.filter(e => e.event === name).length;
 
-  return { 
-    visitors, quizStarted, quizCompleted, scratchCard, 
-    checkout, purchase, activeNow, 
-    checkoutStep1, checkoutStep2, checkoutStep3,
-    approvedSales
+  const stats = {
+    visitors: getCount('visitor'),
+    quizStarted: getCount('quiz_started'),
+    quizQ1: getCount('quiz_q1'),
+    quizQ2: getCount('quiz_q2'),
+    quizQ3: getCount('quiz_q3'),
+    quizQ4: getCount('quiz_q4'),
+    quizQ5: getCount('quiz_q5'),
+    quizCompleted: getCount('quiz_completed'),
+    loadingResults: getCount('loading_results'),
+    scratchCard: getCount('scratch_card'),
+    checkout: getCount('checkout'),
+    checkoutStep1: getCount('checkout_step_1'),
+    checkoutStep2: getCount('checkout_step_2'),
+    checkoutStep3: getCount('checkout_step_3'),
+    addressFocus: getCount('address_focus'),
+    paymentInit: getCount('payment_init'),
+    paymentError: getCount('payment_error'),
+    upsellView: getCount('upsell_view'),
+    upsellAccepted: getCount('upsell_accepted'),
+    upsellDeclined: getCount('upsell_declined'),
+    purchase: getCount('purchase'),
+    approvedSales: orders.length,
+    activeNow: events.filter(e => e.created_at >= activeNowCutoff).length,
   };
+
+  return stats;
 }
 
 export async function clearFunnelEvents() {

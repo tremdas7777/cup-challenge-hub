@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { Eye, EyeOff, LogOut, Save, Link2, Info, BarChart3, ShoppingCart, TrendingUp, Users, CheckCircle, ArrowDown, Trash2, Code, Webhook, Bell, Zap, Loader2, ExternalLink, CreditCard, QrCode, Copy, RefreshCw, Plus, DollarSign, Shield, Gift, MessageCircle, FileImage } from 'lucide-react';
+import { Eye, EyeOff, LogOut, Save, Link2, Info, BarChart3, ShoppingCart, TrendingUp, Users, CheckCircle, ArrowDown, Trash2, Code, Webhook, Bell, Zap, Loader2, ExternalLink, CreditCard, QrCode, Copy, RefreshCw, Plus, DollarSign, Shield, Gift, MessageCircle, FileImage, Check, MapPin, Sparkles } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { getFunnelStats, clearFunnelEvents } from '@/lib/funnelTracking';
@@ -31,7 +31,31 @@ export default function AdminPanel() {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>('analytics');
   const [period, setPeriod] = useState(30);
-  const [stats, setStats] = useState({ visitors: 0, quizStarted: 0, quizCompleted: 0, scratchCard: 0, checkout: 0, purchase: 0, activeNow: 0, checkoutStep1: 0, checkoutStep2: 0, checkoutStep3: 0, approvedSales: 0 });
+  const [stats, setStats] = useState({ 
+    visitors: 0, 
+    quizStarted: 0, 
+    quizQ1: 0,
+    quizQ2: 0,
+    quizQ3: 0,
+    quizQ4: 0,
+    quizQ5: 0,
+    quizCompleted: 0, 
+    loadingResults: 0,
+    scratchCard: 0, 
+    checkout: 0, 
+    checkoutStep1: 0,
+    checkoutStep2: 0,
+    checkoutStep3: 0,
+    addressFocus: 0,
+    paymentInit: 0,
+    paymentError: 0,
+    upsellView: 0,
+    upsellAccepted: 0,
+    upsellDeclined: 0,
+    purchase: 0, 
+    approvedSales: 0,
+    activeNow: 0, 
+  });
 
   // Pixel state
   const [pixelConfig, setPixelConfig] = useState<PixelConfig>({ facebookPixels: [], tiktokPixels: [], googleAdsPixels: [], utmifyHtml: '' });
@@ -264,13 +288,22 @@ export default function AdminPanel() {
   const globalConversion = pct(stats.purchase, stats.visitors);
 
   const funnelSteps = [
-    { icon: <Eye size={20} className="text-primary" />, title: 'Visitantes', description: 'Chegaram à landing page', count: stats.visitors, conversion: null as number | null, dropoff: `${pct(stats.quizStarted, stats.visitors)}% converteram`, progressValue: 100 },
-    { icon: <TrendingUp size={20} className="text-centauro-green" />, title: 'Quiz Iniciado', description: 'Clicaram em Começar', count: stats.quizStarted, conversion: pct(stats.quizStarted, stats.visitors), dropoff: `${pct(stats.quizCompleted, stats.quizStarted)}% converteram`, progressValue: stats.visitors > 0 ? (stats.quizStarted / stats.visitors) * 100 : 0 },
-    { icon: <CheckCircle size={20} className="text-centauro-gold" />, title: 'Quiz Completado', description: 'Terminaram as 8 perguntas', count: stats.quizCompleted, conversion: pct(stats.quizCompleted, stats.visitors), dropoff: `${pct(stats.scratchCard, stats.quizCompleted)}% converteram`, progressValue: stats.visitors > 0 ? (stats.quizCompleted / stats.visitors) * 100 : 0 },
-    { icon: <Gift size={20} className="text-purple-500" />, title: 'Raspadinha', description: 'Abriram a raspadinha', count: stats.scratchCard, conversion: pct(stats.scratchCard, stats.visitors), dropoff: `${pct(stats.checkout, stats.scratchCard)}% converteram`, progressValue: stats.visitors > 0 ? (stats.scratchCard / stats.visitors) * 100 : 0 },
-    { icon: <ShoppingCart size={20} className="text-orange-500" />, title: 'Checkout', description: 'Abriram a página de pagamento', count: stats.checkout, conversion: pct(stats.checkout, stats.visitors), dropoff: `${pct(stats.checkoutStep2, stats.checkout)}% preencheram dados`, progressValue: stats.visitors > 0 ? (stats.checkout / stats.visitors) * 100 : 0 },
-    { icon: <Users size={20} className="text-blue-500" />, title: 'Leads (Passo 2)', description: 'Preencheram nome/email/tel', count: stats.checkoutStep2, conversion: pct(stats.checkoutStep2, stats.visitors), dropoff: `${pct(stats.purchase, stats.checkoutStep2)}% tentaram pagar`, progressValue: stats.visitors > 0 ? (stats.checkoutStep2 / stats.visitors) * 100 : 0 },
-    { icon: <CreditCard size={20} className="text-destructive" />, title: 'Iniciou Pagamento', description: 'Clicou em finalizar pedido', count: stats.purchase, conversion: pct(stats.purchase, stats.visitors), dropoff: `${pct(stats.approvedSales, stats.purchase)}% pagaram`, progressValue: stats.visitors > 0 ? (stats.purchase / stats.visitors) * 100 : 0 },
+    { icon: <Eye size={20} className="text-primary" />, title: 'Visitantes', description: 'Chegaram à landing page', count: stats.visitors, conversion: null as number | null, dropoff: `${pct(stats.quizStarted, stats.visitors)}% iniciaram`, progressValue: 100 },
+    { icon: <TrendingUp size={20} className="text-centauro-green" />, title: 'Quiz Iniciado', description: 'Clicaram em Começar', count: stats.quizStarted, conversion: pct(stats.quizStarted, stats.visitors), dropoff: `${pct(stats.quizQ1, stats.quizStarted)}% responderam Q1`, progressValue: stats.visitors > 0 ? (stats.quizStarted / stats.visitors) * 100 : 0 },
+    
+    // Quiz Detail
+    { icon: <Check size={16} className="text-muted-foreground" />, title: 'Pergunta 1', description: 'Responderam Q1', count: stats.quizQ1, conversion: pct(stats.quizQ1, stats.visitors), dropoff: `${pct(stats.quizQ5, stats.quizQ1)}% chegaram ao fim do quiz`, progressValue: stats.visitors > 0 ? (stats.quizQ1 / stats.visitors) * 100 : 0 },
+    { icon: <Check size={16} className="text-muted-foreground" />, title: 'Pergunta 5', description: 'Responderam Q5', count: stats.quizQ5, conversion: pct(stats.quizQ5, stats.visitors), dropoff: `${pct(stats.quizCompleted, stats.quizQ5)}% finalizaram`, progressValue: stats.visitors > 0 ? (stats.quizQ5 / stats.visitors) * 100 : 0 },
+
+    { icon: <CheckCircle size={20} className="text-centauro-gold" />, title: 'Quiz Completado', description: 'Terminaram as perguntas', count: stats.quizCompleted, conversion: pct(stats.quizCompleted, stats.visitors), dropoff: `${pct(stats.loadingResults, stats.quizCompleted)}% viram animação`, progressValue: stats.visitors > 0 ? (stats.quizCompleted / stats.visitors) * 100 : 0 },
+    { icon: <RefreshCw size={20} className="text-blue-400" />, title: 'Animação Loading', description: 'Viram tela de carregamento', count: stats.loadingResults, conversion: pct(stats.loadingResults, stats.visitors), dropoff: `${pct(stats.scratchCard, stats.loadingResults)}% viram raspadinha`, progressValue: stats.visitors > 0 ? (stats.loadingResults / stats.visitors) * 100 : 0 },
+    { icon: <Gift size={20} className="text-purple-500" />, title: 'Raspadinha', description: 'Abriram a raspadinha', count: stats.scratchCard, conversion: pct(stats.scratchCard, stats.visitors), dropoff: `${pct(stats.checkout, stats.scratchCard)}% clicaram no prêmio`, progressValue: stats.visitors > 0 ? (stats.scratchCard / stats.visitors) * 100 : 0 },
+    { icon: <ShoppingCart size={20} className="text-orange-500" />, title: 'Checkout Aberto', description: 'Abriram a página de pagamento', count: stats.checkout, conversion: pct(stats.checkout, stats.visitors), dropoff: `${pct(stats.addressFocus, stats.checkout)}% preencheram endereço`, progressValue: stats.visitors > 0 ? (stats.checkout / stats.visitors) * 100 : 0 },
+    
+    // Checkout Detail
+    { icon: <MapPin size={20} className="text-blue-500" />, title: 'Passo 2: Endereço', description: 'Interagiram com o endereço', count: stats.addressFocus, conversion: pct(stats.addressFocus, stats.visitors), dropoff: `${pct(stats.paymentInit, stats.addressFocus)}% iniciaram pagamento`, progressValue: stats.visitors > 0 ? (stats.addressFocus / stats.visitors) * 100 : 0 },
+    { icon: <CreditCard size={20} className="text-destructive" />, title: 'Iniciou Pagamento', description: 'Stripe foi carregado', count: stats.paymentInit, conversion: pct(stats.paymentInit, stats.visitors), dropoff: `${pct(stats.approvedSales, stats.paymentInit)}% pagaram`, progressValue: stats.visitors > 0 ? (stats.paymentInit / stats.visitors) * 100 : 0 },
+    
     { icon: <CheckCircle size={20} className="text-centauro-green" />, title: 'Venda Aprovada', description: 'Pagamento confirmado', count: stats.approvedSales, conversion: pct(stats.approvedSales, stats.visitors), dropoff: null as string | null, progressValue: stats.visitors > 0 ? (stats.approvedSales / stats.visitors) * 100 : 0 },
   ];
 
@@ -390,11 +423,14 @@ export default function AdminPanel() {
                 <BarChart data={[
                   { etapa: 'Visitantes', valor: stats.visitors, fill: 'hsl(var(--primary))' },
                   { etapa: 'Quiz Início', valor: stats.quizStarted, fill: 'hsl(142, 71%, 45%)' },
+                  { etapa: 'Quiz Q1', valor: stats.quizQ1, fill: 'hsl(142, 71%, 45%)' },
+                  { etapa: 'Quiz Q5', valor: stats.quizQ5, fill: 'hsl(142, 71%, 45%)' },
                   { etapa: 'Quiz Fim', valor: stats.quizCompleted, fill: 'hsl(45, 93%, 47%)' },
+                  { etapa: 'Animação', valor: stats.loadingResults, fill: 'hsl(210, 100%, 50%)' },
                   { etapa: 'Raspadinha', valor: stats.scratchCard, fill: 'hsl(270, 60%, 55%)' },
                   { etapa: 'Checkout', valor: stats.checkout, fill: 'hsl(30, 100%, 50%)' },
-                  { etapa: 'Leads', valor: stats.checkoutStep2, fill: 'hsl(210, 100%, 50%)' },
-                  { etapa: 'Iniciou Pagamento', valor: stats.purchase, fill: 'hsl(0, 84%, 60%)' },
+                  { etapa: 'Endereço', valor: stats.addressFocus, fill: 'hsl(210, 100%, 50%)' },
+                  { etapa: 'Pagam. Init', valor: stats.paymentInit, fill: 'hsl(0, 84%, 60%)' },
                   { etapa: 'Aprovado', valor: stats.approvedSales, fill: 'hsl(142, 71%, 45%)' },
                 ]} layout="vertical" margin={{ left: 10, right: 30 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
@@ -506,6 +542,36 @@ export default function AdminPanel() {
                       </div>
                     );
                   })}
+                </div>
+              </Card>
+            )}
+
+            {/* Upsell Breakdown */}
+            {stats.upsellView > 0 && (
+              <Card className="mt-4 p-5 border border-border shadow-sm bg-background">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <Sparkles size={16} className="text-purple-500" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-foreground text-sm">Desempenho do Upsell</h3>
+                    <p className="text-muted-foreground text-[11px]">Estatísticas da oferta de 1-clique</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-secondary p-3 rounded-lg text-center">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Viram</p>
+                    <p className="text-xl font-black text-foreground">{stats.upsellView}</p>
+                  </div>
+                  <div className="bg-centauro-green/10 p-3 rounded-lg text-center border border-centauro-green/20">
+                    <p className="text-[10px] font-bold text-centauro-green uppercase">Aceitaram</p>
+                    <p className="text-xl font-black text-centauro-green">{stats.upsellAccepted}</p>
+                    <p className="text-[10px] font-bold text-centauro-green">{Math.round((stats.upsellAccepted / stats.upsellView) * 100)}%</p>
+                  </div>
+                  <div className="bg-destructive/10 p-3 rounded-lg text-center border border-destructive/20">
+                    <p className="text-[10px] font-bold text-destructive uppercase">Recusaram</p>
+                    <p className="text-xl font-black text-destructive">{stats.upsellDeclined}</p>
+                  </div>
                 </div>
               </Card>
             )}

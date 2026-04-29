@@ -222,6 +222,10 @@ export default function QuizHome() {
     if (correct) playCorrectSound();
     else playWrongSound();
 
+    // Track specific question completion
+    const eventName = `quiz_q${currentQuestion + 1}` as any;
+    trackEvent(eventName);
+
     // Auto advance to next question after 1.2s delay
     setTimeout(() => {
       handleNextQuestion();
@@ -235,7 +239,13 @@ export default function QuizHome() {
       setShowResult(false);
       setIsCorrect(false);
     } else {
-      if (!hasTrackedQuizComplete.current) { trackEvent('quiz_completed'); hasTrackedQuizComplete.current = true; } playRevealSound(); setShowAnimation(true);
+      if (!hasTrackedQuizComplete.current) { 
+        trackEvent('quiz_completed'); 
+        hasTrackedQuizComplete.current = true; 
+        trackEvent('loading_results');
+      } 
+      playRevealSound(); 
+      setShowAnimation(true);
     }
   };
 

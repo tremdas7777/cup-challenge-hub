@@ -401,42 +401,52 @@ export default function Checkout() {
 
         {/* 2. Adresse & Zahlung */}
         <Card className="border border-border bg-white shadow-sm overflow-hidden">
-          <div className="p-5 md:p-6 border-b border-border/50">
-            <div className="flex items-center gap-2 mb-5">
+          <div className="p-5 md:p-6 border-b border-border/50 space-y-4">
+            <div className="flex items-center gap-2 mb-2">
               <MapPin size={16} className="text-foreground" />
               <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
             </div>
 
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div data-field-error={showFieldErrors && (cep.length < 5) ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
-                  <div className="relative">
-                    <Input
-                      placeholder="00000"
-                      value={cep}
-                      onChange={handleCepChange}
-                      className={`py-5 border-2 ${showFieldErrors && (cep.length < 5) ? 'border-destructive' : 'border-border'}`}
-                      maxLength={8}
-                    />
-                    {cepLoading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
-                  </div>
-                </div>
-                <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
-                  <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div data-field-error={showFieldErrors && (cep.length < 5) ? 'true' : undefined}>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">PLZ</label>
+                <div className="relative">
+                  <Input
+                    placeholder="00000"
+                    value={cep}
+                    onChange={handleCepChange}
+                    onFocus={() => !clientSecret && initPaymentIntent()}
+                    className={`py-5 border-2 ${showFieldErrors && (cep.length < 5) ? 'border-destructive' : 'border-border'}`}
+                    maxLength={8}
+                  />
+                  {cepLoading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
                 </div>
               </div>
+              <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Stadt</label>
+                <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
+              </div>
+            </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
-                  <Input placeholder="Straße" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`} />
-                </div>
-                <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
-                  <Input placeholder="Nr." value={numero} onChange={(e) => setNumero(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`} />
-                </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Straße</label>
+                <Input placeholder="Straße" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`} />
+              </div>
+              <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Nr.</label>
+                <Input placeholder="Nr." value={numero} onChange={(e) => setNumero(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`} />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Stadtteil (Optional)</label>
+                <Input placeholder="Stadtteil" value={bairro} onChange={(e) => setBairro(e.target.value)} className="py-5 border-2 border-border" />
+              </div>
+              <div>
+                <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Zusatz (Optional)</label>
+                <Input placeholder="Haus A, 2. Stock..." value={complemento} onChange={(e) => setComplemento(e.target.value)} className="py-5 border-2 border-border" />
               </div>
             </div>
           </div>
@@ -480,10 +490,22 @@ export default function Checkout() {
                 <p className="text-destructive text-xs font-bold mb-2">{paymentError}</p>
                 <Button variant="outline" size="sm" onClick={() => initPaymentIntent()}>Wiederholen</Button>
               </div>
-            ) : (
+            ) : paymentLoading ? (
               <div className="py-12 flex flex-col items-center justify-center gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung...</p>
+              </div>
+            ) : (
+              <div className="py-8 text-center px-6">
+                <p className="text-xs text-muted-foreground mb-4">Geben Sie Ihre E-Mail oben ein, um die Zahlung zu aktivieren.</p>
+                <Button 
+                  onClick={() => initPaymentIntent()} 
+                  disabled={paymentLoading}
+                  variant="outline"
+                  className="w-full border-2 border-dashed border-border py-6 font-bold uppercase tracking-wider text-xs"
+                >
+                  {paymentLoading ? 'Laden...' : 'Zahlung jetzt laden'}
+                </Button>
               </div>
             )}
           </div>

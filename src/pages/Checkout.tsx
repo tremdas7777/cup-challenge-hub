@@ -98,6 +98,7 @@ export default function Checkout() {
     });
   }, []);
 
+  useEffect(() => {
     // Trigger payment intent init early
     if (validateEmail(email) && !clientSecret && !paymentLoading) {
       initPaymentIntent();

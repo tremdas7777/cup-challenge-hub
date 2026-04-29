@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { CheckCircle, Truck, Shield, Lock, Ticket, Clock, Users, Loader2, ChevronRight, User, MapPin, CreditCard } from 'lucide-react';
 import esnLogo from '@/assets/esn-logo.png';
-import comboPackImg from '@/assets/esn-combo-pack.png';
+import comboPackImg from '@/assets/esn-combo-pack.jpg';
 import giftCardImg from '@/assets/esn-gift-card.png';
 import { trackEvent } from '@/lib/funnelTracking';
 import { fireConversionEvent, getPixelConfig } from '@/lib/pixelManager';

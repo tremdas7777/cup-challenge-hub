@@ -436,7 +436,14 @@ export default function Checkout() {
                         colorText: '#212121',
                         borderRadius: '8px',
                       }
-                    }
+                    },
+                    defaultValues: {
+                      billingDetails: {
+                        address: {
+                          country: 'DE',
+                        },
+                      },
+                    },
                   }}
                 >
                   <PaymentForm 

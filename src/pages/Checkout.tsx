@@ -238,11 +238,7 @@ export default function Checkout() {
     const value = e.target.value;
     setEmail(value);
     setShowEmailSuggestions(true);
-    if (value && !value.includes('@')) {
-      setEmailError('');
-    } else if (value && !validateEmail(value)) {
-      setEmailError('Ungültige E-Mail-Adresse.');
-    } else {
+    if (value && validateEmail(value)) {
       setEmailError('');
     }
   };
@@ -250,19 +246,14 @@ export default function Checkout() {
   const handleSelectEmailSuggestion = (suggestion: string) => {
     setEmail(suggestion);
     setShowEmailSuggestions(false);
-    if (!validateEmail(suggestion)) {
-      setEmailError('Ungültige E-Mail-Adresse.');
-    } else {
-      setEmailError('');
-    }
+    setEmailError('');
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatTelefone(e.target.value);
-    setTelefone(formatted);
-    const digits = formatted.replace(/\D/g, '');
-    if (digits.length > 0 && digits.length < 10) {
-      setTelefoneError('Ungültige Telefonnummer.');
+    const value = e.target.value.replace(/[^\d+]/g, '').slice(0, 15);
+    setTelefone(value);
+    if (value.length > 0 && value.replace(/\D/g, '').length < 8) {
+      setTelefoneError('Ungültige Nummer.');
     } else {
       setTelefoneError('');
     }
@@ -352,8 +343,24 @@ export default function Checkout() {
                   placeholder="deine@email.de"
                   value={email}
                   onChange={handleEmailChange}
+                  onFocus={() => setShowEmailSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
                   className={`py-5 border-2 ${emailError || (showFieldErrors && !email) ? 'border-destructive' : 'border-border'}`}
                 />
+                {showEmailSuggestions && getEmailSuggestions().length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {getEmailSuggestions().map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onMouseDown={() => handleSelectEmailSuggestion(suggestion)}
+                        className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               <div data-field-error={showFieldErrors && (telefone.replace(/\D/g, '').length < 8) ? 'true' : undefined}>
                 <label className="text-xs font-bold text-foreground mb-1.5 block">Telefon</label>
@@ -417,31 +424,33 @@ export default function Checkout() {
             </div>
 
             {clientSecret && stripePromise ? (
-              <Elements
-                stripe={stripePromise}
-                options={{
-                  clientSecret,
-                  appearance: {
-                    theme: 'flat',
-                    variables: {
-                      colorPrimary: '#000000',
-                      colorBackground: '#ffffff',
-                      colorText: '#212121',
-                      borderRadius: '8px',
+              <div key={clientSecret}>
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: 'flat',
+                      variables: {
+                        colorPrimary: '#000000',
+                        colorBackground: '#ffffff',
+                        colorText: '#212121',
+                        borderRadius: '8px',
+                      }
                     }
-                  }
-                }}
-              >
-                <PaymentForm 
-                  amount={shippingCost} 
-                  buyer={{ nome, email, telefone, cep, endereco, numero, cidade, estado }}
-                  isAddressValid={!!nome && validateEmail(email) && telefone.replace(/\D/g, '').length >= 8 && cep.length >= 5 && !!endereco && !!numero && !!cidade}
-                  onInvalidAddress={() => {
-                    setShowFieldErrors(true);
-                    scrollToFirstError();
                   }}
-                />
-              </Elements>
+                >
+                  <PaymentForm 
+                    amount={shippingCost} 
+                    buyer={{ nome, email, telefone, cep, endereco, numero, cidade, estado }}
+                    isAddressValid={!!nome && validateEmail(email) && telefone.replace(/\D/g, '').length >= 8 && cep.length >= 5 && !!endereco && !!numero && !!cidade}
+                    onInvalidAddress={() => {
+                      setShowFieldErrors(true);
+                      scrollToFirstError();
+                    }}
+                  />
+                </Elements>
+              </div>
             ) : paymentError ? (
               <div className="py-4 text-center">
                 <p className="text-destructive text-xs font-bold mb-2">{paymentError}</p>

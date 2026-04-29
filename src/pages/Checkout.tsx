@@ -428,6 +428,7 @@ export default function Checkout() {
                   stripe={stripePromise}
                   options={{
                     clientSecret,
+                    locale: 'de',
                     appearance: {
                       theme: 'flat',
                       variables: {

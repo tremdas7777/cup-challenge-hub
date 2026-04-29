@@ -289,24 +289,10 @@ export default function Checkout() {
     if (currentStep === 1 && isStep1Valid) {
       setShowFieldErrors(false);
       setCurrentStep(2);
-      trackEvent('checkout_step_2'); // cliente avançou para endereço
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      trackEvent('checkout_step_2'); 
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (currentStep === 1) {
       scrollToFirstError();
-    } else if (currentStep === 2) {
-      if (!shippingMethod) {
-        setShippingMethod('sedex');
-      }
-      const cleanCep = cep.replace(/\D/g, '');
-      const stepValid = (cleanCep.length === 5 || cleanCep.length === 8) && !!endereco && !!numero && !!cidade && !!estado;
-      if (stepValid) {
-        setShowFieldErrors(false);
-        setCurrentStep(3);
-        trackEvent('checkout_step_3');
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      } else {
-        scrollToFirstError();
-      }
     }
   };
 
@@ -326,15 +312,15 @@ export default function Checkout() {
       </div>
 
       {/* Urgency Bar */}
-      <div className="bg-foreground text-primary-foreground py-2.5">
+      <div className="bg-foreground text-primary-foreground py-2.5 border-b border-white/10">
         <div className="max-w-4xl mx-auto px-4 flex items-center justify-center gap-6 text-xs font-bold">
           <div className="flex items-center gap-2">
-            <Clock size={14} className="text-centauro-gold" />
+            <Clock size={14} className="text-white" />
             <span>Angebot endet in:</span>
-            <span className="text-centauro-gold animate-countdown font-mono">{formatTime(timeLeft)}</span>
+            <span className="text-white animate-countdown font-mono">{formatTime(timeLeft)}</span>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <Users size={14} className="text-centauro-gold" />
+          <div className="hidden md:flex items-center gap-2 border-l border-white/20 pl-6">
+            <Users size={14} className="text-white" />
             <span>{viewersCount} Personen sehen sich das gerade an</span>
           </div>
         </div>
@@ -351,9 +337,9 @@ export default function Checkout() {
                 }}
                 className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all cursor-pointer ${
                   currentStep === step.number
-                    ? 'bg-centauro-green text-primary-foreground'
+                    ? 'bg-foreground text-primary-foreground'
                     : step.number < currentStep
-                    ? 'bg-centauro-green/20 text-centauro-green'
+                    ? 'bg-foreground/10 text-foreground'
                     : 'bg-muted text-muted-foreground'
                 }`}
               >
@@ -361,7 +347,7 @@ export default function Checkout() {
                   currentStep === step.number
                     ? 'bg-primary-foreground/20'
                     : step.number < currentStep
-                    ? 'bg-centauro-green/30'
+                    ? 'bg-foreground/20'
                     : 'bg-muted-foreground/20'
                 }`}>
                   {step.number < currentStep ? (
@@ -413,7 +399,7 @@ export default function Checkout() {
         {currentStep === 1 && (
           <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
             <div className="flex items-center gap-2 mb-5">
-              <User size={16} className="text-centauro-green" />
+              <User size={16} className="text-foreground" />
               <h3 className="text-base font-black text-foreground uppercase tracking-tight">Persönliche Daten</h3>
             </div>
 
@@ -488,181 +474,114 @@ export default function Checkout() {
           </Card>
         )}
 
-        {/* STEP 2: Frete */}
-        {currentStep === 2 && (
-          <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
-            <div className="flex items-center gap-2 mb-5">
-              <MapPin size={16} className="text-centauro-green" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
-            </div>
-
-            <div className="space-y-4">
-               {/* PLZ */}
-               <div data-field-error={showFieldErrors && cep.length !== 5 ? 'true' : undefined}>
-                 <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
-                 <div className="relative">
-                   <Input
-                     placeholder="00000"
-                     value={cep}
-                     onChange={handleCepChange}
-                     inputMode="numeric"
-                     pattern="[0-9]*"
-                     className={`py-5 ${showFieldErrors && cep.length !== 5 ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                     maxLength={5}
-                   />
-                   {cepLoading && (
-                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                       <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                     </div>
-                   )}
-                 </div>
-                 {showFieldErrors && cep.length !== 5 && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-               </div>
-
-              {/* Endereço + Número */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
-                  <Input
-                    placeholder="Straße, Hausnummer..."
-                    value={endereco}
-                    onChange={(e) => setEndereco(e.target.value)}
-                    className={`py-5 ${showFieldErrors && !endereco ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                  />
-                  {showFieldErrors && !endereco && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-                </div>
-                <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
-                  <Input
-                    placeholder="Nr."
-                    value={numero}
-                    onChange={(e) => setNumero(e.target.value)}
-                    inputMode="text"
-                    pattern="[0-9]*"
-                    className={`py-5 ${showFieldErrors && !numero ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                  />
-                  {showFieldErrors && !numero && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-                </div>
+        {/* STEP 2 & 3: Adresse & Zahlung (Unificado) */}
+        {currentStep >= 2 && (
+          <div className="animate-fade-in space-y-6">
+            <Card className="p-5 md:p-6 border border-border bg-white shadow-sm">
+              <div className="flex items-center gap-2 mb-5">
+                <MapPin size={16} className="text-foreground" />
+                <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
               </div>
 
-              {/* Complemento */}
-              <div>
-                <label className="text-xs font-bold text-foreground mb-1.5 block">Zusatz <span className="text-muted-foreground font-normal">(optional)</span></label>
-                <Input
-                  placeholder="Wohnung, Stockwerk..."
-                  value={complemento}
-                  onChange={(e) => setComplemento(e.target.value)}
-                  className="py-5"
-                />
+              <div className="space-y-4">
+                {/* PLZ */}
+                <div data-field-error={showFieldErrors && (cep.length !== 5 && cep.length !== 8) ? 'true' : undefined}>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
+                  <div className="relative">
+                    <Input
+                      placeholder="00000"
+                      value={cep}
+                      onChange={handleCepChange}
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      className={`py-5 border-2 ${(showFieldErrors && cep.length !== 5 && cep.length !== 8) ? 'border-destructive' : 'border-border'}`}
+                      maxLength={8}
+                    />
+                    {cepLoading && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Endereço + Número */}
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
+                    <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
+                    <Input
+                      placeholder="Straße, Hausnummer..."
+                      value={endereco}
+                      onChange={(e) => setEndereco(e.target.value)}
+                      className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`}
+                    />
+                  </div>
+                  <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
+                    <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
+                    <Input
+                      placeholder="Nr."
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`}
+                    />
+                  </div>
+                </div>
+
+                {/* Bairro + Cidade + Estado */}
+                <div className="grid grid-cols-[1fr_1fr_80px] gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-foreground mb-1.5 block">Stadtteil</label>
+                    <Input placeholder="Stadtteil" value={bairro} onChange={(e) => setBairro(e.target.value)} className="py-5 border-2 border-border" />
+                  </div>
+                  <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
+                    <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
+                    <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
+                  </div>
+                  <div data-field-error={showFieldErrors && !estado ? 'true' : undefined}>
+                    <label className="text-xs font-bold text-foreground mb-1.5 block">Bundesland</label>
+                    <Input placeholder="BL" value={estado} onChange={(e) => setEstado(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !estado ? 'border-destructive' : 'border-border'}`} />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-5 md:p-6 border border-border bg-white shadow-sm">
+              <div className="flex items-center gap-2 mb-5">
+                <CreditCard size={16} className="text-foreground" />
+                <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
               </div>
 
-              {/* Bairro + Cidade + Estado */}
-              <div className="grid grid-cols-[1fr_1fr_80px] gap-4">
-                <div data-field-error={showFieldErrors && !bairro ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadtteil</label>
-                  <Input placeholder="Stadtteil" value={bairro} onChange={(e) => setBairro(e.target.value)} className={`py-5 ${showFieldErrors && !bairro ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
-                  {showFieldErrors && !bairro && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-                </div>
-                <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
-                  <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 ${showFieldErrors && !cidade ? 'border-destructive focus-visible:ring-destructive' : ''}`} />
-                  {showFieldErrors && !cidade && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-                </div>
-                <div data-field-error={showFieldErrors && !estado ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Bundesland</label>
-                  <select value={estado} onChange={(e) => setEstado(e.target.value)} className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${showFieldErrors && !estado ? 'border-destructive focus:ring-destructive' : ''}`}>
-                    <option value="">BL</option>
-                    {["BW","BY","BE","BB","HB","HH","HE","MV","NI","NW","RP","SL","SN","ST","SH","TH"].map(bl => (
-                      <option key={bl} value={bl}>{bl}</option>
-                    ))}
-                  </select>
-                  {showFieldErrors && !estado && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-                </div>
-              </div>
-
-
-            </div>
-
-            <div className="flex gap-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(1)}
-                className="flex-1 py-7 font-bold text-sm"
-              >
-                Zurück
-              </Button>
-              <Button
-                onClick={handleNextStep}
-                className="flex-[2] bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-7 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
-              >
-                WEITER <ChevronRight size={18} className="ml-1" />
-              </Button>
-            </div>
-          </Card>
-        )}
-
-        {/* STEP 3: Pagamento */}
-        {currentStep === 3 && (
-          <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
-            <div className="flex items-center gap-2 mb-5">
-              <CreditCard size={16} className="text-centauro-green" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
-            </div>
-
-            {/* Summary of previous steps */}
-            <div className="space-y-4 mb-6">
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-foreground uppercase">Persönliche Daten</h4>
-                  <button onClick={() => setCurrentStep(1)} className="text-[10px] font-bold text-centauro-green hover:underline">Bearbeiten</button>
-                </div>
-                <p className="text-xs text-muted-foreground">{nome}</p>
-                <p className="text-xs text-muted-foreground">{email} • {telefone}</p>
-              </div>
-
-              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-black text-foreground uppercase">Lieferung</h4>
-                  <button onClick={() => setCurrentStep(2)} className="text-[10px] font-bold text-centauro-green hover:underline">Bearbeiten</button>
-                </div>
-                <p className="text-xs text-muted-foreground">{endereco}, {numero}{complemento ? `, ${complemento}` : ''}</p>
-                <p className="text-xs text-muted-foreground">{bairro} — {cidade}/{estado} — PLZ {cep}</p>
-                <p className="text-xs font-bold text-centauro-green">✓ Kostenloser Versand nach ganz Deutschland</p>
-              </div>
-
-
-            </div>
-
-              <div className="border-2 border-centauro-green rounded-lg p-4 bg-centauro-green/5 mb-4">
+              <div className="border-2 border-centauro-green rounded-lg p-4 bg-centauro-green/5 mb-6">
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full border-2 border-centauro-green flex items-center justify-center">
                     <div className="w-2.5 h-2.5 rounded-full bg-centauro-green" />
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-black text-foreground">Kreditkarte</p>
-                    <p className="text-[10px] text-muted-foreground">Einmalzahlung (1x)</p>
+                    <p className="text-[10px] text-muted-foreground">Sichere Zahlung via Stripe</p>
                   </div>
-                  <span className="text-lg font-black text-centauro-green">€{(shippingCost || 12.00).toFixed(2).replace('.', ',')}</span>
+                  <span className="text-lg font-black text-foreground">€{(shippingCost || 12.00).toFixed(2).replace('.', ',')}</span>
                 </div>
               </div>
 
-            {cardError && (
-              <div className="mb-3 p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center border border-destructive/30">
-                {cardError}
-              </div>
-            )}
+              {cardError && (
+                <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center border border-destructive/30">
+                  {cardError}
+                </div>
+              )}
 
               <Button
                 onClick={() => {
-                  if (!isFormValid) {
+                  if (!isStep2Valid) {
                     setShowFieldErrors(true);
+                    scrollToFirstError();
                     return;
                   }
                   handleSubmit();
                 }}
                 disabled={cardLoading}
-                className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-7 rounded-lg transition-transform hover:scale-[1.02] active:scale-95"
-                style={{ boxShadow: '0 6px 25px hsl(145 63% 42% / 0.5)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
+                className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg py-8 rounded-lg shadow-xl transition-all hover:scale-[1.02] active:scale-95"
+                style={{ boxShadow: '0 8px 30px hsl(145 63% 42% / 0.4)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
               >
                 {cardLoading ? (
                   <><Loader2 size={18} className="mr-2 animate-spin" /> BITTE WARTEN...</>
@@ -670,7 +589,14 @@ export default function Checkout() {
                   'JETZT BESTÄTIGEN'
                 )}
               </Button>
-          </Card>
+              
+              <div className="flex items-center justify-center gap-4 mt-6 opacity-40">
+                <Shield size={14} className="text-foreground" />
+                <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">Sicheres SSL-Protokoll</span>
+                <Lock size={14} className="text-foreground" />
+              </div>
+            </Card>
+          </div>
         )}
 
         {/* Trust */}

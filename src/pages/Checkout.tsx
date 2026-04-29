@@ -476,10 +476,9 @@ export default function Checkout() {
           <img src={esnLogo} alt="ESN" className="h-10 mx-auto mb-2 opacity-30" />
           <p className="text-muted-foreground text-[10px]">© 2026 ESN - Elite Sports Nutrition. Alle Rechte vorbehalten.</p>
         </div>
-      </div>
 
-      {/* Store Unavailable Error Popup */}
-      <AlertDialog open={showStoreError} onOpenChange={setShowStoreError}>
+        {/* Store Unavailable Error Popup */}
+        <AlertDialog open={showStoreError} onOpenChange={setShowStoreError}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] mx-auto rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Unidade Indisponível</AlertDialogTitle>

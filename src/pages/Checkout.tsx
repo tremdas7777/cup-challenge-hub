@@ -274,16 +274,14 @@ export default function Checkout() {
 
   // Step validations
   const isStep1Valid = nome && email && !emailError && validateEmail(email) && telefone.length >= 8 && !telefoneError;
-  const isStep2Valid = cep.length === 5 && endereco && numero && cidade && estado && shippingMethod;
+  const isStep2Valid = (cep.length === 5 || cep.length === 8) && !!endereco && !!numero && !!cidade && !!estado && !!shippingMethod;
   const isFormValid = isStep1Valid && isStep2Valid;
 
   const scrollToFirstError = () => {
-    setTimeout(() => {
-      const firstError = document.querySelector('[data-field-error="true"]');
-      if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
+    const firstError = document.querySelector('[data-field-error="true"]');
+    if (firstError) {
+      firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
   };
 
   const handleNextStep = () => {
@@ -299,12 +297,13 @@ export default function Checkout() {
       if (!shippingMethod) {
         setShippingMethod('sedex');
       }
-      const stepValid = cep.replace(/\D/g, '').length === 5 && !!endereco && !!numero && !!cidade && !!estado;
+      const cleanCep = cep.replace(/\D/g, '');
+      const stepValid = (cleanCep.length === 5 || cleanCep.length === 8) && !!endereco && !!numero && !!cidade && !!estado;
       if (stepValid) {
         setShowFieldErrors(false);
         setCurrentStep(3);
-        trackEvent('checkout_step_3'); // cliente avançou para pagamento
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        trackEvent('checkout_step_3');
+        window.scrollTo({ top: 0, behavior: 'instant' });
       } else {
         scrollToFirstError();
       }

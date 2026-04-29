@@ -78,8 +78,6 @@ export default function Checkout() {
       }
       const value = (cfg.productTicketCents || 1000) / 100;
       setShippingCost(value);
-      setShippingCost(value);
-      setCreditCardEnabled(!!cfg.creditCardEnabled);
       // Track checkout event with the dynamic value
       trackEvent('checkout');
       trackEvent('checkout_step_1'); // Schritt 1: Persönliche Daten

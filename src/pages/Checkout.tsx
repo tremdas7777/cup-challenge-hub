@@ -57,6 +57,7 @@ export default function Checkout() {
   const [estado, setEstado] = useState('');
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<'sedex' | 'retirada' | null>('sedex');
@@ -165,10 +166,11 @@ export default function Checkout() {
   const initPaymentIntent = async () => {
     if (clientSecret || paymentLoading) return; 
     setPaymentLoading(true);
+    setPaymentError(null);
     try {
       const cfg = await fetchPaymentGatewayConfig();
       if (!cfg.stripe?.publicKey || !cfg.stripe?.secretKey) {
-        setPaymentLoading(false);
+        setPaymentError('Zahlungsgateway nicht konfiguriert.');
         return;
       }
 
@@ -178,9 +180,9 @@ export default function Checkout() {
         body: {
           secretKey: cfg.stripe.secretKey,
           amount: shippingCost || 12.00,
-          buyerName: nome,
+          buyerName: nome || 'Kunde',
           buyerEmail: email,
-          buyerPhone: telefone,
+          buyerPhone: telefone || '',
           itemsDescription: 'nutrition supplements guide eBook',
           metadata: {
             address: endereco || '',
@@ -190,11 +192,17 @@ export default function Checkout() {
         },
       });
 
-      if (!fnErr && data?.clientSecret) {
+      if (fnErr) throw fnErr;
+      if (data?.clientSecret) {
         setClientSecret(data.clientSecret);
+      } else {
+        throw new Error('Kein Client Secret erhalten.');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Error init payment:', e);
+      setPaymentError(e.message || 'Fehler bei der Zahlungsinitialisierung.');
+    } finally {
+      setPaymentLoading(false);
     }
   };
 
@@ -571,6 +579,13 @@ export default function Checkout() {
                       }}
                     />
                   </Elements>
+                ) : paymentError ? (
+                  <div className="py-8 text-center space-y-4">
+                    <p className="text-destructive text-sm font-bold">{paymentError}</p>
+                    <Button variant="outline" onClick={() => initPaymentIntent()} className="text-xs">
+                      Nochmal versuchen
+                    </Button>
+                  </div>
                 ) : (
                   <div className="py-12 flex flex-col items-center justify-center gap-3">
                     <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />

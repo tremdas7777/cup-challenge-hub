@@ -6,7 +6,7 @@ import giftCardImg from '@/assets/esn-gift-card.png';
 import creatineImg from '@/assets/esn-creatine.png';
 import isoclearImg from '@/assets/esn-isoclear.png';
 import designerWheyImg from '@/assets/esn-designer-whey.png';
-import comboImg from '@/assets/esn-combo-pack.png';
+import comboImg from '@/assets/esn-combo-pack.jpg';
 import proteinBarImg from '@/assets/esn-protein-bar.png';
 
 interface ScratchItem {

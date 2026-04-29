@@ -15,7 +15,7 @@ import { fetchPaymentGatewayConfig } from '@/lib/paymentGateway';
 import { fireConversionEvent } from '@/lib/pixelManager';
 import { trackEvent } from '@/lib/funnelTracking';
 import esnLogo from '@/assets/esn-logo.png';
-import comboPackImg from '@/assets/esn-combo-pack.png';
+import comboPackImg from '@/assets/esn-combo-pack.jpg';
 
 interface CheckoutBuyer {
   nome: string;

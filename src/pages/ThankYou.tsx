@@ -60,7 +60,7 @@ export default function ThankYou() {
     // Show upsell after a brief delay
     const upsellTimer = setTimeout(() => {
       if (!alreadyDone) setShowUpsell(true);
-    }, 1500);
+    }, 500);
 
     return () => {
       clearTimeout(timer);

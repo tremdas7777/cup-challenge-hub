@@ -86,8 +86,6 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       if (data?.success) {
         // Mark as done
         sessionStorage.setItem('upsell_completed', '1');
-        // If it required a redirect (3DS), data might have a specific response, 
-        // but for most cards it will just succeed.
         window.location.href = '/obrigado-final?upsell=success';
       } else {
         throw new Error(data?.error || 'Zahlung fehlgeschlagen');

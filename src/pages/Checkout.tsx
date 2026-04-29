@@ -188,42 +188,30 @@ export default function Checkout() {
       trackingParameters: JSON.stringify(getTrackingParameters()),
     };
 
-    if (true) { // Always use Stripe if not using external checkout
+    if (true) { // Always use embedded Stripe Elements checkout
       if (!hasStripeKeys) {
         setCardError('Stripe-Gateway nicht konfiguriert. Bitte Admin-Bereich prüfen.');
         setTimeout(() => setCardError(''), 8000);
         return;
       }
-      setCardLoading(true);
-      setCardError('');
-      try {
-        const { data, error } = await supabase.functions.invoke('criar-checkout-stripe', {
-          body: {
-            secretKey: gatewayConfig.stripe.secretKey,
-            amount: shippingCost || 12.00,
-            buyerName: nome,
-            buyerEmail: email,
-            buyerPhone: telefone,
-            buyerDocument: '', // No CPF/ID needed for Germany funnel
-            itemsDescription: 'nutrition supplements guide eBook',
-            metadata: purchaseMetadata,
-          },
-        });
 
-        if (error) throw error;
-        if (data?.url) {
-          window.location.href = data.url;
-        } else {
-          throw new Error('Não foi possível gerar a URL do Stripe');
-        }
-      } catch (err: any) {
-        console.error('Stripe error:', err);
-        const errorMsg = err.message || 'Fehler bei der Stripe-Zahlung. Bitte erneut versuchen.';
-        setCardError(`Stripe Fehler: ${errorMsg}`);
-        setTimeout(() => setCardError(''), 10000);
-      } finally {
-        setCardLoading(false);
-      }
+      // Save buyer data and navigate to embedded payment page
+      const buyerData = {
+        nome,
+        email,
+        telefone,
+        cep: cep.replace(/\D/g, ''),
+        endereco,
+        numero,
+        complemento,
+        bairro,
+        cidade,
+        estado,
+        shippingMethod: shippingMethod || 'sedex',
+        shippingCost: shippingCost || 12.00,
+      };
+      sessionStorage.setItem('esn_checkout_buyer', JSON.stringify(buyerData));
+      window.location.href = '/pagamento';
     }
   };
 

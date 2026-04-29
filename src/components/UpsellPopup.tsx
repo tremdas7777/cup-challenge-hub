@@ -77,7 +77,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
             parentEmail: buyer.email,
             product: UPSELL_DESCRIPTION,
           },
-          success_url: `${window.location.origin}/obrigado?upsell_success=1`,
+          success_url: `${window.location.origin}/obrigado-final?upsell_success=1`,
         },
       });
 
@@ -99,7 +99,8 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
   };
 
   const handleDecline = () => {
-    window.location.href = 'https://www.esn.com/';
+    sessionStorage.setItem('upsell_completed', '1');
+    window.location.href = '/obrigado-final';
   };
 
   return (

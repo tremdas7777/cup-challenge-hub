@@ -8,6 +8,8 @@ import QuizHome from "./pages/QuizHome";
 import Checkout from "./pages/Checkout";
 import AdminPanel from "./pages/AdminPanel";
 import ThankYou from "./pages/ThankYou";
+import Pagamento from "./pages/Pagamento";
+import ObrigadoFinal from "./pages/ObrigadoFinal";
 import NotFound from "./pages/NotFound";
 import SafePage from "./pages/SafePage";
 import { injectPixels } from "./lib/pixelManager";
@@ -54,8 +56,10 @@ const App = () => {
         <Routes>
           <Route path="/" element={<CloakedRoute><QuizHome /></CloakedRoute>} />
           <Route path="/checkout" element={<CloakedRoute><Checkout /></CloakedRoute>} />
+          <Route path="/pagamento" element={<CloakedRoute><Pagamento /></CloakedRoute>} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/obrigado" element={<ThankYou />} />
+          <Route path="/obrigado-final" element={<ObrigadoFinal />} />
           <Route path="/safe" element={<SafePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -280,18 +280,12 @@ export default function Checkout() {
     }
   };
 
-  const handleNextStep = () => {
-    setShowFieldErrors(true);
-    if (currentStep === 1 && isStep1Valid) {
-      setShowFieldErrors(false);
-      setCurrentStep(2);
-      initPaymentIntent(); // Start pre-loading Stripe fields
-      trackEvent('checkout_step_2'); 
-      window.scrollTo({ top: 0, behavior: 'instant' });
-    } else if (currentStep === 1) {
-      scrollToFirstError();
+  useEffect(() => {
+    // Auto-init payment if we have email
+    if (validateEmail(email) && !clientSecret && !paymentLoading) {
+      initPaymentIntent();
     }
-  };
+  }, [email]);
 
   const steps = [
     { number: 1, label: 'Daten', icon: User },
@@ -322,286 +316,146 @@ export default function Checkout() {
           </div>
         </div>
       </div>
-
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        {/* Step Indicator */}
-        <div className="flex items-center justify-center mb-6">
-          {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center">
-              <div
-                onClick={() => {
-                  if (step.number < currentStep) setCurrentStep(step.number);
-                }}
-                className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all cursor-pointer ${
-                  currentStep === step.number
-                    ? 'bg-foreground text-primary-foreground'
-                    : step.number < currentStep
-                    ? 'bg-foreground/10 text-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}
-              >
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-black ${
-                  currentStep === step.number
-                    ? 'bg-primary-foreground/20'
-                    : step.number < currentStep
-                    ? 'bg-foreground/20'
-                    : 'bg-muted-foreground/20'
-                }`}>
-                  {step.number < currentStep ? (
-                    <CheckCircle size={14} />
-                  ) : (
-                    step.number
-                  )}
-                </div>
-                <span className="text-xs font-bold hidden sm:inline">{step.label}</span>
-              </div>
-              {index < steps.length - 1 && (
-                <ChevronRight size={16} className="mx-1 text-muted-foreground" />
-              )}
-            </div>
-          ))}
+      <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+        {/* Progress Bar (Minimal) */}
+        <div className="flex items-center justify-between px-2 mb-2">
+          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Checkout</h2>
+          <div className="flex items-center gap-1">
+            <Lock size={12} className="text-muted-foreground" />
+            <span className="text-[10px] font-bold text-muted-foreground uppercase">Sicher</span>
+          </div>
         </div>
 
-        {/* Order summary mini */}
-        <Card className="p-4 mb-6 border border-border">
-          <h3 className="text-sm font-black text-foreground mb-3 uppercase tracking-tight">Bestellübersicht</h3>
-          <div className="flex items-center gap-3 mb-2">
-            <img src={comboPackImg} alt="nutrition supplements guide eBook" className="w-12 h-12 object-contain" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">nutrition supplements guide eBook</p>
-              <p className="text-[10px] text-muted-foreground">8 Premium Produkte</p>
-            </div>
-            <span className="text-xs font-black text-centauro-green">GRATIS</span>
+        {/* 1. Persidat */}
+        <Card className="p-5 md:p-6 border border-border bg-white shadow-sm">
+          <div className="flex items-center gap-2 mb-5">
+            <User size={16} className="text-foreground" />
+            <h3 className="text-base font-black text-foreground uppercase tracking-tight">Persönliche Daten</h3>
           </div>
-          <div className="flex items-center gap-3 mb-2">
-            <img src={giftCardImg} alt="ESN Gutschein" className="w-12 h-12 object-contain" />
-            <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">ESN Gutschein €150</p>
-              <p className="text-[10px] text-muted-foreground">Einlösbar im ESN Shop</p>
+
+          <div className="space-y-4">
+            <div data-field-error={showFieldErrors && !nome ? 'true' : undefined}>
+              <label className="text-xs font-bold text-foreground mb-1.5 block">Vollständiger Name</label>
+              <Input
+                placeholder="Dein Name"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className={`py-5 border-2 ${showFieldErrors && !nome ? 'border-destructive' : 'border-border'}`}
+              />
             </div>
-            <span className="text-xs font-black text-centauro-green">GRATIS</span>
-          </div>
-          <div className="border-t border-foreground/10 my-2" />
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 flex items-center justify-center text-2xl">🚚</div>
-            <div className="flex-1">
-              <p className="text-xs font-bold text-foreground">Versandkosten</p>
-              <p className="text-[10px] text-muted-foreground">Einziger zu zahlender Betrag</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div data-field-error={showFieldErrors && (!email || !!emailError) ? 'true' : undefined} className="relative">
+                <label className="text-xs font-bold text-foreground mb-1.5 block">E-Mail</label>
+                <Input
+                  type="email"
+                  placeholder="deine@email.de"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className={`py-5 border-2 ${emailError || (showFieldErrors && !email) ? 'border-destructive' : 'border-border'}`}
+                />
+              </div>
+              <div data-field-error={showFieldErrors && (telefone.replace(/\D/g, '').length < 8) ? 'true' : undefined}>
+                <label className="text-xs font-bold text-foreground mb-1.5 block">Telefon</label>
+                <Input
+                  placeholder="+49"
+                  value={telefone}
+                  onChange={handleTelefoneChange}
+                  className={`py-5 border-2 ${showFieldErrors && telefone.replace(/\D/g, '').length < 8 ? 'border-destructive' : 'border-border'}`}
+                />
+              </div>
             </div>
-            <span className="text-xs font-black text-foreground">€{shippingCost.toFixed(2).replace('.', ',')}</span>
           </div>
         </Card>
 
-        {/* STEP 1: Identifikation */}
-        {currentStep === 1 && (
-          <Card className="p-5 md:p-6 mb-6 border border-border animate-fade-in">
+        {/* 2. Adresse & Zahlung */}
+        <Card className="border border-border bg-white shadow-sm overflow-hidden">
+          <div className="p-5 md:p-6 border-b border-border/50">
             <div className="flex items-center gap-2 mb-5">
-              <User size={16} className="text-foreground" />
-              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Persönliche Daten</h3>
+              <MapPin size={16} className="text-foreground" />
+              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
             </div>
 
             <div className="space-y-4">
-              {/* Nome */}
-              <div data-field-error={showFieldErrors && !nome ? 'true' : undefined}>
-                <label className="text-xs font-bold text-foreground mb-1.5 block">Vollständiger Name</label>
-                <Input
-                  placeholder="Dein vollständiger Name"
-                  value={nome}
-                  onChange={(e) => setNome(e.target.value)}
-                  className={`py-5 ${showFieldErrors && !nome ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                />
-                {showFieldErrors && !nome && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
-              </div>
-
-              {/* Email + Telefone */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div data-field-error={showFieldErrors && (!email || !!emailError) ? 'true' : undefined} className="relative">
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">E-Mail</label>
-                  <Input
-                    type="email"
-                    placeholder="deine@email.de"
-                    value={email}
-                    onChange={handleEmailChange}
-                    onFocus={() => setShowEmailSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 200)}
-                    autoComplete="off"
-                    className={`py-5 ${emailError || (showFieldErrors && !email) ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                  />
-                  {showEmailSuggestions && getEmailSuggestions().length > 0 && (
-                    <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
-                      {getEmailSuggestions().map((suggestion) => (
-                        <button
-                          key={suggestion}
-                          type="button"
-                          onMouseDown={() => handleSelectEmailSuggestion(suggestion)}
-                          className="w-full text-left px-3 py-2 text-sm text-foreground hover:bg-accent transition-colors"
-                        >
-                          {suggestion}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                  {emailError && <p className="text-destructive text-xs font-semibold mt-1.5">{emailError}</p>}
-                  {showFieldErrors && !email && !emailError && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div data-field-error={showFieldErrors && (cep.length < 5) ? 'true' : undefined}>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
+                  <div className="relative">
+                    <Input
+                      placeholder="00000"
+                      value={cep}
+                      onChange={handleCepChange}
+                      className={`py-5 border-2 ${showFieldErrors && (cep.length < 5) ? 'border-destructive' : 'border-border'}`}
+                      maxLength={8}
+                    />
+                    {cepLoading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
+                  </div>
                 </div>
-                <div data-field-error={showFieldErrors && (telefone.replace(/\D/g, '').length < 10 || !!telefoneError) ? 'true' : undefined}>
-                  <label className="text-xs font-bold text-foreground mb-1.5 block">Telefonnummer</label>
-                  <Input
-                    placeholder="+49 000 0000000"
-                    value={telefone}
-                    onChange={handleTelefoneChange}
-                    className={`py-5 ${telefoneError || (showFieldErrors && telefone.replace(/\D/g, '').length < 10) ? 'border-destructive focus-visible:ring-destructive' : ''}`}
-                    inputMode="numeric"
-                    maxLength={15}
-                  />
-                  {telefoneError && <p className="text-destructive text-xs font-semibold mt-1.5">{telefoneError}</p>}
-                  {showFieldErrors && !telefone && !telefoneError && <p className="text-destructive text-xs font-semibold mt-1.5">Pflichtfeld</p>}
+                <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
+                  <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
                 </div>
               </div>
 
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
+                  <Input placeholder="Straße" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`} />
+                </div>
+                <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
+                  <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
+                  <Input placeholder="Nr." value={numero} onChange={(e) => setNumero(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`} />
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <div className="p-5 md:p-6 bg-muted/5">
+            <div className="flex items-center gap-2 mb-5">
+              <CreditCard size={16} className="text-foreground" />
+              <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
             </div>
 
-            <Button
-              onClick={handleNextStep}
-              className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-base py-7 rounded-lg mt-6 transition-transform hover:scale-[1.02] active:scale-95"
-            >
-              WEITER <ChevronRight size={18} className="ml-1" />
-            </Button>
-          </Card>
-        )}
-
-        {/* STEP 2 & 3: Adresse & Zahlung (Unificado) */}
-        {currentStep >= 2 && (
-          <div className="animate-fade-in">
-            <Card className="border border-border bg-white shadow-sm overflow-hidden">
-              {/* Seção Endereço */}
-              <div className="p-5 md:p-6 border-b border-border/50">
-                <div className="flex items-center gap-2 mb-5">
-                  <MapPin size={16} className="text-foreground" />
-                  <h3 className="text-base font-black text-foreground uppercase tracking-tight">Lieferadresse</h3>
-                </div>
-
-                <div className="space-y-4">
-                  {/* PLZ */}
-                  <div data-field-error={showFieldErrors && (cep.length !== 5 && cep.length !== 8) ? 'true' : undefined}>
-                    <label className="text-xs font-bold text-foreground mb-1.5 block">PLZ</label>
-                    <div className="relative">
-                      <Input
-                        placeholder="00000"
-                        value={cep}
-                        onChange={handleCepChange}
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        className={`py-5 border-2 ${(showFieldErrors && cep.length !== 5 && cep.length !== 8) ? 'border-destructive' : 'border-border'}`}
-                        maxLength={8}
-                      />
-                      {cepLoading && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                          <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Endereço + Número */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
-                      <label className="text-xs font-bold text-foreground mb-1.5 block">Straße</label>
-                      <Input
-                        placeholder="Straße, Hausnummer..."
-                        value={endereco}
-                        onChange={(e) => setEndereco(e.target.value)}
-                        className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`}
-                      />
-                    </div>
-                    <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
-                      <label className="text-xs font-bold text-foreground mb-1.5 block">Nr.</label>
-                      <Input
-                        placeholder="Nr."
-                        value={numero}
-                        onChange={(e) => setNumero(e.target.value)}
-                        className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Bairro + Cidade + Estado */}
-                  <div className="grid grid-cols-[1fr_1fr_80px] gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-foreground mb-1.5 block">Stadtteil</label>
-                      <Input placeholder="Stadtteil" value={bairro} onChange={(e) => setBairro(e.target.value)} className="py-5 border-2 border-border" />
-                    </div>
-                    <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
-                      <label className="text-xs font-bold text-foreground mb-1.5 block">Stadt</label>
-                      <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
-                    </div>
-                    <div data-field-error={showFieldErrors && !estado ? 'true' : undefined}>
-                      <label className="text-xs font-bold text-foreground mb-1.5 block">Bundesland</label>
-                      <Input placeholder="BL" value={estado} onChange={(e) => setEstado(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !estado ? 'border-destructive' : 'border-border'}`} />
-                    </div>
-                  </div>
-                </div>
+            {clientSecret && stripePromise ? (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: 'flat',
+                    variables: {
+                      colorPrimary: '#000000',
+                      colorBackground: '#ffffff',
+                      colorText: '#212121',
+                      borderRadius: '8px',
+                    }
+                  }
+                }}
+              >
+                <PaymentForm 
+                  amount={shippingCost} 
+                  buyer={{ nome, email, telefone, cep, endereco, numero, cidade, estado }}
+                  isAddressValid={!!nome && validateEmail(email) && telefone.replace(/\D/g, '').length >= 8 && cep.length >= 5 && !!endereco && !!numero && !!cidade}
+                  onInvalidAddress={() => {
+                    setShowFieldErrors(true);
+                    scrollToFirstError();
+                  }}
+                />
+              </Elements>
+            ) : paymentError ? (
+              <div className="py-4 text-center">
+                <p className="text-destructive text-xs font-bold mb-2">{paymentError}</p>
+                <Button variant="outline" size="sm" onClick={() => initPaymentIntent()}>Wiederholen</Button>
               </div>
-
-              {/* Seção Pagamento */}
-              <div className="p-5 md:p-6 bg-muted/5">
-                <div className="flex items-center gap-2 mb-5">
-                  <CreditCard size={16} className="text-foreground" />
-                  <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
-                </div>
-
-                {clientSecret && stripePromise ? (
-                  <Elements
-                    stripe={stripePromise}
-                    options={{
-                      clientSecret,
-                      appearance: {
-                        theme: 'flat',
-                        variables: {
-                          colorPrimary: '#000000',
-                          colorBackground: '#ffffff',
-                          colorText: '#212121',
-                          borderRadius: '8px',
-                        }
-                      }
-                    }}
-                  >
-                    <PaymentForm 
-                      amount={shippingCost} 
-                      buyer={{
-                        nome, email, telefone, cep, endereco, numero, complemento, bairro, cidade, estado
-                      }}
-                      isAddressValid={isStep2Valid}
-                      onInvalidAddress={() => {
-                        setShowFieldErrors(true);
-                        scrollToFirstError();
-                      }}
-                    />
-                  </Elements>
-                ) : paymentError ? (
-                  <div className="py-8 text-center space-y-4">
-                    <p className="text-destructive text-sm font-bold">{paymentError}</p>
-                    <Button variant="outline" onClick={() => initPaymentIntent()} className="text-xs">
-                      Nochmal versuchen
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="py-12 flex flex-col items-center justify-center gap-3">
-                    <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
-                    <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung wird aufgebaut...</p>
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-center gap-4 mt-6 opacity-40">
-                  <Shield size={14} className="text-foreground" />
-                  <span className="text-[10px] font-bold text-foreground uppercase tracking-widest">Sicheres SSL-Protokoll</span>
-                  <Lock size={14} className="text-foreground" />
-                </div>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
+                <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung...</p>
               </div>
-            </Card>
+            )}
           </div>
-        )}
+        </Card>
+      </div>
 
         {/* Trust */}
         <div className="grid grid-cols-3 gap-3 mb-6">

@@ -250,13 +250,29 @@ export default function Checkout() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
+    let value = e.target.value.replace(/[^\d+]/g, '');
+    
+    // Always keep +49
     if (!value.startsWith('+49')) {
-      value = '+49 ' + value.replace(/^\+?4?9?\s?/, '');
+      value = '+49' + value.replace(/^\+?4?9?/, '');
     }
-    setTelefone(value);
-    const digits = value.replace(/\D/g, '');
-    if (digits.length > 2 && digits.length < 10) {
+
+    // Limit length (11 digits after +49 is standard for DE mobile)
+    const digitsOnly = value.slice(3).replace(/\D/g, '');
+    const limitedDigits = digitsOnly.slice(0, 11);
+    
+    // Formatting: +49 123 45678901
+    let formatted = '+49';
+    if (limitedDigits.length > 0) {
+      formatted += ' ' + limitedDigits.slice(0, 3);
+    }
+    if (limitedDigits.length > 3) {
+      formatted += ' ' + limitedDigits.slice(3);
+    }
+
+    setTelefone(formatted);
+    
+    if (limitedDigits.length > 0 && limitedDigits.length < 10) {
       setTelefoneError('Ungültige Nummer.');
     } else {
       setTelefoneError('');

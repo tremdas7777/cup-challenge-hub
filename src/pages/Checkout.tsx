@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -64,9 +64,6 @@ export default function Checkout() {
   const [showStoreError, setShowStoreError] = useState(false);
   const [showCepError, setShowCepError] = useState(false);
   const [nearestStore, setNearestStore] = useState<CentauroStore | null>(null);
-  const [googleStores, setGoogleStores] = useState<GoogleStore[]>([]);
-  const [selectedGoogleStore, setSelectedGoogleStore] = useState<GoogleStore | null>(null);
-  const [storesLoading, setStoresLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(600);
   const [viewersCount] = useState(Math.floor(Math.random() * 30) + 38);
 
@@ -76,7 +73,6 @@ export default function Checkout() {
   const [cardError, setCardError] = useState('');
   const [cardLoading, setCardLoading] = useState(false);
 
-  const cepValid = cep.replace(/\D/g, '').length === 5 && !!endereco;
   const [shippingCost, setShippingCost] = useState(10.00);
 
   useEffect(() => {
@@ -94,17 +90,10 @@ export default function Checkout() {
       setShippingCost(value);
       // Track checkout event with the dynamic value
       trackEvent('checkout');
-      trackEvent('checkout_step_1'); // Schritt 1: Persönliche Daten
+      trackEvent('checkout_step_1'); 
       fireConversionEvent('InitiateCheckout', { value, currency: 'EUR' });
     });
   }, []);
-
-  useEffect(() => {
-    // Trigger payment intent init early
-    if (validateEmail(email) && !clientSecret && !paymentLoading) {
-      initPaymentIntent();
-    }
-  }, [email, clientSecret, paymentLoading]);
 
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
@@ -115,12 +104,6 @@ export default function Checkout() {
   const formatCep = (value: string) => {
     return value.replace(/\D/g, '').slice(0, 8);
   };
-
-  const formatTelefone = (value: string) => {
-    return value.replace(/[^\d+]/g, '').slice(0, 15);
-  };
-
-
 
   const handleCepChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const formatted = formatCep(e.target.value);
@@ -206,13 +189,6 @@ export default function Checkout() {
     }
   };
 
-  const handleSubmit = async () => {
-    // This will be handled by the Embedded PaymentForm now
-    console.log('Submit triggered, but should be handled by PaymentForm sub-component');
-  };
-
-
-
   const validateEmail = (value: string): boolean => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   };
@@ -279,11 +255,6 @@ export default function Checkout() {
     }
   };
 
-  // Step validations
-  const isStep1Valid = nome && email && !emailError && validateEmail(email) && telefone.length >= 8 && !telefoneError;
-  const isStep2Valid = (cep.length === 5 || cep.length === 8) && !!endereco && !!numero && !!cidade && !!estado && !!shippingMethod;
-  const isFormValid = isStep1Valid && isStep2Valid;
-
   const scrollToFirstError = () => {
     const firstError = document.querySelector('[data-field-error="true"]');
     if (firstError) {
@@ -301,12 +272,6 @@ export default function Checkout() {
       initPaymentIntent();
     }
   }, [email]);
-
-  const steps = [
-    { number: 1, label: 'Daten', icon: User },
-    { number: 2, label: 'Adresse', icon: MapPin },
-    { number: 3, label: 'Zahlung', icon: CreditCard },
-  ];
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Rubik', 'Inter', system-ui, sans-serif" }}>
@@ -490,22 +455,10 @@ export default function Checkout() {
                 <p className="text-destructive text-xs font-bold mb-2">{paymentError}</p>
                 <Button variant="outline" size="sm" onClick={() => initPaymentIntent()}>Wiederholen</Button>
               </div>
-            ) : paymentLoading ? (
+            ) : (
               <div className="py-12 flex flex-col items-center justify-center gap-3">
                 <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
                 <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung...</p>
-              </div>
-            ) : (
-              <div className="py-8 text-center px-6">
-                <p className="text-xs text-muted-foreground mb-4">Geben Sie Ihre E-Mail oben ein, um die Zahlung zu aktivieren.</p>
-                <Button 
-                  onClick={() => initPaymentIntent()} 
-                  disabled={paymentLoading}
-                  variant="outline"
-                  className="w-full border-2 border-dashed border-border py-6 font-bold uppercase tracking-wider text-xs"
-                >
-                  {paymentLoading ? 'Laden...' : 'Zahlung jetzt laden'}
-                </Button>
               </div>
             )}
           </div>

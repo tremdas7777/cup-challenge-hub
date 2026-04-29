@@ -45,7 +45,7 @@ export default function Checkout() {
   const [nome, setNome] = useState(prefilledName);
   const [email, setEmail] = useState('');
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [telefone, setTelefone] = useState('');
+  const [telefone, setTelefone] = useState('+49 ');
   const [telefoneError, setTelefoneError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [cep, setCep] = useState('');
@@ -250,9 +250,13 @@ export default function Checkout() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/[^\d+]/g, '').slice(0, 15);
+    let value = e.target.value;
+    if (!value.startsWith('+49')) {
+      value = '+49 ' + value.replace(/^\+?4?9?\s?/, '');
+    }
     setTelefone(value);
-    if (value.length > 0 && value.replace(/\D/g, '').length < 8) {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length > 2 && digits.length < 10) {
       setTelefoneError('Ungültige Nummer.');
     } else {
       setTelefoneError('');
@@ -272,7 +276,11 @@ export default function Checkout() {
   };
 
   useEffect(() => {
-    // Auto-init payment if we have email
+    // Initial load tracking
+    trackEvent('checkout');
+    trackEvent('checkout_step_1');
+
+    // Auto-init payment if we have email (prefilled or typed)
     if (validateEmail(email) && !clientSecret && !paymentLoading) {
       initPaymentIntent();
     }

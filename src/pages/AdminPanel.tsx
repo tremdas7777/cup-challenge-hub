@@ -77,7 +77,6 @@ export default function AdminPanel() {
 
   const fetchOrders = async () => {
     setOrdersLoading(true);
-    await syncPagouAiPayments({ limit: 50 });
     const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(50);
     setOrders(data || []);
     setOrdersLoading(false);
@@ -1107,161 +1106,12 @@ export default function AdminPanel() {
               </div>
             </Card>
 
-            {/* Test Orders - botões separados PIX e Cartão. Confirmam criação real no gateway e mostram status detalhado. */}
+            {/* Stripe ativo */}
             <Card className="p-4 mb-4 border border-dashed border-primary/40 bg-primary/5">
-              <div className="flex items-center gap-2 mb-2">
-                <Zap size={16} className="text-primary" />
-                <span className="font-black text-foreground text-sm">Pedidos de Teste no Gateway</span>
+              <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
+                <p className="text-xs font-bold text-foreground">Stripe ist als einziges Gateway aktiv.</p>
+                <p className="text-[10px] text-muted-foreground mt-1">Zahlungen werden direkt über Stripe Checkout abgewickelt.</p>
               </div>
-              <p className="text-muted-foreground text-[11px] mb-3">
-                Cada botão cria um <strong>pedido real</strong> no gateway ativo (aparece no painel deles), grava na base e dispara <strong>Utmify pendente + aprovado</strong> e <strong>todos os webhooks</strong>. Use para validar a integração ponta-a-ponta de cada método.
-              </p>
-
-              {(() => {
-                const runTest = async (method: 'pix' | 'credit_card', cardToken?: string, existingGatewayData?: any) => {
-                  const setLoading = method === 'pix' ? setTestPixLoading : setTestCardLoading;
-                  const setResult = method === 'pix' ? setTestPixResult : setTestCardResult;
-                  setLoading(true);
-                  setResult(null);
-                  const lines: string[] = [];
-                  try {
-                    const priceCents = gatewayConfig.productTicketCents || 4490;
-                    const amountBrl = priceCents / 100;
-                    const active = gatewayConfig.activeGateway;
-                    const buyer = {
-                      buyerName: 'Cliente Teste',
-                      buyerEmail: 'teste@teste.com',
-                      buyerPhone: '11999999999',
-                      buyerDocument: '12345678909',
-                      itemsDescription: `Pedido Teste ${method === 'pix' ? 'PIX' : 'Cartão'} - nutrition supplements guide eBook`,
-                    };
-
-                    lines.push(`Gateway ativo: ${active}`);
-                    lines.push(`Método: ${method === 'pix' ? 'PIX' : 'Cartão de Crédito'}`);
-                    lines.push(`Valor: R$ ${amountBrl.toFixed(2).replace('.', ',')}`);
-
-                    let pixData: any = existingGatewayData ?? null;
-                    let pixError: any = null;
-
-                    if (method === 'pix' && !pixData) {
-                      if (active === 'centurionpay') {
-                        const r = await supabase.functions.invoke('criar-pix-centurionpay', {
-                          body: { secretKey: gatewayConfig.centurionpay.secretKey, companyId: gatewayConfig.centurionpay.companyId, amount: amountBrl, ...buyer },
-                        });
-                        pixData = r.data; pixError = r.error;
-                      } else if (active === 'ironpay') {
-                        const r = await supabase.functions.invoke('criar-pix-ironpay', {
-                          body: { apiToken: gatewayConfig.ironpay.apiToken, amount: amountBrl, ...buyer },
-                        });
-                        pixData = r.data; pixError = r.error;
-                      } else if (active === 'pagouai') {
-                        const r = await supabase.functions.invoke('criar-pagamento-pagouai', {
-                          body: { secretKey: gatewayConfig.pagouai.secretKey, method: 'pix', amount: amountBrl, ...buyer },
-                        });
-                        pixData = r.data; pixError = r.error;
-                      } else {
-                        throw new Error(`Gateway "${active}" não suporta teste PIX automático aqui.`);
-                      }
-                    } else if (!pixData) {
-                      // Cartão de crédito → Pagou.ai (token pgct_… gerado pelo SDK na frente)
-                      if (active !== 'pagouai') {
-                        throw new Error(`Cartão de Crédito é processado via Pagou.ai. Mude o gateway ativo para "pagouai" para testar.`);
-                      }
-                      if (!cardToken || !cardToken.startsWith('pgct_')) {
-                        throw new Error('Token de cartão inválido. Use o formulário seguro Pagou.ai (token deve começar com pgct_).');
-                      }
-                      lines.push(`token gerado pelo SDK: ${cardToken.slice(0, 14)}…`);
-                      const r = await supabase.functions.invoke('criar-pagamento-pagouai', {
-                        body: {
-                          secretKey: gatewayConfig.pagouai.secretKey,
-                          method: 'credit_card',
-                          amount: amountBrl,
-                          cardToken,
-                          installments: 1,
-                          ...buyer,
-                        },
-                      });
-                      pixData = r.data; pixError = r.error;
-                    }
-
-                    if (pixError || (pixData && pixData.success === false)) {
-                      const realMsg = pixData?.error || pixError?.message || 'Falha ao criar pedido no gateway';
-                      let hint = '';
-                      if (/TRANSACTION_METHOD_DISABLED|PIX transactions are disabled/i.test(realMsg)) {
-                        hint = ' — Conta Pagou.ai sem PIX habilitado. Ative no painel Pagou.ai → Métodos de pagamento.';
-                      } else if (/CREDIT_CARD.*disabled|Card transactions are disabled|credit_card.*disabled/i.test(realMsg)) {
-                        hint = ' — Conta Pagou.ai sem Cartão habilitado. Ative no painel Pagou.ai (pode exigir KYC).';
-                      } else if (/Payment token must start with 'pgct_'|invalid.*token|token.*invalid/i.test(realMsg)) {
-                        hint = ' — Token inválido. O cartão não foi tokenizado pelo SDK Pagou.ai (pgct_…).';
-                      } else if (/401|403|unauthorized|invalid.*key/i.test(realMsg)) {
-                        hint = ' — Chave secreta inválida. Confirme se colou a sk_live_… (não a publicável pk_…).';
-                      }
-                      throw new Error(`${realMsg}${hint}`);
-                    }
-                    if (!pixData?.order_id) throw new Error('Gateway não retornou order_id.');
-
-                    const realOrderId = pixData.order_id;
-                    const txId = pixData.transaction_id || pixData.external_id || '—';
-                    const status = pixData.status || 'pending';
-                    lines.push(`✓ Pedido criado no gateway`);
-                    lines.push(`order_id: ${realOrderId}`);
-                    lines.push(`transaction_id: ${txId}`);
-                    lines.push(`status retornado: ${status}`);
-                    if (method === 'pix' && pixData.pix_code) {
-                      lines.push(`pix_code: ${String(pixData.pix_code).slice(0, 40)}…`);
-                    }
-
-                    const payload = {
-                      orderId: realOrderId,
-                      customerName: buyer.buyerName,
-                      customerEmail: buyer.buyerEmail,
-                      customerPhone: buyer.buyerPhone,
-                      customerDocument: buyer.buyerDocument,
-                      productName: buyer.itemsDescription,
-                      priceInCents: priceCents,
-                    };
-                    const webhookData = { orderId: realOrderId, buyerName: buyer.buyerName, buyerEmail: buyer.buyerEmail, amount: amountBrl, isTest: true };
-
-                    const [pendingUtmify] = await Promise.all([
-                      sendUtmifyPending(payload),
-                      fireWebhookEvent('venda_pendente', webhookData),
-                    ]);
-                    lines.push(`Utmify pendente: ${pendingUtmify ? 'OK ✓' : 'FALHOU ✗'}`);
-                    lines.push(`Webhook venda_pendente: disparado`);
-                    lines.push(`Aguardando 15s para simular aprovação…`);
-                    setResult({ ok: true, lines: [...lines] });
-
-                    await new Promise(r => setTimeout(r, 15000));
-
-                    const [paidUtmify] = await Promise.all([
-                      sendUtmifySale(payload),
-                      fireWebhookEvent('venda_aprovada', webhookData),
-                    ]);
-                    lines.push(`Utmify aprovada: ${paidUtmify ? 'OK ✓' : 'FALHOU ✗'}`);
-                    lines.push(`Webhook venda_aprovada: disparado`);
-                    setResult({ ok: true, lines });
-                  } catch (e: any) {
-                    lines.push(`✗ Erro: ${e?.message || 'falha ao enviar teste'}`);
-                    setResult({ ok: false, lines });
-                  } finally {
-                    setLoading(false);
-                  }
-                };
-
-                const ResultBox = ({ result }: { result: { ok: boolean; lines: string[] } | null }) => {
-                  if (!result) return null;
-                  return (
-                    <div className={`mt-2 p-2.5 rounded-md text-[11px] font-mono leading-relaxed border ${result.ok ? 'bg-centauro-green/5 border-centauro-green/30 text-foreground' : 'bg-destructive/5 border-destructive/30 text-destructive'}`}>
-                      {result.lines.map((l, i) => (<div key={i}>{l}</div>))}
-                    </div>
-                  );
-                };
-
-                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
-                      <p className="text-xs font-bold text-foreground">Stripe ist als einziges Gateway aktiv.</p>
-                      <p className="text-[10px] text-muted-foreground mt-1">Zahlungen werden direkt über Stripe Checkout abgewickelt.</p>
-                    </div>
-              })()}
             </Card>
 
 

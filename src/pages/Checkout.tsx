@@ -16,12 +16,22 @@ import { getAttribution, getTrackingParameters } from '@/lib/attribution';
 import { supabase } from '@/integrations/supabase/client';
 import { findNearestStore, type CentauroStore } from '@/lib/centauroStores';
 
-interface GoogleStore {
-  name: string;
-  address: string;
-  rating: number | null;
-  open_now: boolean | null;
-  place_id: string;
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
+interface CheckoutBuyer {
+  nome: string;
+  email: string;
+  telefone: string;
+  cep?: string;
+  endereco?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  estado?: string;
+  shippingMethod?: string;
+  shippingCost?: number;
 }
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
@@ -45,6 +55,9 @@ export default function Checkout() {
   const [bairro, setBairro] = useState('');
   const [cidade, setCidade] = useState('');
   const [estado, setEstado] = useState('');
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+  const [clientSecret, setClientSecret] = useState<string>('');
+  const [paymentLoading, setPaymentLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
   const [shippingMethod, setShippingMethod] = useState<'sedex' | 'retirada' | null>('sedex');
   const [showStoreError, setShowStoreError] = useState(false);
@@ -149,70 +162,41 @@ export default function Checkout() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (false) {
-      setShowStoreError(true);
-      return;
-    }
-
-    trackEvent('purchase');
-    // Para PIX, o evento "Purchase" é disparado apenas quando o pagamento é confirmado (no PixPopup).
-    // Utmify "venda_pendente" também é enviado pelo PixPopup quando o popup abre.
-
-    // Persist buyer data for upsell flow on /obrigado
+  const initPaymentIntent = async () => {
+    if (clientSecret) return; // Already initialized
     try {
-      sessionStorage.removeItem('upsell_completed');
-      sessionStorage.setItem('upsell_buyer', JSON.stringify({
-        nome, email, telefone,
-        cep, endereco, numero, complemento, bairro, cidade, estado,
-      }));
-    } catch {}
+      const cfg = await fetchPaymentGatewayConfig();
+      if (!cfg.stripe?.publicKey || !cfg.stripe?.secretKey) return;
 
-    const gatewayConfig = await fetchPaymentGatewayConfig();
-    const hasStripeKeys = !!gatewayConfig.stripe?.secretKey?.trim();
+      setStripePromise(loadStripe(cfg.stripe.publicKey));
 
-    console.log('Gateway config:', JSON.stringify({ activeGateway: 'stripe', stripeHasSecret: hasStripeKeys }));
+      const { data, error: fnErr } = await supabase.functions.invoke('criar-payment-intent', {
+        body: {
+          secretKey: cfg.stripe.secretKey,
+          amount: shippingCost || 12.00,
+          buyerName: nome,
+          buyerEmail: email,
+          buyerPhone: telefone,
+          itemsDescription: 'nutrition supplements guide eBook',
+          metadata: {
+            address: endereco || '',
+            addressNumber: numero || '',
+            itemsDescription: 'nutrition supplements guide eBook',
+          },
+        },
+      });
 
-    const purchaseMetadata: Record<string, string> = {
-      address: endereco,
-      addressNumber: numero,
-      complement: complemento,
-      neighborhood: bairro || '',
-      city: cidade,
-      state: estado,
-      cep: cep.replace(/\D/g, ''),
-      shippingMethod: shippingMethod || 'sedex',
-      shippingCostCents: String(Math.round((shippingCost || 12.00) * 100)),
-      itemsDescription: 'nutrition supplements guide eBook',
-      attribution: JSON.stringify(getAttribution()),
-      trackingParameters: JSON.stringify(getTrackingParameters()),
-    };
-
-    if (true) { // Always use embedded Stripe Elements checkout
-      if (!hasStripeKeys) {
-        setCardError('Stripe-Gateway nicht konfiguriert. Bitte Admin-Bereich prüfen.');
-        setTimeout(() => setCardError(''), 8000);
-        return;
+      if (!fnErr && data?.clientSecret) {
+        setClientSecret(data.clientSecret);
       }
-
-      // Save buyer data and navigate to embedded payment page
-      const buyerData = {
-        nome,
-        email,
-        telefone,
-        cep: cep.replace(/\D/g, ''),
-        endereco,
-        numero,
-        complemento,
-        bairro,
-        cidade,
-        estado,
-        shippingMethod: shippingMethod || 'sedex',
-        shippingCost: shippingCost || 12.00,
-      };
-      sessionStorage.setItem('esn_checkout_buyer', JSON.stringify(buyerData));
-      window.location.href = '/pagamento';
+    } catch (e) {
+      console.error('Error init payment:', e);
     }
+  };
+
+  const handleSubmit = async () => {
+    // This will be handled by the Embedded PaymentForm now
+    console.log('Submit triggered, but should be handled by PaymentForm sub-component');
   };
 
 
@@ -289,6 +273,7 @@ export default function Checkout() {
     if (currentStep === 1 && isStep1Valid) {
       setShowFieldErrors(false);
       setCurrentStep(2);
+      initPaymentIntent(); // Start pre-loading Stripe fields
       trackEvent('checkout_step_2'); 
       window.scrollTo({ top: 0, behavior: 'instant' });
     } else if (currentStep === 1) {
@@ -551,44 +536,36 @@ export default function Checkout() {
                 <h3 className="text-base font-black text-foreground uppercase tracking-tight">Zahlungsmethode</h3>
               </div>
 
-              <div className="border-2 border-centauro-green rounded-lg p-4 bg-centauro-green/5 mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full border-2 border-centauro-green flex items-center justify-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-centauro-green" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-black text-foreground">Kreditkarte</p>
-                    <p className="text-[10px] text-muted-foreground">Sichere Zahlung via Stripe</p>
-                  </div>
-                  <span className="text-lg font-black text-foreground">€{(shippingCost || 12.00).toFixed(2).replace('.', ',')}</span>
-                </div>
-              </div>
-
-              {cardError && (
-                <div className="mb-4 p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center border border-destructive/30">
-                  {cardError}
+              {clientSecret && stripePromise ? (
+                <Elements
+                  stripe={stripePromise}
+                  options={{
+                    clientSecret,
+                    appearance: {
+                      theme: 'flat',
+                      variables: {
+                        colorPrimary: '#000000',
+                        colorBackground: '#ffffff',
+                        colorText: '#212121',
+                        borderRadius: '8px',
+                      }
+                    }
+                  }}
+                >
+                  <PaymentForm 
+                    amount={shippingCost} 
+                    buyer={{
+                      nome, email, telefone, cep, endereco, numero, complemento, bairro, cidade, estado
+                    }}
+                    onSuccess={() => {}} // Handle navigation in PaymentForm
+                  />
+                </Elements>
+              ) : (
+                <div className="py-12 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
+                  <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung wird aufgebaut...</p>
                 </div>
               )}
-
-              <Button
-                onClick={() => {
-                  if (!isStep2Valid) {
-                    setShowFieldErrors(true);
-                    scrollToFirstError();
-                    return;
-                  }
-                  handleSubmit();
-                }}
-                disabled={cardLoading}
-                className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg py-8 rounded-lg shadow-xl transition-all hover:scale-[1.02] active:scale-95"
-                style={{ boxShadow: '0 8px 30px hsl(145 63% 42% / 0.4)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
-              >
-                {cardLoading ? (
-                  <><Loader2 size={18} className="mr-2 animate-spin" /> BITTE WARTEN...</>
-                ) : (
-                  'JETZT BESTÄTIGEN'
-                )}
-              </Button>
               
               <div className="flex items-center justify-center gap-4 mt-6 opacity-40">
                 <Shield size={14} className="text-foreground" />
@@ -668,5 +645,87 @@ export default function Checkout() {
 
 
     </div>
+  );
+}
+
+function PaymentForm({ amount, buyer }: { amount: number; buyer: any }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+
+    setLoading(true);
+    setError('');
+
+    // Persist buyer data for upsell flow
+    sessionStorage.setItem('upsell_buyer', JSON.stringify(buyer));
+
+    const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      confirmParams: {
+        return_url: `${window.location.origin}/obrigado`,
+        receipt_email: buyer.email,
+        payment_method_data: {
+          billing_details: {
+            name: buyer.nome,
+            email: buyer.email,
+            phone: buyer.telefone,
+            address: {
+              line1: `${buyer.endereco || ''} ${buyer.numero || ''}`.trim(),
+              city: buyer.cidade || undefined,
+              state: buyer.estado || undefined,
+              postal_code: buyer.cep || undefined,
+              country: 'DE',
+            },
+          },
+        },
+      },
+      redirect: 'if_required',
+    });
+
+    if (stripeError) {
+      setError(stripeError.message || 'Zahlungsfehler.');
+      setLoading(false);
+      return;
+    }
+
+    if (paymentIntent && paymentIntent.status === 'succeeded') {
+      trackEvent('purchase');
+      navigate('/obrigado');
+    } else {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="bg-muted/30 rounded-lg p-4 border border-border">
+        <PaymentElement options={{ layout: 'accordion' }} />
+      </div>
+
+      {error && (
+        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center border border-destructive/30">
+          {error}
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        disabled={!stripe || loading}
+        className="w-full bg-centauro-green hover:bg-centauro-green/80 text-primary-foreground font-black text-lg py-8 rounded-lg shadow-xl transition-all hover:scale-[1.02] active:scale-95"
+        style={{ boxShadow: '0 8px 30px hsl(145 63% 42% / 0.4)', animation: 'pulse-glow-green 2s ease-in-out infinite' }}
+      >
+        {loading ? (
+          <><Loader2 size={18} className="mr-2 animate-spin" /> BITTE WARTEN...</>
+        ) : (
+          `JETZT BESTÄTIGEN — €${amount.toFixed(2).replace('.', ',')}`
+        )}
+      </Button>
+    </form>
   );
 }

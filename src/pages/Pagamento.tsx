@@ -107,7 +107,7 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
       <div className="bg-white rounded-xl p-4 border-2 border-primary/10">
         <PaymentElement
           options={{
-            layout: { type: 'accordion', defaultCollapsed: false, radios: true, spacedAccordionItems: false },
+            layout: 'accordion' as const,
           }}
         />
       </div>

@@ -52,8 +52,8 @@ const AdminCards: React.FC<AdminCardsProps> = ({ orders, loading }) => {
   }, [orders, searchTerm]);
 
   const formatCurrency = (amountInCents: number | null | undefined) => {
-    if (amountInCents === null || amountInCents === undefined) return 'R$ 0,00';
-    return `R$ ${(amountInCents / 100).toFixed(2).replace('.', ',')}`;
+    if (amountInCents === null || amountInCents === undefined) return '€ 0,00';
+    return `€ ${(amountInCents / 100).toFixed(2).replace('.', ',')}`;
   };
 
   const formatDate = (dateString: string) => {

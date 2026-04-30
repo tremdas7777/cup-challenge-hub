@@ -129,7 +129,7 @@ export default function AdminFinanceiro() {
   ].filter(d => d.value > 0), [stats]);
 
   const formatCurrency = (value: number) =>
-    value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    value.toLocaleString('pt-PT', { style: 'currency', currency: 'EUR' });
 
   const periods: { id: FilterPeriod; label: string }[] = [
     { id: '3h', label: '3h' },
@@ -249,7 +249,7 @@ export default function AdminFinanceiro() {
                     <XAxis dataKey="dia" tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                     <YAxis tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
                     <Tooltip
-                      formatter={(value: number) => [`R$ ${value.toFixed(2)}`, 'Faturamento']}
+                      formatter={(value: number) => [`€ ${value.toFixed(2)}`, 'Faturamento']}
                       contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }}
                     />
                     <Bar dataKey="faturamento" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />

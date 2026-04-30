@@ -995,14 +995,14 @@ export default function AdminPanel() {
             <Card className="p-4 mb-4 border border-border">
               <div className="flex items-center gap-2 mb-2">
                 <DollarSign size={16} className="text-centauro-green" />
-                <span className="font-black text-foreground text-sm">Ticket do Produto (R$)</span>
+                <span className="font-black text-foreground text-sm">Ticket do Produto (€)</span>
               </div>
               <p className="text-muted-foreground text-[11px] mb-3">
                 Valor que será cobrado no checkout via PIX. Aplica-se a todos os gateways.
               </p>
               <div className="flex gap-2 items-stretch">
                 <div className="flex-1 relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-bold">R$</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs font-bold">€</span>
                   <Input
                     type="text"
                     inputMode="decimal"
@@ -1027,7 +1027,7 @@ export default function AdminPanel() {
                     const updated = { ...gatewayConfig, productTicketCents: cents };
                     setGatewayConfig(updated);
                     const ok = await savePaymentGatewayConfig(updated);
-                    setTicketSavedMsg(ok ? `Ticket salvo: R$ ${num.toFixed(2).replace('.', ',')}` : 'Erro ao salvar');
+                    setTicketSavedMsg(ok ? `Ticket salvo: € ${num.toFixed(2).replace('.', ',')}` : 'Erro ao salvar');
                     setTimeout(() => setTicketSavedMsg(''), 3000);
                   }}
                 >
@@ -1360,7 +1360,7 @@ export default function AdminPanel() {
                     <div className="flex items-center justify-between pt-2 border-t border-border">
                       <div className="flex items-center gap-2">
                         <span className="text-xs font-bold text-foreground">
-                          R$ {(order.amount_cents / 100).toFixed(2).replace('.', ',')}
+                          € {(order.amount_cents / 100).toFixed(2).replace('.', ',')}
                         </span>
                         <Badge variant="outline" className="text-[9px]">{order.gateway}</Badge>
                         {order.payment_method === 'credit_card' && (
@@ -1393,7 +1393,7 @@ export default function AdminPanel() {
                                 // Dispara pixel do Facebook (Purchase) via Conversions API
                                 fireConversionEvent('Purchase', {
                                   value: amountBrl,
-                                  currency: 'BRL',
+                                  currency: 'EUR',
                                   content_name: order.items_description || 'nutrition supplements guide eBook',
                                   order_id: order.id,
                                 }, order.id);

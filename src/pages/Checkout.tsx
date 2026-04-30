@@ -442,13 +442,6 @@ export default function Checkout() {
                         borderRadius: '8px',
                       }
                     },
-                    defaultValues: {
-                      billingDetails: {
-                        address: {
-                          country: 'DE',
-                        },
-                      },
-                    },
                   }}
                 >
                   <PaymentForm 

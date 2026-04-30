@@ -73,7 +73,7 @@ export default function Checkout() {
   const [cardError, setCardError] = useState('');
   const [cardLoading, setCardLoading] = useState(false);
 
-  const [shippingCost, setShippingCost] = useState(10.00);
+  const [shippingCost, setShippingCost] = useState(12.00);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -86,7 +86,7 @@ export default function Checkout() {
         window.location.href = cfg.externalCheckoutUrl;
         return;
       }
-      const value = (cfg.productTicketCents || 1000) / 100;
+      const value = (cfg.productTicketCents || 1200) / 100;
       setShippingCost(value);
       // Track checkout event with the dynamic value
       trackEvent('checkout');

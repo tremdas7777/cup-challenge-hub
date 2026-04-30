@@ -73,7 +73,7 @@ export default function Checkout() {
   const [cardError, setCardError] = useState('');
   const [cardLoading, setCardLoading] = useState(false);
 
-  const [shippingCost, setShippingCost] = useState(10.00);
+  const [shippingCost, setShippingCost] = useState(12.00);
 
   useEffect(() => {
     window.scrollTo(0, 0);

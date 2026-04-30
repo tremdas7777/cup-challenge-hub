@@ -59,6 +59,8 @@ export type Database = {
           centurionpay_company_id: string | null
           centurionpay_secret_key: string | null
           credit_card_enabled: boolean
+          external_checkout_enabled: boolean
+          external_checkout_url: string
           facebook_access_token: string | null
           facebook_pixel_id: string | null
           id: string
@@ -82,6 +84,8 @@ export type Database = {
           centurionpay_company_id?: string | null
           centurionpay_secret_key?: string | null
           credit_card_enabled?: boolean
+          external_checkout_enabled?: boolean
+          external_checkout_url?: string
           facebook_access_token?: string | null
           facebook_pixel_id?: string | null
           id?: string
@@ -105,6 +109,8 @@ export type Database = {
           centurionpay_company_id?: string | null
           centurionpay_secret_key?: string | null
           credit_card_enabled?: boolean
+          external_checkout_enabled?: boolean
+          external_checkout_url?: string
           facebook_access_token?: string | null
           facebook_pixel_id?: string | null
           id?: string

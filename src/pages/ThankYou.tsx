@@ -175,7 +175,7 @@ export default function ThankYou() {
         <div className="space-y-3">
           {window.location.search.includes('upsell_success=1') && (
             <div className="bg-centauro-green/10 border border-centauro-green p-3 rounded-lg mb-2 text-center">
-              <p className="text-xs font-bold text-centauro-green">✓ Creatine wurde erfolgreich hinzugefügt!</p>
+              <p className="text-xs font-bold text-centauro-green">✓ Kreatin wurde erfolgreich hinzugefügt!</p>
             </div>
           )}
           <Button

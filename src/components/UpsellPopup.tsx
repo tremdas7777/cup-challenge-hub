@@ -30,7 +30,7 @@ interface UpsellPopupProps {
 }
 
 const UPSELL_AMOUNT = 6.00;
-const UPSELL_DESCRIPTION = 'ESN Ultrapure Creatine Monohydrate (Special Limited Offer)';
+const UPSELL_DESCRIPTION = 'Ultrapure Kreatin Pulver (Special Limited Offer)';
 
 export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: UpsellPopupProps) {
   const [stage, setStage] = useState<'offer' | 'processing'>('offer');
@@ -124,10 +124,10 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
 
             <DialogHeader className="px-5 pt-5 pb-2">
               <DialogTitle className="text-lg font-black uppercase leading-tight">
-                Sichere dir jetzt die ESN Ultrapure Creatine
+                Sichere dir jetzt das Ultrapure Kreatin Pulver
               </DialogTitle>
               <DialogDescription className="text-xs">
-                Reines Creatine Monohydrat für optimale Performance. Limitiertes Angebot.
+                Reines Kreatin-Monohydrat für optimale Performance. Limitiertes Angebot.
               </DialogDescription>
             </DialogHeader>
 
@@ -155,7 +155,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
               <ul className="space-y-1.5 text-xs text-foreground">
                 <li className="flex items-start gap-2">
                   <CheckCircle size={14} className="text-centauro-green mt-0.5 flex-shrink-0" />
-                  <span>100% Ultrapure Creatine Monohydrat</span>
+                  <span>100% Ultrapure Kreatin Pulver</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle size={14} className="text-centauro-green mt-0.5 flex-shrink-0" />

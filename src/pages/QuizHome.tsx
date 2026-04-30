@@ -445,7 +445,7 @@ export default function QuizHome() {
                 <h3 className="text-lg font-black text-foreground mb-0.5">nutrition supplements guide eBook</h3>
                 <p className="text-muted-foreground text-xs mb-3">8 Premium ESN Produkte im Set</p>
                 <ul className="space-y-1.5 text-xs mb-4">
-                  {['Whey Protein, Kreatin, Isoclear', 'Pre-Workout, Daily Vitamins, Protein Bar', 'Magnesium, Ashwagandha'].map((item) => (
+                  {['Whey Protein, Creatine, Isoclear', 'Pre-Workout, Daily Vitamins, Protein Bar', 'Magnesium, Ashwagandha'].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-foreground">
                       <CheckCircle size={12} className="text-centauro-green shrink-0" /> {item}
                     </li>

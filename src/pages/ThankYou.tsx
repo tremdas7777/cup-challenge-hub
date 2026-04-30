@@ -3,6 +3,8 @@ import { CheckCircle, Package, Truck, Gift, ArrowRight, ShieldCheck } from 'luci
 import { Button } from '@/components/ui/button';
 import esnLogo from '@/assets/esn-logo.png';
 import UpsellPopup from '@/components/UpsellPopup';
+import { fireConversionEvent } from '@/lib/pixelManager';
+import { trackEvent } from '@/lib/funnelTracking';
 
 interface UpsellBuyer {
   nome: string;
@@ -30,6 +32,14 @@ export default function ThankYou() {
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', '#212121');
     document.documentElement.style.backgroundColor = '#212121';
     document.body.style.backgroundColor = '#212121';
+
+    // Track purchase event if not already tracked
+    const purchaseTracked = sessionStorage.getItem('purchase_tracked') === '1';
+    if (!purchaseTracked) {
+      fireConversionEvent('Purchase', { value: 12.00, currency: 'EUR' });
+      trackEvent('sale_completed');
+      sessionStorage.setItem('purchase_tracked', '1');
+    }
 
     const timer = setTimeout(() => setShowConfetti(false), 4000);
 

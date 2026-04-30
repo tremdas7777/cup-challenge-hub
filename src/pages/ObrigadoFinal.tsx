@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { CheckCircle, ExternalLink, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import esnLogo from '@/assets/esn-logo.png';
+import { fireConversionEvent } from '@/lib/pixelManager';
+import { trackEvent } from '@/lib/funnelTracking';
 
 const ESN_URL = 'https://www.esn.com/';
 const REDIRECT_SECONDS = 8;
@@ -13,6 +15,16 @@ export default function ObrigadoFinal() {
     document.documentElement.style.backgroundColor = '#212121';
     document.body.style.backgroundColor = '#212121';
     window.scrollTo(0, 0);
+
+    // Track upsell purchase if success parameter is present
+    const isUpsellSuccess = window.location.search.includes('upsell=success') || window.location.search.includes('upsell_success=1');
+    const upsellTracked = sessionStorage.getItem('upsell_tracked') === '1';
+    
+    if (isUpsellSuccess && !upsellTracked) {
+      fireConversionEvent('Purchase', { value: 6.00, currency: 'EUR' });
+      trackEvent('upsell_completed');
+      sessionStorage.setItem('upsell_tracked', '1');
+    }
 
     const interval = setInterval(() => {
       setSeconds((s) => {

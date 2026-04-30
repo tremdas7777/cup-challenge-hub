@@ -129,7 +129,7 @@ export default function AdminPanel() {
     if (!isAuthenticated) return;
     const refresh = async () => {
       const s = await getFunnelStats(period);
-      setStats(s);
+      setStats(s as any);
     };
     refresh();
     const interval = setInterval(refresh, 30000);
@@ -164,7 +164,7 @@ export default function AdminPanel() {
     } catch { setMessage('Erro ao salvar!'); }
   };
 
-  const handleClearStats = async () => { await clearFunnelEvents(); const s = await getFunnelStats(period); setStats(s); };
+  const handleClearStats = async () => { await clearFunnelEvents(); const s = await getFunnelStats(period); setStats(s as any); };
 
   const handleSavePixels = () => {
     savePixelConfig(pixelConfig);

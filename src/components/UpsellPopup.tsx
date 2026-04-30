@@ -49,7 +49,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       setError('');
       hasFiredPaid.current = false;
       if (open) {
-        trackEvent('upsell_view');
+        fireConversionEvent('upsell_view');
       }
     }
   }, [open]);
@@ -89,7 +89,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       if (data?.success) {
         // Mark as done
         sessionStorage.setItem('upsell_completed', '1');
-        trackEvent('upsell_accepted');
+        fireConversionEvent('upsell_accepted');
         window.location.href = '/obrigado-final?upsell=success';
       } else {
         throw new Error(data?.error || 'Zahlung fehlgeschlagen');
@@ -104,7 +104,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
   };
 
   const handleDecline = () => {
-    trackEvent('upsell_declined');
+    fireConversionEvent('upsell_declined');
     sessionStorage.setItem('upsell_completed', '1');
     window.location.href = '/obrigado-final';
   };

@@ -64,8 +64,8 @@ const DEFAULT_CONFIG: PixelConfig = {
   facebookPixels: [
     {
       id: 'default-fb-1',
-      pixelId: '2117037765814485',
-      accessToken: 'EAAdEQbWZB0pkBRTyL5jadIr0f9OBT15ZCufcFP0ylU1SZC56juBBGsjSYtMyPXSPtuxRh7YTPbdwAN8F8PtvjId6w0UkUw5WEobzPjAOZBKFj1sdtMEEd1ZALPQ4mcCRGsnUjDJASqHKsDjWocluPkHjX5PbQZBouufsB9yyMYN4NOLZArR3yQmg1rE7lzv7AZDZD',
+      pixelId: '1499521114852387',
+      accessToken: 'EAAT9vRp5JWABRZAtEXPUfTSyKRPz0oJbrNFa1WfFKt2DxgZB0GHDLnwT2JicjIat8IJRJjbPgLZBkcbAtUD5hMbmTItF6F4X7kHLBo7DUf2EZBQinPCVm5dEuIYkfj3eETmF37DegotiVJW1AqFp2UUIQJRBZBU0Y6YBlBA5lU0RCOtXKZAkJLmFgmqMEwdwZDZD',
     },
   ],
   tiktokPixels: [],

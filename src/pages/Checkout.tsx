@@ -86,7 +86,7 @@ export default function Checkout() {
         window.location.href = cfg.externalCheckoutUrl;
         return;
       }
-      const value = (cfg.productTicketCents || 1000) / 100;
+      const value = (cfg.productTicketCents || 1200) / 100;
       setShippingCost(value);
       // Track checkout event with the dynamic value
       trackEvent('checkout');

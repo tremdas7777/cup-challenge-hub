@@ -492,6 +492,7 @@ export default function Checkout() {
                       setShowFieldErrors(true);
                       scrollToFirstError();
                     }}
+                    orderId={orderId}
                   />
                 </Elements>
               </div>
@@ -581,7 +582,7 @@ export default function Checkout() {
   );
 }
 
-function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress }: { amount: number; buyer: any; isAddressValid: boolean; onInvalidAddress: () => void }) {
+function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId }: { amount: number; buyer: any; isAddressValid: boolean; onInvalidAddress: () => void; orderId: string | null }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -639,6 +640,16 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress }: { amou
       if (typeof paymentIntent.payment_method === 'string') {
         sessionStorage.setItem('stripe_payment_method_id', paymentIntent.payment_method);
       }
+      
+      // Update order status in database
+      if (orderId) {
+        try {
+          await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId);
+        } catch (err) {
+          console.error('Failed to update order status:', err);
+        }
+      }
+
       trackEvent('purchase');
       navigate('/obrigado');
     } else {

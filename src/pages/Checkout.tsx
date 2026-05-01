@@ -57,6 +57,7 @@ export default function Checkout() {
   const [estado, setEstado] = useState('');
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('');
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
@@ -178,6 +179,9 @@ export default function Checkout() {
       if (fnErr) throw fnErr;
       if (data?.clientSecret) {
         setClientSecret(data.clientSecret);
+        if (data.order_id) {
+          setOrderId(data.order_id);
+        }
       } else {
         throw new Error('Kein Client Secret erhalten.');
       }
@@ -255,6 +259,18 @@ export default function Checkout() {
     }
   };
 
+  const updateOrderData = async (updates: any) => {
+    if (!orderId) return;
+    try {
+      await supabase
+        .from('orders')
+        .update(updates)
+        .eq('id', orderId);
+    } catch (err) {
+      console.error('Error updating order data:', err);
+    }
+  };
+
   const scrollToFirstError = () => {
     const firstError = document.querySelector('[data-field-error="true"]');
     if (firstError) {
@@ -320,6 +336,7 @@ export default function Checkout() {
                 placeholder="Dein Name"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
+                onBlur={() => updateOrderData({ buyer_name: nome })}
                 className={`py-5 border-2 ${showFieldErrors && !nome ? 'border-destructive' : 'border-border'}`}
                 onFocus={() => trackEvent('checkout_step_1')}
               />
@@ -358,6 +375,7 @@ export default function Checkout() {
                   placeholder="+49"
                   value={telefone}
                   onChange={handleTelefoneChange}
+                  onBlur={() => updateOrderData({ buyer_phone: telefone })}
                   className={`py-5 border-2 ${showFieldErrors && telefone.replace(/\D/g, '').length < 8 ? 'border-destructive' : 'border-border'}`}
                 />
               </div>
@@ -386,6 +404,7 @@ export default function Checkout() {
                       trackEvent('address_focus');
                       if (!clientSecret) initPaymentIntent();
                     }}
+                    onBlur={() => updateOrderData({ buyer_cep: cep, buyer_city: cidade, buyer_state: estado })}
                     maxLength={8}
                   />
                   {cepLoading && <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />}
@@ -393,18 +412,36 @@ export default function Checkout() {
               </div>
               <div data-field-error={showFieldErrors && !cidade ? 'true' : undefined}>
                 <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Stadt</label>
-                <Input placeholder="Stadt" value={cidade} onChange={(e) => setCidade(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} />
+                <Input 
+                  placeholder="Stadt" 
+                  value={cidade} 
+                  onChange={(e) => setCidade(e.target.value)} 
+                  onBlur={() => updateOrderData({ buyer_city: cidade })}
+                  className={`py-5 border-2 ${showFieldErrors && !cidade ? 'border-destructive' : 'border-border'}`} 
+                />
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
               <div className="col-span-2" data-field-error={showFieldErrors && !endereco ? 'true' : undefined}>
                 <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Straße</label>
-                <Input placeholder="Straße" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`} />
+                <Input 
+                  placeholder="Straße" 
+                  value={endereco} 
+                  onChange={(e) => setEndereco(e.target.value)} 
+                  onBlur={() => updateOrderData({ buyer_address: endereco })}
+                  className={`py-5 border-2 ${showFieldErrors && !endereco ? 'border-destructive' : 'border-border'}`} 
+                />
               </div>
               <div data-field-error={showFieldErrors && !numero ? 'true' : undefined}>
                 <label className="text-[10px] font-bold text-muted-foreground mb-1 block uppercase">Nr.</label>
-                <Input placeholder="Nr." value={numero} onChange={(e) => setNumero(e.target.value)} className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`} />
+                <Input 
+                  placeholder="Nr." 
+                  value={numero} 
+                  onChange={(e) => setNumero(e.target.value)} 
+                  onBlur={() => updateOrderData({ buyer_address_number: numero })}
+                  className={`py-5 border-2 ${showFieldErrors && !numero ? 'border-destructive' : 'border-border'}`} 
+                />
               </div>
             </div>
 

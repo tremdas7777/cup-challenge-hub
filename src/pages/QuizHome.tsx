@@ -256,11 +256,14 @@ export default function QuizHome() {
       hasTrackedCheckout.current = true;
     }
 
-    if (gatewayConfig?.externalCheckoutEnabled && gatewayConfig?.externalCheckoutUrl) {
-      window.location.href = gatewayConfig.externalCheckoutUrl;
-    } else {
-      navigate('/checkout');
-    }
+    // Re-fetch config to ensure we have the latest from admin panel
+    fetchPaymentGatewayConfig().then(cfg => {
+      if (cfg?.externalCheckoutEnabled && cfg?.externalCheckoutUrl) {
+        window.location.href = cfg.externalCheckoutUrl;
+      } else {
+        navigate('/checkout');
+      }
+    });
   };
 
   // SPLASH SCREEN

@@ -193,7 +193,7 @@ export default function Checkout() {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
   };
 
-  const emailDomains = ['@gmail.com', '@outlook.com', '@hotmail.com', '@yahoo.com', '@icloud.com'];
+  const emailDomains = ['@web.de', '@gmx.de', '@t-online.de', '@gmail.com', '@outlook.de', '@hotmail.de', '@yahoo.de', '@freenet.de'];
 
   const getEmailSuggestions = (): string[] => {
     if (!email || email.includes('@')) {

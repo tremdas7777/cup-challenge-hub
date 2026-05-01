@@ -64,13 +64,6 @@ export default function ThankYou() {
       setUpsellDone(true);
       return () => clearTimeout(timer);
     }
-
-    let parsed: UpsellBuyer | null = null;
-    try {
-      const raw = sessionStorage.getItem('upsell_buyer');
-      if (raw) parsed = JSON.parse(raw);
-    } catch {}
-
     // Fallback for preview/testing
     if (!parsed) {
       parsed = {

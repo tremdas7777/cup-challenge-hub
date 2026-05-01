@@ -25,6 +25,8 @@ export type FunnelEvent =
   | 'upsell_view'
   | 'upsell_accepted'
   | 'upsell_declined'
+  | 'upsell_completed'
+  | 'sale_completed'
   | 'purchase';
 
 const SESSION_KEY = 'funnel_session_id';

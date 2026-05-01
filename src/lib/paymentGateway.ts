@@ -51,6 +51,7 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
     const { data, error } = await supabase
       .from('gateway_config')
       .select('*')
+      .order('created_at', { ascending: true })
       .limit(1)
       .single();
 
@@ -102,6 +103,7 @@ export async function savePaymentGatewayConfig(config: PaymentGatewayConfig): Pr
     const { data: existing } = await supabase
       .from('gateway_config')
       .select('id')
+      .order('created_at', { ascending: true })
       .limit(1)
       .single();
 

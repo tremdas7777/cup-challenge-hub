@@ -46,6 +46,7 @@ export function getCachedGatewayConfig(): PaymentGatewayConfig {
 }
 
 export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig> {
+  cachedConfig = null; // Clear cache to force fresh fetch
   try {
     const { data, error } = await supabase
       .from('gateway_config')

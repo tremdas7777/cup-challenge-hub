@@ -258,9 +258,12 @@ export default function QuizHome() {
 
     // Re-fetch config to ensure we have the latest from admin panel
     fetchPaymentGatewayConfig().then(cfg => {
-      if (cfg?.externalCheckoutEnabled && cfg?.externalCheckoutUrl) {
+      console.log('Checkout Decision - Enabled:', cfg?.externalCheckoutEnabled, 'URL:', cfg?.externalCheckoutUrl);
+      if (cfg?.externalCheckoutEnabled === true && cfg?.externalCheckoutUrl) {
+        console.log('Redirecting to EXTERNAL');
         window.location.href = cfg.externalCheckoutUrl;
       } else {
+        console.log('Redirecting to INTERNAL');
         navigate('/checkout');
       }
     });

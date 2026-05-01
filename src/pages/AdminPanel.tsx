@@ -151,6 +151,64 @@ export default function AdminPanel() {
     }
   };
 
+  const handleManualPixelFire = async () => {
+    try {
+      const cfg = JSON.parse(localStorage.getItem('pixel_config') || '{}');
+      const fbPixels = cfg.facebookPixels || [];
+      const ttPixels = cfg.tiktokPixels || [];
+      
+      if (fbPixels.length === 0 && ttPixels.length === 0) {
+        setMessage('Erro: Nenhum pixel configurado');
+        setTimeout(() => setMessage(''), 3000);
+        return;
+      }
+      
+      const eventId = 'manual_recuperado_' + Date.now();
+      
+      fbPixels.forEach((fb: any) => {
+        if (!fb.pixelId || !fb.accessToken) return;
+        fetch(`https://graph.facebook.com/v19.0/${fb.pixelId}/events?access_token=${fb.accessToken}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            data: [{
+              event_name: 'Purchase',
+              event_time: Math.floor(Date.now() / 1000),
+              event_id: eventId,
+              action_source: 'website',
+              event_source_url: window.location.href,
+              user_data: { client_user_agent: navigator.userAgent },
+              custom_data: { value: 12.00, currency: 'EUR' }
+            }]
+          })
+        });
+      });
+
+      ttPixels.forEach((tt: any) => {
+        if (!tt.pixelId || !tt.accessToken) return;
+        fetch('https://business-api.tiktok.com/open_api/v1.3/pixel/track/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Access-Token': tt.accessToken },
+          body: JSON.stringify({
+            pixel_code: tt.pixelId,
+            event: 'CompletePayment',
+            event_id: eventId,
+            timestamp: new Date().toISOString(),
+            context: { page: { url: window.location.href } },
+            properties: { value: 12.00, currency: 'EUR' }
+          })
+        });
+      });
+
+      setMessage('Venda enviada para o Pixel (CAPI/Events API)!');
+      setTimeout(() => setMessage(''), 5000);
+    } catch (e) {
+      setMessage('Erro ao enviar evento manual');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+
   const handleSaveCheckout = async () => {
     if (gatewayConfig.externalCheckoutEnabled && !gatewayConfig.externalCheckoutUrl.trim()) { 
       setMessage('URL não pode estar vazia quando o checkout externo está ativo!'); 
@@ -388,6 +446,14 @@ export default function AdminPanel() {
                   {m < 60 ? `${m} min` : m < 1440 ? `${m / 60}h` : `${m / 1440}d`}
                 </button>
               ))}
+              <div className="flex-1" />
+              <button 
+                onClick={handleManualPixelFire}
+                className="px-3 py-1.5 rounded-md text-xs font-bold transition-colors whitespace-nowrap bg-indigo-500/10 text-indigo-500 border border-indigo-500/30 hover:bg-indigo-500/20"
+                title="Recuperar evento do pixel (12 EUR)"
+              >
+                Injetar Pixel Manual
+              </button>
             </div>
 
             <div className="space-y-0">

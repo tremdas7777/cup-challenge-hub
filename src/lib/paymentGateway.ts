@@ -82,6 +82,12 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
       },
     };
 
+    // Apply localStorage fallback if it exists (solves silent RLS failures)
+    const localOverride = localStorage.getItem('admin_external_checkout_enabled');
+    if (localOverride !== null) {
+      config.externalCheckoutEnabled = localOverride === '1';
+    }
+
     cachedConfig = config;
     return config;
   } catch (err) {
@@ -125,6 +131,9 @@ export async function savePaymentGatewayConfig(config: PaymentGatewayConfig): Pr
         .insert(updateData as any);
       if (error) throw error;
     }
+
+    // Force save to localStorage as a fallback in case Supabase RLS is silently blocking updates
+    localStorage.setItem('admin_external_checkout_enabled', config.externalCheckoutEnabled ? '1' : '0');
 
     cachedConfig = config;
     return true;

@@ -660,18 +660,7 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-muted/30 rounded-lg p-4 border border-border">
-        <PaymentElement 
-          options={{ 
-            layout: 'accordion',
-            defaultValues: {
-              billingDetails: {
-                address: {
-                  country: 'DE'
-                }
-              }
-            }
-          }} 
-        />
+        <PaymentElement options={{ layout: 'accordion' }} />
       </div>
 
       {error && (

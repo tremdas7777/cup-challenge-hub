@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
         external_id: paymentIntent.id,
         gateway: 'stripe',
         gateway_response: paymentIntent,
-        status: 'pending',
+        status: paymentIntent.status === 'succeeded' ? 'paid' : 'pending',
         amount_cents: amountCents,
         shipping_method: meta.shippingMethod || null,
         shipping_cost_cents: meta.shippingCostCents ? Number(meta.shippingCostCents) : null,

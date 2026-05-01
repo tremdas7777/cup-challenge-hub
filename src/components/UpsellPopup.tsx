@@ -87,6 +87,13 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       if (invokeError) throw invokeError;
       
       if (data?.success) {
+        if (data.order_id) {
+          try {
+            await supabase.from('orders').update({ status: 'paid' }).eq('id', data.order_id);
+          } catch (e) {
+            console.error('Failed to update upsell order status:', e);
+          }
+        }
         // Mark as done
         sessionStorage.setItem('upsell_completed', '1');
         fireConversionEvent('upsell_accepted');

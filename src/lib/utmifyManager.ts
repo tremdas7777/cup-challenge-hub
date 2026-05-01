@@ -110,7 +110,7 @@ export async function testUtmifyToken(token: string): Promise<{ success: boolean
         totalPriceInCents: 100,
         gatewayFeeInCents: 0,
         userCommissionInCents: 100,
-        currency: 'BRL',
+        currency: 'EUR',
       },
       isTest: true,
     };
@@ -236,7 +236,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
       totalPriceInCents: data.priceInCents,
       gatewayFeeInCents: 0,
       userCommissionInCents: data.priceInCents,
-      currency: 'BRL',
+      currency: 'EUR',
     },
     ...(data.isTest ? { isTest: true } : {}),
   };

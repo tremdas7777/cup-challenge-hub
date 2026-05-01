@@ -89,10 +89,6 @@ export default function Checkout() {
       }
       const value = (cfg.productTicketCents || 1200) / 100;
       setShippingCost(value);
-      // Track checkout event with the dynamic value
-      trackEvent('checkout');
-      trackEvent('checkout_step_1'); 
-      fireConversionEvent('InitiateCheckout', { value, currency: 'EUR' });
     });
   }, []);
 
@@ -279,15 +275,22 @@ export default function Checkout() {
   };
 
   useEffect(() => {
-    // Initial load tracking
-    trackEvent('checkout');
-    trackEvent('checkout_step_1');
-
     // Auto-init payment if we have email (prefilled or typed)
     if (validateEmail(email) && !clientSecret && !paymentLoading) {
       initPaymentIntent();
+      
+      const checkoutTracked = sessionStorage.getItem('checkout_tracked') === '1';
+      if (!checkoutTracked) {
+        fireConversionEvent('InitiateCheckout', { value: shippingCost, currency: 'EUR' }, undefined, {
+          email,
+          phone: telefone,
+          firstName: nome.split(' ')[0],
+        });
+        trackEvent('checkout');
+        sessionStorage.setItem('checkout_tracked', '1');
+      }
     }
-  }, [email]);
+  }, [email, clientSecret]);
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Rubik', 'Inter', system-ui, sans-serif" }}>

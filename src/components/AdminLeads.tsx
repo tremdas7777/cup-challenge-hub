@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Loader2, Users, Phone, Mail, FileText, Copy, CheckCircle } from 'lucide-react';
+import { RefreshCw, Loader2, Users, Phone, Mail, FileText, Copy, CheckCircle, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { syncPagouAiPayments } from '@/lib/pagouaiStatus';
@@ -17,6 +17,10 @@ interface Lead {
   status: string;
   created_at: string;
   pix_code: string | null;
+  buyer_cep: string | null;
+  buyer_address: string | null;
+  buyer_address_number: string | null;
+  buyer_city: string | null;
 }
 
 type FilterStatus = 'todos' | 'paid' | 'pending' | 'expired' | 'cancelled';
@@ -32,7 +36,7 @@ export default function AdminLeads() {
     await syncPagouAiPayments({ limit: 100 });
     const { data } = await supabase
       .from('orders')
-      .select('id, buyer_name, buyer_document, buyer_phone, buyer_email, amount_cents, status, created_at, pix_code')
+      .select('id, buyer_name, buyer_document, buyer_phone, buyer_email, amount_cents, status, created_at, pix_code, buyer_cep, buyer_address, buyer_address_number, buyer_city')
       .order('created_at', { ascending: false })
       .limit(200);
     setLeads((data as Lead[]) || []);
@@ -206,6 +210,16 @@ export default function AdminLeads() {
                       </button>
                     )}
                   </div>
+                  {(lead.buyer_address || lead.buyer_cep) && (
+                    <div className="flex items-center gap-1.5 mt-1.5 pt-1.5 border-t border-border/50">
+                      <MapPin size={10} className="text-muted-foreground shrink-0" />
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {lead.buyer_cep && `${lead.buyer_cep}, `}
+                        {lead.buyer_address && `${lead.buyer_address} ${lead.buyer_address_number || ''}`}
+                        {lead.buyer_city && ` - ${lead.buyer_city}`}
+                      </p>
+                    </div>
+                  )}
                   <p className="text-[10px] text-muted-foreground mt-1">
                     {new Date(lead.created_at).toLocaleString('de-DE')} • € {(lead.amount_cents / 100).toFixed(2).replace('.', ',')}
                   </p>

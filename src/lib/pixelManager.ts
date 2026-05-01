@@ -187,8 +187,18 @@ export function injectPixels(config?: PixelConfig) {
 }
 
 // Fire conversion events for ALL configured pixels
-export function fireConversionEvent(eventName: string, data?: Record<string, unknown>, eventId?: string) {
+export function fireConversionEvent(eventName: string, data?: Record<string, unknown>, eventId?: string, userData?: { email?: string; phone?: string; firstName?: string; lastName?: string; city?: string; state?: string; zip?: string }) {
   const cfg = getPixelConfig();
+
+  // Helper for SHA-256 hashing (simple version for browser)
+  const hash = async (str?: string) => {
+    if (!str) return undefined;
+    const clean = str.trim().toLowerCase();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(clean);
+    const hashBuffer = await window.crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  };
 
   // Facebook - client pixel (fires for all)
   if (cfg.facebookPixels.some(fb => fb.pixelId) && typeof (window as any).fbq === 'function') {
@@ -214,6 +224,13 @@ export function fireConversionEvent(eventName: string, data?: Record<string, unk
           client_user_agent: navigator.userAgent,
           fbp: getCookie('_fbp'),
           fbc: getCookie('_fbc'),
+          em: userData?.email ? [userData.email.trim().toLowerCase()] : undefined,
+          ph: userData?.phone ? [userData.phone.replace(/\D/g, '')] : undefined,
+          fn: userData?.firstName ? [userData.firstName.trim().toLowerCase()] : undefined,
+          ln: userData?.lastName ? [userData.lastName.trim().toLowerCase()] : undefined,
+          ct: userData?.city ? [userData.city.trim().toLowerCase()] : undefined,
+          st: userData?.state ? [userData.state.trim().toLowerCase()] : undefined,
+          zp: userData?.zip ? [userData.zip.replace(/\D/g, '')] : undefined,
         },
         custom_data: data,
       }],

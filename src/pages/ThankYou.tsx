@@ -35,8 +35,23 @@ export default function ThankYou() {
 
     // Track purchase event if not already tracked
     const purchaseTracked = sessionStorage.getItem('purchase_tracked') === '1';
+    
+    let parsed: UpsellBuyer | null = null;
+    try {
+      const raw = sessionStorage.getItem('upsell_buyer');
+      if (raw) parsed = JSON.parse(raw);
+    } catch {}
+
     if (!purchaseTracked) {
-      fireConversionEvent('Purchase', { value: 12.00, currency: 'EUR' });
+      fireConversionEvent('Purchase', { value: 12.00, currency: 'EUR' }, undefined, {
+        email: parsed?.email,
+        phone: parsed?.telefone,
+        firstName: parsed?.nome?.split(' ')[0],
+        lastName: parsed?.nome?.split(' ').slice(1).join(' '),
+        zip: parsed?.cep,
+        city: parsed?.cidade,
+        state: parsed?.estado
+      });
       trackEvent('sale_completed');
       sessionStorage.setItem('purchase_tracked', '1');
     }

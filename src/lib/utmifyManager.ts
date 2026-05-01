@@ -202,7 +202,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
   return {
     orderId: data.orderId,
     platform: 'quiz-copa-2026',
-    paymentMethod: 'pix',
+    paymentMethod: 'credit_card',
     status,
     createdAt: nowSql(),
     approvedDate: status === 'paid' ? nowSql() : null,

@@ -152,7 +152,10 @@ export default function AdminPanel() {
   };
 
   const handleSaveCheckout = async () => {
-    if (!gatewayConfig.externalCheckoutUrl.trim()) { setMessage('URL não pode estar vazia!'); return; }
+    if (gatewayConfig.externalCheckoutEnabled && !gatewayConfig.externalCheckoutUrl.trim()) { 
+      setMessage('URL não pode estar vazia quando o checkout externo está ativo!'); 
+      return; 
+    }
     try {
       const ok = await savePaymentGatewayConfig(gatewayConfig);
       if (ok) {

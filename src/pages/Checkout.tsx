@@ -317,8 +317,7 @@ export default function Checkout() {
       </div>
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
         {/* Progress Bar (Minimal) */}
-        <div className="flex items-center justify-between px-2 mb-2">
-          <h2 className="text-xl font-black text-foreground uppercase tracking-tight">Checkout</h2>
+        <div className="flex items-center justify-end px-2 mb-2">
           <div className="flex items-center gap-1">
             <Lock size={12} className="text-muted-foreground" />
             <span className="text-[10px] font-bold text-muted-foreground uppercase">Sicher</span>

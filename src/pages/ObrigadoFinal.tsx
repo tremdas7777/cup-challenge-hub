@@ -21,7 +21,7 @@ export default function ObrigadoFinal() {
     const upsellTracked = sessionStorage.getItem('upsell_tracked') === '1';
     
     if (isUpsellSuccess && !upsellTracked) {
-      fireConversionEvent('Purchase', { value: 6.00, currency: 'EUR' });
+      fireConversionEvent('Purchase', { value: 4.00, currency: 'EUR' });
       trackEvent('upsell_completed');
       sessionStorage.setItem('upsell_tracked', '1');
     }

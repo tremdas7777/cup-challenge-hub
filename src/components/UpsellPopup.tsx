@@ -29,7 +29,7 @@ interface UpsellPopupProps {
   buyer: UpsellBuyer;
 }
 
-const UPSELL_AMOUNT = 6.00;
+const UPSELL_AMOUNT = 4.00;
 const UPSELL_DESCRIPTION = 'ESN Ultrapure Creatine Monohydrate (Special Limited Offer)';
 
 export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: UpsellPopupProps) {
@@ -151,7 +151,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
               <div className="text-center space-y-1">
                 <p className="text-[11px] text-muted-foreground line-through">Statt €29,90</p>
                 <p className="text-3xl font-black text-centauro-green">
-                  €6<span className="text-xl">,00</span>
+                  €4<span className="text-xl">,00</span>
                 </p>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">
                   Einmaliges Angebot • Inklusive Versand
@@ -188,7 +188,7 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
                   {loading ? (
                     <><Loader2 size={16} className="mr-2 animate-spin" /> WIRD VERARBEITET...</>
                   ) : (
-                    <>Ja, für €6,00 hinzufügen</>
+                    <>Ja, für €4,00 hinzufügen</>
                   )}
                 </Button>
                 <button

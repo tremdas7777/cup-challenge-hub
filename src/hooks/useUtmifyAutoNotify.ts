@@ -23,86 +23,11 @@ function totalPriceCents(o: OrderRow): number {
 }
 
 export function useUtmifyAutoNotify() {
-  // Avoid duplicate notifications across re-renders / fast events
-  const notifiedPending = useRef<Set<string>>(new Set());
-  const notifiedPaid = useRef<Set<string>>(new Set());
-
+  // Silence the automatic DB listener for sales.
+  // We now handle notifications directly in the checkout/payment success callbacks
+  // or via manual admin actions to ensure exactly ONE approved sale is sent.
   useEffect(() => {
-    const channel = supabase
-      .channel('orders-utmify-auto')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'orders' },
-        async (payload) => {
-          const o = payload.new as OrderRow;
-          if (!o?.id) return;
-          try {
-            // Só dispara para Utmify se já entrou como PAID (cartão aprovado na hora).
-            // Pendentes NÃO devem ser notificados.
-          if ((o.status === 'paid' || o.status === 'approved') && !notifiedPaid.current.has(o.id)) {
-            notifiedPaid.current.add(o.id);
-            
-            // Fire Facebook/TikTok/Google pixels
-            fireConversionEvent('Purchase', {
-              value: (o.amount_cents || 0) / 100,
-              currency: 'EUR',
-              content_name: o.items_description || 'Produto',
-              order_id: o.id
-            }, o.id);
-
-            await sendUtmifySale({
-              orderId: o.id,
-              customerName: o.buyer_name || 'Cliente',
-              customerEmail: o.buyer_email || 'sem-email@cliente.com',
-              customerPhone: o.buyer_phone,
-              customerDocument: o.buyer_document || undefined,
-              productName: o.items_description || 'ESN Premium Bundle + Supplement Guide',
-              priceInCents: o.amount_cents || 0,
-            });
-          }
-        } catch (e) {
-          console.error('[utmify-auto] pending error:', e);
-        }
-      },
-    )
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'orders' },
-      async (payload) => {
-        const newRow = payload.new as OrderRow;
-        const oldRow = payload.old as Partial<OrderRow>;
-        if (!newRow?.id) return;
-        if (newRow.status !== 'paid' && newRow.status !== 'approved') return;
-        if (oldRow?.status === 'paid' || oldRow?.status === 'approved') return;
-        if (notifiedPaid.current.has(newRow.id)) return;
-        notifiedPaid.current.add(newRow.id);
-        try {
-          // Fire Facebook/TikTok/Google pixels
-          fireConversionEvent('Purchase', {
-            value: (newRow.amount_cents || 0) / 100,
-            currency: 'EUR',
-            content_name: newRow.items_description || 'Produto',
-            order_id: newRow.id
-          }, newRow.id);
-
-          await sendUtmifySale({
-            orderId: newRow.id,
-            customerName: newRow.buyer_name || 'Cliente',
-            customerEmail: newRow.buyer_email || 'sem-email@cliente.com',
-            customerPhone: newRow.buyer_phone,
-            customerDocument: newRow.buyer_document || undefined,
-            productName: newRow.items_description || 'ESN Premium Bundle + Supplement Guide',
-            priceInCents: newRow.amount_cents || 0,
-          });
-          } catch (e) {
-            console.error('[utmify-auto] paid error:', e);
-          }
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    // This hook is now a placeholder to prevent breaking App.tsx imports,
+    // but the logic is handled at the source of the transaction.
   }, []);
 }

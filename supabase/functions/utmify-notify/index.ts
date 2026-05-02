@@ -1,6 +1,8 @@
-// Server-side Utmify forwarder. Avoids browser CORS and ensures sales notifications
-// are delivered reliably from anywhere (admin test, checkout PIX flow, webhooks).
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
 
 const API_URL = "https://api.utmify.com.br/api-credentials/orders";
 

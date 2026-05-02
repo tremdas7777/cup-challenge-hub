@@ -94,6 +94,13 @@ export default function QuizHome() {
 
   // Preload ALL critical images during splash, then dismiss splash
   useEffect(() => {
+    // Check if already completed
+    const alreadyCompleted = localStorage.getItem('esn_quiz_completed') === '1';
+    if (alreadyCompleted) {
+      setShowHome(false);
+      setQuizComplete(true);
+    }
+
     const criticalImages = [
       esnLogo, 
       quizBannerPreload, 
@@ -366,7 +373,11 @@ export default function QuizHome() {
   }
 
   if (showScratchCard) {
-    return <ScratchCard onComplete={() => { setShowScratchCard(false); setQuizComplete(true); }} />;
+    return <ScratchCard onComplete={() => { 
+      setShowScratchCard(false); 
+      setQuizComplete(true); 
+      localStorage.setItem('esn_quiz_completed', '1');
+    }} />;
   }
 
   if (quizComplete) {

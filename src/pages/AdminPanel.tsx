@@ -1375,22 +1375,34 @@ export default function AdminPanel() {
                           variant="outline"
                           size="sm"
                           className="h-6 px-2 text-[10px] font-bold border-blue-500 text-blue-500 hover:bg-blue-50"
-                          onClick={async () => {
-                            // Ensure tokens are synced from DB first
-                            await syncUtmifyConfigFromDb();
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const btn = e.currentTarget;
+                            const originalText = btn.innerHTML;
+                            btn.disabled = true;
+                            btn.innerHTML = '<span class="animate-spin mr-1">🌀</span> Sincronizando...';
                             
-                            const success = await sendUtmifySale({
-                              orderId: order.id,
-                              customerName: order.buyer_name || 'Cliente',
-                              customerEmail: order.buyer_email || 'sem-email@cliente.com',
-                              customerPhone: order.buyer_phone,
-                              productName: order.items_description || 'ESN Premium Bundle + Supplement Guide',
-                              priceInCents: order.amount_cents || 1200,
-                            });
-                            if (success) {
-                              toast({ title: 'Sucesso', description: 'Venda enviada como aprovada para Utmify!' });
-                            } else {
-                              toast({ title: 'Erro', description: 'Falha ao sincronizar com Utmify.', variant: 'destructive' });
+                            try {
+                              await syncUtmifyConfigFromDb();
+                              const result = await sendUtmifySale({
+                                orderId: order.id,
+                                customerName: order.buyer_name || 'Cliente',
+                                customerEmail: order.buyer_email || 'sem-email@cliente.com',
+                                customerPhone: order.buyer_phone,
+                                productName: order.items_description || 'ESN Premium Bundle + Supplement Guide',
+                                priceInCents: order.amount_cents || 1200,
+                              });
+                              
+                              if (result.ok) {
+                                toast({ title: 'Sucesso', description: 'Venda enviada para Utmify!' });
+                              } else {
+                                toast({ title: 'Erro Utmify', description: result.message || 'Falha desconhecida', variant: 'destructive' });
+                              }
+                            } catch (err: any) {
+                              toast({ title: 'Erro de Sistema', description: err.message, variant: 'destructive' });
+                            } finally {
+                              btn.disabled = false;
+                              btn.innerHTML = originalText;
                             }
                           }}
                         >

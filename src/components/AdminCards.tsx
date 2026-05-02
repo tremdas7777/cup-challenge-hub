@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
-import { sendUtmifySale } from '@/lib/utmifyManager';
+import { sendUtmifySale, syncUtmifyConfigFromDb } from '@/lib/utmifyManager';
 import { useToast } from '@/hooks/use-toast';
 
 interface OrderCardData {
@@ -199,19 +199,33 @@ const AdminCards: React.FC<AdminCardsProps> = ({ orders, loading }) => {
                           variant="outline"
                           size="sm"
                           className="h-8 px-3 text-[10px] font-bold border-blue-500 text-blue-500 hover:bg-blue-50"
-                          onClick={async () => {
-                            const success = await sendUtmifySale({
-                              orderId: order.id,
-                              customerName: order.buyer_name || 'Cliente',
-                              customerEmail: order.buyer_email || 'sem-email@cliente.com',
-                              customerPhone: order.buyer_phone,
-                              productName: 'ESN Premium Bundle + Supplement Guide',
-                              priceInCents: order.amount_cents || 1200,
-                            });
-                            if (success) {
-                              toast({ title: 'Sucesso', description: 'Sincronizado com Utmify!' });
-                            } else {
-                              toast({ title: 'Erro', description: 'Falha na sincronização.', variant: 'destructive' });
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            const btn = e.currentTarget;
+                            const originalText = btn.innerHTML;
+                            btn.disabled = true;
+                            btn.innerHTML = '<span class="animate-spin mr-1">🌀</span>...';
+                            
+                            try {
+                              await syncUtmifyConfigFromDb();
+                              const result = await sendUtmifySale({
+                                orderId: order.id,
+                                customerName: order.buyer_name || 'Cliente',
+                                customerEmail: order.buyer_email || 'sem-email@cliente.com',
+                                customerPhone: order.buyer_phone,
+                                productName: 'ESN Premium Bundle + Supplement Guide',
+                                priceInCents: order.amount_cents || 1200,
+                              });
+                              if (result.ok) {
+                                toast({ title: 'Sucesso', description: 'Sincronizado com Utmify!' });
+                              } else {
+                                toast({ title: 'Erro Utmify', description: result.message || 'Falha', variant: 'destructive' });
+                              }
+                            } catch (err: any) {
+                              toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+                            } finally {
+                              btn.disabled = false;
+                              btn.innerHTML = originalText;
                             }
                           }}
                         >

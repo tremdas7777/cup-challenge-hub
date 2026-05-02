@@ -149,20 +149,26 @@ export async function testUtmifyToken(token: string): Promise<{ success: boolean
 
 
 /** Forwards payload to Utmify via edge function (avoids browser CORS) */
-async function forwardViaEdge(tokens: string[], payload: Record<string, unknown>): Promise<boolean> {
-  if (tokens.length === 0) return false;
+async function forwardViaEdge(tokens: string[], payload: Record<string, unknown>): Promise<{ ok: boolean; message?: string }> {
+  if (tokens.length === 0) return { ok: false, message: 'Sem tokens configurados' };
   try {
     const { data, error } = await supabase.functions.invoke('utmify-notify', {
       body: { tokens, payload },
     });
     if (error) {
       console.error('utmify-notify error:', error);
-      return false;
+      return { ok: false, message: error.message || 'Erro na função do servidor' };
     }
-    return !!(data as any)?.ok;
-  } catch (e) {
+    const result = data as any;
+    if (!result?.ok) {
+      const firstError = result?.results?.find((r: any) => !r.ok);
+      const detail = firstError ? `Erro ${firstError.status}: ${firstError.body}` : 'Erro na Utmify';
+      return { ok: false, message: detail };
+    }
+    return { ok: true };
+  } catch (e: any) {
     console.error('utmify-notify exception:', e);
-    return false;
+    return { ok: false, message: e.message || 'Erro de conexão' };
   }
 }
 

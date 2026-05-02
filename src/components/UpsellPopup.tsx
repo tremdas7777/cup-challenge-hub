@@ -147,11 +147,12 @@ export default function UpsellPopup({ open, onOpenChange, onPaid, buyer }: Upsel
       },
     });
 
-    if (invokeError || !data?.client_secret) {
+    const cs = data?.clientSecret || data?.client_secret;
+    if (invokeError || !cs) {
       throw new Error(data?.error || 'Konnte Zahlung nicht initialisieren');
     }
 
-    setClientSecret(data.client_secret);
+    setClientSecret(cs);
     setStripePromise(loadStripe(gatewayConfig.stripe.publicKey));
     setStage('card_form');
     setLoading(false);

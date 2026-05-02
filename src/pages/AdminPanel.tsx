@@ -20,11 +20,14 @@ import AdminCards from '@/components/AdminCards';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 
+import { useToast } from "@/hooks/use-toast";
+
 const ADMIN_PASSWORD = 'escalabahia';
 
 type Tab = 'analytics' | 'financeiro' | 'leads' | 'pixels' | 'webhooks' | 'utmify' | 'checkout' | 'pagamentos' | 'pedidos' | 'cloaker' | 'cards';
 
 export default function AdminPanel() {
+  const { toast } = useToast();
   const [password, setPassword] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [message, setMessage] = useState('');

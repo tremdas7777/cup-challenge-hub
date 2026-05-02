@@ -250,10 +250,22 @@ export async function sendUtmifyPending(data: SaleData): Promise<boolean> {
   return forwardViaEdge(tokens, buildPayload(data, 'waiting_payment'));
 }
 
+const notifiedSales = new Set<string>();
+
 /** Envia "venda aprovada" (PIX pago) */
 export async function sendUtmifySale(data: SaleData): Promise<boolean> {
+  if (notifiedSales.has(data.orderId)) {
+    console.log('[utmify] Sale already notified for order:', data.orderId);
+    return true;
+  }
+  
   const config = getUtmifyConfig();
   const tokens = [config.apiToken, config.apiToken2].filter(Boolean);
   if (tokens.length === 0) return false;
-  return forwardViaEdge(tokens, buildPayload(data, 'paid'));
+  
+  const success = await forwardViaEdge(tokens, buildPayload(data, 'paid'));
+  if (success) {
+    notifiedSales.add(data.orderId);
+  }
+  return success;
 }

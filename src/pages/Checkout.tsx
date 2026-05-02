@@ -651,7 +651,18 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
         }
       }
 
+      // Notify Utmify immediately
+      await sendUtmifySale({
+        orderId: orderId || `st_${Date.now()}`,
+        customerName: buyer.nome,
+        customerEmail: buyer.email,
+        customerPhone: buyer.telefone,
+        productName: 'ESN Premium Bundle + Supplement Guide',
+        priceInCents: Math.round(amount * 100),
+      });
+
       trackEvent('purchase');
+      fireConversionEvent('Purchase', { value: amount, currency: 'EUR' });
       navigate('/obrigado');
     } else {
       setLoading(false);
@@ -699,7 +710,9 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
         {loading ? (
           <><Loader2 size={18} className="mr-2 animate-spin" /> BITTE WARTEN...</>
         ) : (
-          `JETZT BESTÄTIGEN — €${amount.toFixed(2).replace('.', ',')}`
+          <span className="flex items-center gap-2">
+            JETZT BEZAHLEN — €{amount.toFixed(2).replace('.', ',')}
+          </span>
         )}
       </Button>
     </form>

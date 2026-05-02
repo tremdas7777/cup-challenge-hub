@@ -10,6 +10,7 @@ import { fireConversionEvent } from '@/lib/pixelManager';
 import { trackEvent } from '@/lib/funnelTracking';
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
+import { sendUtmifySale } from '@/lib/utmifyManager';
 
 const STORAGE_KEY = 'esn_checkout_buyer';
 
@@ -86,6 +87,16 @@ function PaymentForm({ totalAmount, buyer, isAddressValid, orderId }: { totalAmo
           console.error('Failed to update order status:', err);
         }
       }
+
+      // Notify Utmify immediately
+      await sendUtmifySale({
+        orderId: orderId || `st_${Date.now()}`,
+        customerName: buyer.nome,
+        customerEmail: buyer.email,
+        customerPhone: buyer.telefone,
+        productName: 'ESN Premium Bundle + Supplement Guide',
+        priceInCents: Math.round(totalAmount * 100),
+      });
 
       trackEvent('purchase');
       fireConversionEvent('Purchase', { value: totalAmount, currency: 'EUR' });

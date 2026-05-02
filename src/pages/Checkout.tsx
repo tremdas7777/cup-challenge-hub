@@ -269,19 +269,27 @@ export default function Checkout() {
   };
 
   useEffect(() => {
+    trackEvent('checkout_step_1');
+    const checkoutTracked = sessionStorage.getItem('checkout_tracked') === '1';
+    if (!checkoutTracked) {
+      trackEvent('checkout');
+      sessionStorage.setItem('checkout_tracked', '1');
+    }
+  }, []);
+
+  useEffect(() => {
     // Auto-init payment if we have email (prefilled or typed)
     if (validateEmail(email) && !clientSecret && !paymentLoading) {
       initPaymentIntent();
       
-      const checkoutTracked = sessionStorage.getItem('checkout_tracked') === '1';
-      if (!checkoutTracked) {
+      const pixelTracked = sessionStorage.getItem('pixel_checkout_tracked') === '1';
+      if (!pixelTracked) {
         fireConversionEvent('InitiateCheckout', { value: shippingCost, currency: 'EUR' }, undefined, {
           email,
           phone: telefone,
           firstName: nome.split(' ')[0],
         });
-        trackEvent('checkout');
-        sessionStorage.setItem('checkout_tracked', '1');
+        sessionStorage.setItem('pixel_checkout_tracked', '1');
       }
     }
   }, [email, clientSecret]);
@@ -397,6 +405,7 @@ export default function Checkout() {
                     onChange={handleCepChange}
                     className={`py-5 border-2 ${showFieldErrors && (cep.length < 5) ? 'border-destructive' : 'border-border'}`}
                     onFocus={() => {
+                      trackEvent('checkout_step_2');
                       trackEvent('address_focus');
                       if (!clientSecret) initPaymentIntent();
                     }}
@@ -601,6 +610,8 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
 
     setLoading(true);
     setError('');
+    trackEvent('checkout_step_3');
+    trackEvent('payment_init');
 
     // Persist buyer data for upsell flow
     sessionStorage.setItem('upsell_buyer', JSON.stringify(buyer));

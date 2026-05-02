@@ -188,7 +188,7 @@ export default function ThankYou() {
           )}
           <Button
             className="w-full h-14 text-base font-black uppercase tracking-wider bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl shadow-lg"
-            onClick={() => window.location.href = 'https://www.esn.com/'}
+            onClick={() => window.location.href = 'https://esnsuplements.lovable.app/collections/bestseller'}
           >
             <ArrowRight size={18} className="mr-2" />
             ZUM OFFIZIELLEN SHOP

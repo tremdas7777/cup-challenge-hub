@@ -5,7 +5,7 @@ import esnLogo from '@/assets/esn-logo.png';
 import { fireConversionEvent } from '@/lib/pixelManager';
 import { trackEvent } from '@/lib/funnelTracking';
 
-const ESN_URL = 'https://www.esn.com/';
+const ESN_URL = 'https://esnsuplements.lovable.app/collections/bestseller';
 const REDIRECT_SECONDS = 8;
 
 export default function ObrigadoFinal() {

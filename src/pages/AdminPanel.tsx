@@ -1376,6 +1376,9 @@ export default function AdminPanel() {
                           size="sm"
                           className="h-6 px-2 text-[10px] font-bold border-blue-500 text-blue-500 hover:bg-blue-50"
                           onClick={async () => {
+                            // Ensure tokens are synced from DB first
+                            await syncUtmifyConfigFromDb();
+                            
                             const success = await sendUtmifySale({
                               orderId: order.id,
                               customerName: order.buyer_name || 'Cliente',
@@ -1415,6 +1418,10 @@ export default function AdminPanel() {
                                 .eq('id', order.id);
                               if (!error) {
                                 const amountBrl = order.amount_cents / 100;
+
+                                // Ensure tokens are synced from DB
+                                await syncUtmifyConfigFromDb();
+
                                 // Dispara pixel do Facebook (Purchase) via Conversions API
                                 fireConversionEvent('Purchase', {
                                   value: amountBrl,

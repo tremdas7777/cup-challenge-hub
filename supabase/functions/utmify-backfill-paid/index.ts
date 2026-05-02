@@ -40,7 +40,7 @@ function buildPaidPayload(o: OrderRow) {
     0;
   return {
     orderId: o.id,
-    platform: "esn-supplements-germany",
+    platform: "ESN Global",
     paymentMethod: "credit_card",
     status: "paid",
     createdAt: toSql(o.created_at),

@@ -49,22 +49,30 @@ async function persistUtmifyTokensToDb(config: UtmifyConfig): Promise<void> {
 }
 
 /** Loads tokens from DB and writes them into localStorage so the admin UI shows them. */
-export async function syncUtmifyConfigFromDb(): Promise<UtmifyConfig> {
+export async function syncUtmifyConfigFromDb() {
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('gateway_config')
       .select('utmify_api_token, utmify_api_token_2')
+      .not('utmify_api_token', 'is', null)
+      .order('updated_at', { ascending: false })
       .limit(1)
-      .single();
-    const cfg: UtmifyConfig = {
-      apiToken: (data as any)?.utmify_api_token || '',
-      apiToken2: (data as any)?.utmify_api_token_2 || '',
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
-    return cfg;
-  } catch {
-    return getUtmifyConfig();
+      .maybeSingle();
+
+    if (error) throw error;
+    if (data) {
+      const config: UtmifyConfig = {
+        apiToken: (data as any)?.utmify_api_token || '',
+        apiToken2: (data as any)?.utmify_api_token_2 || '',
+      };
+      saveUtmifyConfig(config);
+      console.log('[utmify] Config synced from DB successfully');
+      return config;
+    }
+  } catch (err) {
+    console.error('[utmify] Error syncing config from DB:', err);
   }
+  return getUtmifyConfig();
 }
 
 export async function testUtmifyToken(token: string): Promise<{ success: boolean; message: string }> {
@@ -75,7 +83,7 @@ export async function testUtmifyToken(token: string): Promise<{ success: boolean
   try {
     const testPayload = {
       orderId: `test_${Date.now()}`,
-      platform: 'esn-supplements-germany',
+      platform: 'ESN Global',
       paymentMethod: 'pix',
       status: 'paid',
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
@@ -201,7 +209,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'approved' | '
   const tracking = data.trackingParameters || getTrackingParametersFromUrl();
   return {
     orderId: data.orderId,
-    platform: 'esn-supplements-germany',
+    platform: 'ESN Global',
     paymentMethod: 'credit_card',
     status,
     createdAt: nowSql(),

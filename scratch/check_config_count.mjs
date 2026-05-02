@@ -1,0 +1,21 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  'https://kwcjpclgmjwsabvomzbr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt3Y2pwY2xnbWp3c2Fidm9temJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcxNjcwNjEsImV4cCI6MjA5Mjc0MzA2MX0.bCCqjV2NSdH-TYQwPtkMAwf_SW8HHOZs1un9zVqL0rQ'
+);
+
+async function main() {
+  const { count, error } = await supabase
+    .from('gateway_config')
+    .select('*', { count: 'exact', head: true });
+
+  if (error) {
+    console.error('Error fetching count:', error.message);
+    return;
+  }
+
+  console.log('Gateway Config row count:', count);
+}
+
+main();

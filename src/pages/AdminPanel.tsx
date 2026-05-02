@@ -1371,6 +1371,28 @@ export default function AdminPanel() {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 px-2 text-[10px] font-bold border-blue-500 text-blue-500 hover:bg-blue-50"
+                          onClick={async () => {
+                            const success = await sendUtmifySale({
+                              orderId: order.id,
+                              customerName: order.buyer_name || 'Cliente',
+                              customerEmail: order.buyer_email || 'sem-email@cliente.com',
+                              customerPhone: order.buyer_phone,
+                              productName: order.items_description || 'ESN Premium Bundle + Supplement Guide',
+                              priceInCents: order.amount_cents || 1200,
+                            });
+                            if (success) {
+                              toast({ title: 'Sucesso', description: 'Venda enviada como aprovada para Utmify!' });
+                            } else {
+                              toast({ title: 'Erro', description: 'Falha ao sincronizar com Utmify.', variant: 'destructive' });
+                            }
+                          }}
+                        >
+                          <RefreshCw size={10} className="mr-1" /> Sincronizar Utmify
+                        </Button>
                         {order.proof_url && (
                           <a
                             href={order.proof_url}
@@ -1401,15 +1423,15 @@ export default function AdminPanel() {
                                   order_id: order.id,
                                 }, order.id);
                                 // Dispara Utmify venda aprovada
-                                sendUtmifySale({
+                                await sendUtmifySale({
                                   orderId: order.id,
                                   customerName: order.buyer_name || 'Cliente',
                                   customerEmail: order.buyer_email || 'sem-email@cliente.com',
                                   customerPhone: order.buyer_phone || null,
                                   customerDocument: order.buyer_document || null,
-                                  productName: order.items_description || 'nutrition supplements guide eBook',
-                                  priceInCents: order.amount_cents,
-                                }).catch(e => console.error('Utmify aprovada error:', e));
+                                  productName: order.items_description || 'ESN Premium Bundle + Supplement Guide',
+                                  priceInCents: order.amount_cents || 1200,
+                                });
                                 // Dispara webhook venda_aprovada
                                 fireWebhookEvent('venda_aprovada', {
                                   source: 'quiz-copa-2026',

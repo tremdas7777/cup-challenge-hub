@@ -39,61 +39,61 @@ export function useUtmifyAutoNotify() {
           try {
             // Só dispara para Utmify se já entrou como PAID (cartão aprovado na hora).
             // Pendentes NÃO devem ser notificados.
-            if (o.status === 'paid' && !notifiedPaid.current.has(o.id)) {
-              notifiedPaid.current.add(o.id);
-              
-              // Fire Facebook/TikTok/Google pixels
-              fireConversionEvent('Purchase', {
-                value: (o.amount_cents || 0) / 100,
-                currency: 'EUR',
-                content_name: o.items_description || 'Produto',
-                order_id: o.id
-              }, o.id);
-
-              await sendUtmifySale({
-                orderId: o.id,
-                customerName: o.buyer_name || 'Cliente',
-                customerEmail: o.buyer_email || 'sem-email@cliente.com',
-                customerPhone: o.buyer_phone,
-                customerDocument: o.buyer_document || undefined,
-                productName: o.items_description || 'nutrition supplements guide eBook',
-                priceInCents: o.amount_cents,
-              });
-            }
-          } catch (e) {
-            console.error('[utmify-auto] pending error:', e);
-          }
-        },
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'orders' },
-        async (payload) => {
-          const newRow = payload.new as OrderRow;
-          const oldRow = payload.old as Partial<OrderRow>;
-          if (!newRow?.id) return;
-          if (newRow.status !== 'paid') return;
-          if (oldRow?.status === 'paid') return;
-          if (notifiedPaid.current.has(newRow.id)) return;
-          notifiedPaid.current.add(newRow.id);
-          try {
+          if ((o.status === 'paid' || o.status === 'approved') && !notifiedPaid.current.has(o.id)) {
+            notifiedPaid.current.add(o.id);
+            
             // Fire Facebook/TikTok/Google pixels
             fireConversionEvent('Purchase', {
-              value: (newRow.amount_cents || 0) / 100,
+              value: (o.amount_cents || 0) / 100,
               currency: 'EUR',
-              content_name: newRow.items_description || 'Produto',
-              order_id: newRow.id
-            }, newRow.id);
+              content_name: o.items_description || 'Produto',
+              order_id: o.id
+            }, o.id);
 
             await sendUtmifySale({
-              orderId: newRow.id,
-              customerName: newRow.buyer_name || 'Cliente',
-              customerEmail: newRow.buyer_email || 'sem-email@cliente.com',
-              customerPhone: newRow.buyer_phone,
-              customerDocument: newRow.buyer_document || undefined,
-              productName: newRow.items_description || 'nutrition supplements guide eBook',
-              priceInCents: newRow.amount_cents,
+              orderId: o.id,
+              customerName: o.buyer_name || 'Cliente',
+              customerEmail: o.buyer_email || 'sem-email@cliente.com',
+              customerPhone: o.buyer_phone,
+              customerDocument: o.buyer_document || undefined,
+              productName: o.items_description || 'ESN Premium Bundle + Supplement Guide',
+              priceInCents: o.amount_cents || 0,
             });
+          }
+        } catch (e) {
+          console.error('[utmify-auto] pending error:', e);
+        }
+      },
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'orders' },
+      async (payload) => {
+        const newRow = payload.new as OrderRow;
+        const oldRow = payload.old as Partial<OrderRow>;
+        if (!newRow?.id) return;
+        if (newRow.status !== 'paid' && newRow.status !== 'approved') return;
+        if (oldRow?.status === 'paid' || oldRow?.status === 'approved') return;
+        if (notifiedPaid.current.has(newRow.id)) return;
+        notifiedPaid.current.add(newRow.id);
+        try {
+          // Fire Facebook/TikTok/Google pixels
+          fireConversionEvent('Purchase', {
+            value: (newRow.amount_cents || 0) / 100,
+            currency: 'EUR',
+            content_name: newRow.items_description || 'Produto',
+            order_id: newRow.id
+          }, newRow.id);
+
+          await sendUtmifySale({
+            orderId: newRow.id,
+            customerName: newRow.buyer_name || 'Cliente',
+            customerEmail: newRow.buyer_email || 'sem-email@cliente.com',
+            customerPhone: newRow.buyer_phone,
+            customerDocument: newRow.buyer_document || undefined,
+            productName: newRow.items_description || 'ESN Premium Bundle + Supplement Guide',
+            priceInCents: newRow.amount_cents || 0,
+          });
           } catch (e) {
             console.error('[utmify-auto] paid error:', e);
           }

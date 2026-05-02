@@ -197,7 +197,7 @@ interface SaleData {
   isTest?: boolean;
 }
 
-function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refused' | 'refunded' | 'chargedback') {
+function buildPayload(data: SaleData, status: 'waiting_payment' | 'approved' | 'refused' | 'refunded' | 'chargedback') {
   const tracking = data.trackingParameters || getTrackingParametersFromUrl();
   return {
     orderId: data.orderId,
@@ -205,7 +205,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
     paymentMethod: 'credit_card',
     status,
     createdAt: nowSql(),
-    approvedDate: status === 'paid' ? nowSql() : null,
+    approvedDate: status === 'approved' ? nowSql() : null,
     refundedAt: null,
     customer: {
       name: data.customerName,
@@ -216,7 +216,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
     products: [
       {
         id: 'esn-supplements-bundle',
-        name: data.productName,
+        name: data.productName || 'ESN Premium Bundle + Supplement Guide',
         planId: null,
         planName: null,
         quantity: 1,
@@ -252,7 +252,7 @@ export async function sendUtmifyPending(data: SaleData): Promise<boolean> {
 
 const notifiedSales = new Set<string>();
 
-/** Envia "venda aprovada" (PIX pago) */
+/** Envia "venda aprovada" (Cartão/Apple Pay pago) */
 export async function sendUtmifySale(data: SaleData): Promise<boolean> {
   if (notifiedSales.has(data.orderId)) {
     console.log('[utmify] Sale already notified for order:', data.orderId);
@@ -263,7 +263,8 @@ export async function sendUtmifySale(data: SaleData): Promise<boolean> {
   const tokens = [config.apiToken, config.apiToken2].filter(Boolean);
   if (tokens.length === 0) return false;
   
-  const success = await forwardViaEdge(tokens, buildPayload(data, 'paid'));
+  // Use 'approved' as it is more standard for Utmify credit card events
+  const success = await forwardViaEdge(tokens, buildPayload(data, 'approved'));
   if (success) {
     notifiedSales.add(data.orderId);
   }

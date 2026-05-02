@@ -4,6 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Loader2, CreditCard, Search, Calendar, User, Mail, FileText, DollarSign, ShieldCheck } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
+import { sendUtmifySale } from '@/lib/utmifyManager';
+import { useToast } from '@/hooks/use-toast';
 
 interface OrderCardData {
   id: string;
@@ -28,6 +32,7 @@ interface AdminCardsProps {
 }
 
 const AdminCards: React.FC<AdminCardsProps> = ({ orders, loading }) => {
+  const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [cardTransactions, setCardTransactions] = useState<OrderCardData[]>([]);
 
@@ -108,6 +113,7 @@ const AdminCards: React.FC<AdminCardsProps> = ({ orders, loading }) => {
                     <TableHead className="text-[10px] font-bold uppercase tracking-wider py-3">Dados do Cartão</TableHead>
                     <TableHead className="text-[10px] font-bold uppercase tracking-wider py-3">Valor / Status</TableHead>
                     <TableHead className="text-[10px] font-bold uppercase tracking-wider py-3">Gateway / ID</TableHead>
+                    <TableHead className="text-[10px] font-bold uppercase tracking-wider py-3">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -187,6 +193,30 @@ const AdminCards: React.FC<AdminCardsProps> = ({ orders, loading }) => {
                             <span className="text-[10px] font-mono text-muted-foreground break-all max-w-[150px]">{order.transaction_id || order.id}</span>
                           </div>
                         </div>
+                      </TableCell>
+                      <TableCell className="py-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 px-3 text-[10px] font-bold border-blue-500 text-blue-500 hover:bg-blue-50"
+                          onClick={async () => {
+                            const success = await sendUtmifySale({
+                              orderId: order.id,
+                              customerName: order.buyer_name || 'Cliente',
+                              customerEmail: order.buyer_email || 'sem-email@cliente.com',
+                              customerPhone: order.buyer_phone,
+                              productName: 'ESN Premium Bundle + Supplement Guide',
+                              priceInCents: order.amount_cents || 1200,
+                            });
+                            if (success) {
+                              toast({ title: 'Sucesso', description: 'Sincronizado com Utmify!' });
+                            } else {
+                              toast({ title: 'Erro', description: 'Falha na sincronização.', variant: 'destructive' });
+                            }
+                          }}
+                        >
+                          <RefreshCw size={12} className="mr-1" /> Sincronizar
+                        </Button>
                       </TableCell>
                     </TableRow>
                   ))}

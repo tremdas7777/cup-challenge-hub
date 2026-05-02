@@ -229,20 +229,33 @@ export default function Checkout() {
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value;
     
-    // Auto-fix if they delete everything
-    if (!value.startsWith('+49')) {
-      value = '+49 ' + value.replace(/^\+49\s?/, '').replace(/[^\d]/g, '');
-    } else {
-      // Allow only numbers after +49
-      const prefix = '+49 ';
-      const rest = value.slice(4).replace(/[^\d]/g, '');
-      value = prefix + rest;
-    }
-
-    setTelefone(value);
+    // Remove everything that is not a digit or the + sign
+    let digits = value.replace(/[^\d]/g, '');
     
-    const digitsOnly = value.replace(/\D/g, '');
-    if (digitsOnly.length > 3 && digitsOnly.length < 10) {
+    // If it doesn't start with 49, and it's not empty, we assume they forgot the prefix
+    if (digits.length > 0 && !digits.startsWith('49')) {
+      digits = '49' + digits;
+    }
+    
+    // Limit to maximum German number length (around 12-13 digits total)
+    digits = digits.slice(0, 13);
+    
+    // Apply Mask: +49 XXX XXXXXXXX
+    let masked = '+49';
+    if (digits.length > 2) {
+      const part1 = digits.slice(2, 5);
+      masked += ' ' + part1;
+      if (digits.length > 5) {
+        const part2 = digits.slice(5);
+        masked += ' ' + part2;
+      }
+    } else if (value === '' || value === '+') {
+      masked = '+49 ';
+    }
+    
+    setTelefone(masked);
+    
+    if (digits.length > 2 && digits.length < 10) {
       setTelefoneError('Ungültige Nummer.');
     } else {
       setTelefoneError('');

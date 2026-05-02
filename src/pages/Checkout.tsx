@@ -61,7 +61,7 @@ export default function Checkout() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
-  const [shippingMethod, setShippingMethod] = useState<'sedex' | 'retirada' | null>('sedex');
+  const [shippingMethod, setShippingMethod] = useState<'dhl' | 'hermes' | null>('dhl');
   const [showStoreError, setShowStoreError] = useState(false);
   const [showCepError, setShowCepError] = useState(false);
   const [nearestStore, setNearestStore] = useState<CentauroStore | null>(null);
@@ -81,6 +81,18 @@ export default function Checkout() {
     if (prefilledName && !nome) {
       setNome(prefilledName);
     }
+
+    // Check for existing order in session
+    const savedOrderId = sessionStorage.getItem('stripe_order_id');
+    const savedClientSecret = sessionStorage.getItem('stripe_client_secret');
+    if (savedOrderId && savedClientSecret) {
+      setOrderId(savedOrderId);
+      setClientSecret(savedClientSecret);
+      fetchPaymentGatewayConfig().then(cfg => {
+        setStripePromise(loadStripe(cfg.stripe.publicKey));
+      });
+    }
+
     // Load product ticket from gateway config (default: €10 shipping fee)
     fetchPaymentGatewayConfig().then((cfg) => {
       if (cfg.externalCheckoutEnabled && cfg.externalCheckoutUrl) {
@@ -150,11 +162,11 @@ export default function Checkout() {
           buyerName: nome || 'Kunde',
           buyerEmail: email,
           buyerPhone: telefone || '',
-          itemsDescription: 'nutrition supplements guide eBook',
+          itemsDescription: 'ESN Premium Bundle + Supplement Guide',
           metadata: {
             address: endereco || '',
             addressNumber: numero || '',
-            itemsDescription: 'nutrition supplements guide eBook',
+            shippingMethod: shippingMethod || 'dhl',
           },
         },
       });
@@ -162,8 +174,10 @@ export default function Checkout() {
       if (fnErr) throw fnErr;
       if (data?.clientSecret) {
         setClientSecret(data.clientSecret);
+        sessionStorage.setItem('stripe_client_secret', data.clientSecret);
         if (data.order_id) {
           setOrderId(data.order_id);
+          sessionStorage.setItem('stripe_order_id', data.order_id);
         }
       } else {
         throw new Error('Kein Client Secret erhalten.');
@@ -213,29 +227,22 @@ export default function Checkout() {
   };
 
   const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value.replace(/[^\d+]/g, '');
+    let value = e.target.value;
     
-    // Always keep +49
+    // Auto-fix if they delete everything
     if (!value.startsWith('+49')) {
-      value = '+49' + value.replace(/^\+?4?9?/, '');
+      value = '+49 ' + value.replace(/^\+49\s?/, '').replace(/[^\d]/g, '');
+    } else {
+      // Allow only numbers after +49
+      const prefix = '+49 ';
+      const rest = value.slice(4).replace(/[^\d]/g, '');
+      value = prefix + rest;
     }
 
-    // Limit length (11 digits after +49 is standard for DE mobile)
-    const digitsOnly = value.slice(3).replace(/\D/g, '');
-    const limitedDigits = digitsOnly.slice(0, 11);
+    setTelefone(value);
     
-    // Formatting: +49 123 45678901
-    let formatted = '+49';
-    if (limitedDigits.length > 0) {
-      formatted += ' ' + limitedDigits.slice(0, 3);
-    }
-    if (limitedDigits.length > 3) {
-      formatted += ' ' + limitedDigits.slice(3);
-    }
-
-    setTelefone(formatted);
-    
-    if (limitedDigits.length > 0 && limitedDigits.length < 10) {
+    const digitsOnly = value.replace(/\D/g, '');
+    if (digitsOnly.length > 3 && digitsOnly.length < 10) {
       setTelefoneError('Ungültige Nummer.');
     } else {
       setTelefoneError('');
@@ -462,10 +469,21 @@ export default function Checkout() {
                     appearance: {
                       theme: 'flat',
                       variables: {
-                        colorPrimary: '#000000',
+                        colorPrimary: '#FFCC00',
                         colorBackground: '#ffffff',
                         colorText: '#212121',
-                        borderRadius: '8px',
+                        colorDanger: '#dc2626',
+                        fontFamily: 'Rubik, Inter, system-ui, sans-serif',
+                        borderRadius: '10px',
+                        fontSizeBase: '14px',
+                        spacingUnit: '4px',
+                      },
+                      rules: {
+                        '.Tab': { border: '2px solid #e5e7eb', boxShadow: 'none' },
+                        '.Tab--selected': { borderColor: '#FFCC00', backgroundColor: '#FFFBEB' },
+                        '.Input': { border: '2px solid #e5e7eb', boxShadow: 'none', padding: '12px' },
+                        '.Input:focus': { borderColor: '#FFCC00', boxShadow: '0 0 0 3px rgba(255, 204, 0, 0.2)' },
+                        '.Label': { fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' },
                       }
                     },
                   }}
@@ -498,9 +516,9 @@ export default function Checkout() {
       </div>
 
         {/* Trust */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6 px-4">
           {[
-            { icon: CheckCircle, color: 'text-foreground', title: 'Sofortiger Versand' },
+            { icon: CheckCircle, color: 'text-foreground', title: 'DHL Versand' },
             { icon: Truck, color: 'text-foreground', title: '3-5 Werktage' },
             { icon: Shield, color: 'text-foreground', title: 'Sicherer Kauf' },
           ].map(({ icon: Icon, color, title }) => (
@@ -529,7 +547,7 @@ export default function Checkout() {
           <AlertDialogFooter>
             <AlertDialogAction
               onClick={() => {
-                setShippingMethod('sedex');
+                setShippingMethod('dhl');
                 setShowStoreError(false);
               }}
               className="bg-primary hover:bg-primary/80"
@@ -546,7 +564,7 @@ export default function Checkout() {
           <AlertDialogHeader>
             <AlertDialogTitle>Ungültige PLZ</AlertDialogTitle>
             <AlertDialogDescription>
-              Die angegebene PLZ wurde nicht gefunden. Bitte überprüfen Sie die Nummer und versuchen Sie es erneut.
+              Die angegebene PLZ wurde não gefunden. Bitte überprüfen Sie die Nummer und versuchen Sie es erneut.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -562,8 +580,6 @@ export default function Checkout() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-
     </div>
   );
 }

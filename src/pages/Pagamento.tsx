@@ -1,46 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loadStripe, type Stripe } from '@stripe/stripe-js';
-import {
-  Elements,
-  PaymentElement,
-  ExpressCheckoutElement,
-  useStripe,
-  useElements,
-} from '@stripe/react-stripe-js';
-import { Loader2, Lock, ShieldCheck, CheckCircle, ArrowLeft, Truck } from 'lucide-react';
+import { Loader2, ShieldCheck, Lock, CreditCard, Apple, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import esnLogo from '@/assets/esn-logo.png';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchPaymentGatewayConfig } from '@/lib/paymentGateway';
 import { fireConversionEvent } from '@/lib/pixelManager';
 import { trackEvent } from '@/lib/funnelTracking';
-import esnLogo from '@/assets/esn-logo.png';
-import comboPackImg from '@/assets/esn-combo-pack.jpg';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements, ExpressCheckoutElement } from '@stripe/react-stripe-js';
+
+const STORAGE_KEY = 'esn_checkout_buyer';
 
 interface CheckoutBuyer {
   nome: string;
   email: string;
   telefone: string;
-  cep?: string;
-  endereco?: string;
-  numero?: string;
-  complemento?: string;
-  bairro?: string;
-  cidade?: string;
-  estado?: string;
-  shippingMethod?: string;
+  cep: string;
+  endereco: string;
+  numero: string;
+  cidade: string;
+  estado: string;
   shippingCost?: number;
+  shippingMethod?: string;
 }
 
-const STORAGE_KEY = 'esn_checkout_buyer';
-
-function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }) {
+function PaymentForm({ totalAmount, buyer, isAddressValid, orderId }: { totalAmount: number; buyer: CheckoutBuyer; isAddressValid: boolean; orderId: string | null }) {
   const stripe = useStripe();
   const elements = useElements();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const onConfirm = async () => {
     if (!stripe || !elements) return;
@@ -48,19 +39,8 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
     setLoading(true);
     setError('');
 
-    // Save buyer for upsell page
-    sessionStorage.setItem('upsell_buyer', JSON.stringify({
-      nome: buyer.nome,
-      email: buyer.email,
-      telefone: buyer.telefone,
-      cep: buyer.cep,
-      endereco: buyer.endereco,
-      numero: buyer.numero,
-      complemento: buyer.complemento,
-      bairro: buyer.bairro,
-      cidade: buyer.cidade,
-      estado: buyer.estado,
-    }));
+    // Persist buyer data for upsell flow
+    sessionStorage.setItem('upsell_buyer', JSON.stringify(buyer));
 
     const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
       elements,
@@ -74,7 +54,6 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
             phone: buyer.telefone,
             address: {
               line1: `${buyer.endereco || ''} ${buyer.numero || ''}`.trim(),
-              line2: buyer.complemento || undefined,
               city: buyer.cidade || undefined,
               state: buyer.estado || undefined,
               postal_code: buyer.cep || undefined,
@@ -89,15 +68,29 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
     if (stripeError) {
       setError(stripeError.message || 'Zahlungsfehler. Bitte erneut versuchen.');
       setLoading(false);
+      trackEvent('payment_error');
       return;
     }
 
     if (paymentIntent && paymentIntent.status === 'succeeded') {
+      // Save payment method for 1-click upsell
+      if (typeof paymentIntent.payment_method === 'string') {
+        sessionStorage.setItem('stripe_payment_method_id', paymentIntent.payment_method);
+      }
+
+      // Update order status in database
+      if (orderId) {
+        try {
+          await supabase.from('orders').update({ status: 'paid' }).eq('id', orderId);
+        } catch (err) {
+          console.error('Failed to update order status:', err);
+        }
+      }
+
       trackEvent('purchase');
-      fireConversionEvent('Purchase', { value: amount, currency: 'EUR' });
+      fireConversionEvent('Purchase', { value: totalAmount, currency: 'EUR' });
       navigate('/obrigado');
     } else {
-      // Stripe handled redirect (3DS, Klarna, etc.)
       setLoading(false);
     }
   };
@@ -108,9 +101,9 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Express Checkout (Apple Pay, Google Pay, Link) */}
-      <div className="bg-white rounded-xl p-4 border-2 border-primary/10">
+      <div className="bg-white rounded-xl p-4 border border-border shadow-sm">
         <p className="text-[10px] uppercase font-bold text-muted-foreground mb-3 text-center">Schnell bezahlen mit</p>
         <ExpressCheckoutElement onConfirm={onConfirm} />
       </div>
@@ -120,20 +113,16 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
           <span className="w-full border-t border-muted-foreground/20"></span>
         </div>
         <div className="relative flex justify-center text-[10px] uppercase font-bold">
-          <span className="bg-background px-2 text-muted-foreground">Oder mit Karte/Klarna</span>
+          <span className="bg-background px-2 text-muted-foreground">Oder com Karte</span>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl p-4 border-2 border-primary/10">
-        <PaymentElement
-          options={{
-            layout: 'accordion' as const,
-          }}
-        />
+      <div className="bg-muted/30 rounded-lg p-4 border border-border">
+        <PaymentElement options={{ layout: 'accordion' }} />
       </div>
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive/30 text-destructive text-xs font-medium rounded-lg p-3">
+        <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center border border-destructive/30">
           {error}
         </div>
       )}
@@ -141,12 +130,15 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
       <Button
         type="submit"
         disabled={!stripe || loading}
-        className="w-full h-14 text-base font-black uppercase tracking-wider bg-centauro-gold hover:bg-centauro-gold/90 text-primary rounded-xl shadow-lg"
+        className="w-full h-16 bg-centauro-green hover:bg-centauro-green/90 text-primary-foreground font-black text-lg rounded-xl shadow-xl transition-all hover:scale-[1.01] active:scale-95 group"
+        style={{ boxShadow: '0 8px 30px hsl(145 63% 42% / 0.3)' }}
       >
         {loading ? (
-          <><Loader2 size={18} className="mr-2 animate-spin" /> WIRD VERARBEITET…</>
+          <><Loader2 size={20} className="mr-2 animate-spin" /> BITTE WARTEN...</>
         ) : (
-          <><Lock size={16} className="mr-2" /> JETZT SICHER BEZAHLEN — €{amount.toFixed(2).replace('.', ',')}</>
+          <span className="flex items-center gap-2">
+            JETZT BEZAHLEN — €{totalAmount.toFixed(2).replace('.', ',')}
+          </span>
         )}
       </Button>
 
@@ -164,6 +156,7 @@ export default function Pagamento() {
   const navigate = useNavigate();
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [clientSecret, setClientSecret] = useState<string>('');
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [buyer, setBuyer] = useState<CheckoutBuyer | null>(null);
   const [amount, setAmount] = useState(12);
   const [loading, setLoading] = useState(true);
@@ -174,7 +167,7 @@ export default function Pagamento() {
     document.body.style.backgroundColor = '#212121';
     window.scrollTo(0, 0);
 
-    const init = async () => {
+    const initPaymentIntent = async () => {
       try {
         const raw = sessionStorage.getItem(STORAGE_KEY);
         if (!raw) {
@@ -184,53 +177,68 @@ export default function Pagamento() {
         const buyerData: CheckoutBuyer = JSON.parse(raw);
         setBuyer(buyerData);
 
+        // Reuse existing session data if available to avoid duplicate orders
+        const savedOrderId = sessionStorage.getItem('stripe_order_id');
+        const savedClientSecret = sessionStorage.getItem('stripe_client_secret');
+        
         const cfg = await fetchPaymentGatewayConfig();
         if (!cfg.stripe?.publicKey || !cfg.stripe?.secretKey) {
-          setError('Stripe nicht konfiguriert.');
+          setError('Zahlungsgateway nicht konfiguriert.');
           setLoading(false);
           return;
         }
 
         const totalAmount = buyerData.shippingCost || (cfg.productTicketCents / 100);
         setAmount(totalAmount);
-
         setStripePromise(loadStripe(cfg.stripe.publicKey));
+
+        if (savedOrderId && savedClientSecret) {
+          setOrderId(savedOrderId);
+          setClientSecret(savedClientSecret);
+          setLoading(false);
+          return;
+        }
 
         const { data, error: fnErr } = await supabase.functions.invoke('criar-payment-intent', {
           body: {
             secretKey: cfg.stripe.secretKey,
             amount: totalAmount,
-            buyerName: buyerData.nome,
+            buyerName: buyerData.nome || 'Kunde',
             buyerEmail: buyerData.email,
-            buyerPhone: buyerData.telefone,
-            itemsDescription: 'nutrition supplements guide eBook',
+            buyerPhone: buyerData.telefone || '',
+            itemsDescription: 'ESN Premium Bundle + Supplement Guide',
             metadata: {
               address: buyerData.endereco || '',
               addressNumber: buyerData.numero || '',
-              complement: buyerData.complemento || '',
-              neighborhood: buyerData.bairro || '',
+              cep: buyerData.cep || '',
               city: buyerData.cidade || '',
               state: buyerData.estado || '',
-              cep: buyerData.cep || '',
-              shippingMethod: buyerData.shippingMethod || 'sedex',
+              shippingMethod: 'dhl_standard',
               shippingCostCents: String(Math.round(totalAmount * 100)),
             },
           },
         });
 
         if (fnErr) throw fnErr;
-        if (!data?.clientSecret) throw new Error('Konnte Zahlung nicht initialisieren.');
-
-        setClientSecret(data.clientSecret);
-        setLoading(false);
+        if (data?.clientSecret) {
+          setClientSecret(data.clientSecret);
+          sessionStorage.setItem('stripe_client_secret', data.clientSecret);
+          if (data.order_id) {
+            setOrderId(data.order_id);
+            sessionStorage.setItem('stripe_order_id', data.order_id);
+          }
+        } else {
+          throw new Error('Kein Client Secret erhalten.');
+        }
       } catch (e: any) {
-        console.error('Pagamento init error:', e);
-        setError(e?.message || 'Fehler beim Laden der Zahlung.');
+        console.error('Error init payment:', e);
+        setError(e.message || 'Zahlungsfehler. Bitte erneut versuchen.');
+      } finally {
         setLoading(false);
       }
     };
 
-    init();
+    initPaymentIntent();
   }, [navigate]);
 
   if (loading) {
@@ -255,139 +263,99 @@ export default function Pagamento() {
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Rubik', 'Inter', system-ui, sans-serif" }}>
-      {/* ESN Header */}
-      <div className="bg-primary py-4 px-4 sticky top-0 z-20 shadow-md">
+      {/* Header */}
+      <div className="bg-primary py-4 px-4 border-b border-white/5">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <button onClick={() => navigate('/checkout')} className="text-primary-foreground/70 hover:text-primary-foreground flex items-center gap-1 text-xs">
-            <ArrowLeft size={14} /> Zurück
-          </button>
-          <img src={esnLogo} alt="ESN" className="h-12 md:h-16 object-contain" style={{ mixBlendMode: 'screen' }} />
-          <div className="flex items-center gap-1 text-primary-foreground/80 text-[10px] font-bold uppercase">
-            <Lock size={10} /> Sicher
+          <img src={esnLogo} alt="ESN" className="h-10 md:h-14 object-contain" style={{ mixBlendMode: 'screen' }} />
+          <div className="flex items-center gap-2 text-primary-foreground/60">
+            <Lock size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Sicherer Checkout</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-        {/* Title */}
-        <div className="text-center space-y-1">
-          <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">
-            Bezahlung abschließen
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Schritt 3 von 3 · Wähle deine bevorzugte Zahlungsart
-          </p>
+      <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
+        <div className="space-y-2 text-center">
+          <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">Abschluss der Zahlung</h1>
+          <p className="text-muted-foreground text-sm">Sichere Bezahlung über Stripe</p>
         </div>
 
-        {/* Order summary */}
-        <Card className="p-4 border-2 border-primary/10 bg-gradient-to-br from-card to-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="w-16 h-16 bg-white rounded-lg flex items-center justify-center p-1 border border-border">
-              <img src={comboPackImg} alt="ESN Combo Pack" className="max-w-full max-h-full object-contain" />
+        <Card className="p-0 border-border bg-white shadow-xl overflow-hidden rounded-2xl">
+          {/* Order Summary Summary */}
+          <div className="bg-muted/30 p-5 border-b border-border">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Ihre Bestellung</span>
+              <span className="px-2 py-1 bg-centauro-green/10 text-centauro-green text-[10px] font-black rounded uppercase">Bereit zum Versand</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-wider text-centauro-gold font-bold">Dein Paket</p>
-              <p className="text-sm font-black text-foreground truncate">ESN Premium Bundle</p>
-              <div className="flex items-center gap-1 text-[10px] text-muted-foreground mt-0.5">
-                <Truck size={10} /> Versand inklusive
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-white rounded-lg border border-border flex items-center justify-center p-2">
+                <CheckCircle2 className="text-centauro-green" size={24} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-black text-foreground truncate">ESN Premium Bundle</p>
+                <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-tighter">+ Supplement Performance Guide</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-black text-foreground">€{amount.toFixed(2).replace('.', ',')}</p>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase font-bold text-muted-foreground">Gesamt</p>
-              <p className="text-xl font-black text-centauro-green">
-                €{amount.toFixed(2).replace('.', ',')}
-              </p>
-            </div>
+          </div>
+
+          <div className="p-6">
+            {clientSecret && stripePromise && buyer ? (
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  locale: 'de',
+                  appearance: {
+                    theme: 'flat',
+                    variables: {
+                      colorPrimary: '#FFCC00',
+                      colorBackground: '#ffffff',
+                      colorText: '#212121',
+                      colorDanger: '#dc2626',
+                      fontFamily: 'Rubik, Inter, system-ui, sans-serif',
+                      borderRadius: '10px',
+                      fontSizeBase: '14px',
+                      spacingUnit: '4px',
+                    },
+                    rules: {
+                      '.Tab': { border: '2px solid #e5e7eb', boxShadow: 'none' },
+                      '.Tab--selected': { borderColor: '#FFCC00', backgroundColor: '#FFFBEB' },
+                      '.Input': { border: '2px solid #e5e7eb', boxShadow: 'none', padding: '12px' },
+                      '.Input:focus': { borderColor: '#FFCC00', boxShadow: '0 0 0 3px rgba(255, 204, 0, 0.2)' },
+                      '.Label': { fontWeight: '700', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' },
+                    }
+                  },
+                }}
+              >
+                <PaymentForm 
+                  totalAmount={amount} 
+                  buyer={buyer} 
+                  isAddressValid={true}
+                  orderId={orderId}
+                />
+              </Elements>
+            ) : (
+              <div className="py-12 flex flex-col items-center justify-center gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-centauro-green" />
+                <p className="text-[10px] font-bold uppercase tracking-widest opacity-50">Sichere Verbindung...</p>
+              </div>
+            )}
           </div>
         </Card>
 
-        {/* Buyer info preview */}
-        {buyer && (
-          <Card className="p-3 border border-border bg-card">
-            <div className="flex items-start justify-between gap-2">
-              <div className="text-[11px] space-y-0.5 flex-1 min-w-0">
-                <p className="font-black text-foreground truncate">{buyer.nome}</p>
-                <p className="text-muted-foreground truncate">{buyer.email}</p>
-                {buyer.endereco && (
-                  <p className="text-muted-foreground truncate">
-                    {buyer.endereco}, {buyer.numero} · {buyer.cidade} {buyer.cep}
-                  </p>
-                )}
-              </div>
-              <button
-                onClick={() => navigate('/checkout')}
-                className="text-[10px] text-centauro-gold font-bold uppercase tracking-wider hover:underline whitespace-nowrap"
-              >
-                Ändern
-              </button>
-            </div>
-          </Card>
-        )}
-
-        {/* Payment Form */}
-        {clientSecret && stripePromise && buyer && (
-          <Elements
-            stripe={stripePromise}
-            options={{
-              clientSecret,
-              appearance: {
-                theme: 'flat',
-                variables: {
-                  colorPrimary: '#FFCC00',
-                  colorBackground: '#ffffff',
-                  colorText: '#212121',
-                  colorDanger: '#dc2626',
-                  fontFamily: 'Rubik, Inter, system-ui, sans-serif',
-                  borderRadius: '10px',
-                  fontSizeBase: '14px',
-                  spacingUnit: '4px',
-                },
-                rules: {
-                  '.Tab': {
-                    border: '2px solid #e5e7eb',
-                    boxShadow: 'none',
-                  },
-                  '.Tab--selected': {
-                    borderColor: '#FFCC00',
-                    backgroundColor: '#FFFBEB',
-                  },
-                  '.Input': {
-                    border: '2px solid #e5e7eb',
-                    boxShadow: 'none',
-                    padding: '12px',
-                  },
-                  '.Input:focus': {
-                    borderColor: '#FFCC00',
-                    boxShadow: '0 0 0 3px rgba(255, 204, 0, 0.2)',
-                  },
-                  '.Label': {
-                    fontWeight: '700',
-                    fontSize: '11px',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  },
-                },
-              },
-            }}
-          >
-            <PaymentForm buyer={buyer} amount={amount} />
-          </Elements>
-        )}
-
-        {/* Trust badges */}
-        <div className="grid grid-cols-3 gap-2 pt-2">
-          <div className="flex flex-col items-center gap-1 p-2 bg-muted/30 rounded-lg">
-            <ShieldCheck size={16} className="text-centauro-green" />
-            <span className="text-[9px] font-bold uppercase text-center">SSL Geschützt</span>
+        {/* Security Info */}
+        <div className="flex flex-col items-center gap-4 py-4">
+          <div className="flex items-center gap-6 opacity-40 grayscale hover:grayscale-0 transition-all">
+            <CreditCard size={24} />
+            <Apple size={24} />
+            <ShieldCheck size={24} />
           </div>
-          <div className="flex flex-col items-center gap-1 p-2 bg-muted/30 rounded-lg">
-            <CheckCircle size={16} className="text-centauro-green" />
-            <span className="text-[9px] font-bold uppercase text-center">Geld-zurück</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 p-2 bg-muted/30 rounded-lg">
-            <Lock size={16} className="text-centauro-green" />
-            <span className="text-[9px] font-bold uppercase text-center">Stripe Verified</span>
-          </div>
+          <p className="text-[10px] text-muted-foreground text-center max-w-xs leading-relaxed">
+            Ihre Zahlungsinformationen werden verschlüsselt verarbeitet. Wir speichern keine vollständigen Kartendaten auf nossos Servern.
+          </p>
         </div>
       </div>
     </div>

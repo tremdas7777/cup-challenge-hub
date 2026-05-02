@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     });
 
     const amountCents = Math.round(body.amount * 100);
-    const productName = body.itemsDescription || 'ESN Bundle';
+    const productName = body.itemsDescription || 'ESN Premium Bundle + Supplement Guide';
 
     const safeMetadata: Record<string, string> = {};
     if (body.metadata) {
@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
         gateway_response: paymentIntent,
         status: paymentIntent.status === 'succeeded' ? 'paid' : 'pending',
         amount_cents: amountCents,
-        shipping_method: meta.shippingMethod || null,
+        shipping_method: meta.shippingMethod || 'dhl_standard',
         shipping_cost_cents: meta.shippingCostCents ? Number(meta.shippingCostCents) : null,
         items_description: productName,
         buyer_name: body.buyerName,

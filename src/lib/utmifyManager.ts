@@ -211,15 +211,16 @@ interface SaleData {
   isTest?: boolean;
 }
 
-function buildPayload(data: SaleData, status: 'waiting_payment' | 'approved' | 'refused' | 'refunded' | 'chargedback') {
+function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refused' | 'refunded' | 'chargedback') {
+  const now = nowSql();
   const tracking = data.trackingParameters || getTrackingParametersFromUrl();
   return {
     orderId: data.orderId,
     platform: 'ESN Global',
     paymentMethod: 'credit_card',
     status,
-    createdAt: nowSql(),
-    approvedDate: status === 'approved' ? nowSql() : null,
+    createdAt: now,
+    approvedDate: status === 'paid' ? now : null,
     refundedAt: null,
     customer: {
       name: data.customerName,
@@ -231,20 +232,20 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'approved' | '
       {
         id: 'esn-supplements-bundle',
         name: data.productName || 'ESN Premium Bundle + Supplement Guide',
-        planId: null,
-        planName: null,
+        planId: 'default',
+        planName: 'One-time',
         quantity: 1,
         priceInCents: data.priceInCents,
       },
     ],
     trackingParameters: {
-      src: tracking.src ?? null,
-      sck: tracking.sck ?? null,
-      utm_source: tracking.utm_source ?? null,
-      utm_campaign: tracking.utm_campaign ?? null,
-      utm_medium: tracking.utm_medium ?? null,
-      utm_content: tracking.utm_content ?? null,
-      utm_term: tracking.utm_term ?? null,
+      src: String(tracking.src || ''),
+      sck: String(tracking.sck || ''),
+      utm_source: String(tracking.utm_source || ''),
+      utm_campaign: String(tracking.utm_campaign || ''),
+      utm_medium: String(tracking.utm_medium || ''),
+      utm_content: String(tracking.utm_content || ''),
+      utm_term: String(tracking.utm_term || ''),
     },
     commission: {
       totalPriceInCents: data.priceInCents,
@@ -257,30 +258,29 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'approved' | '
 }
 
 /** Envia "venda pendente" (PIX gerado, aguardando pagamento) */
-export async function sendUtmifyPending(data: SaleData): Promise<boolean> {
+export async function sendUtmifyPending(data: SaleData): Promise<{ ok: boolean; message?: string }> {
   const config = getUtmifyConfig();
   const tokens = [config.apiToken, config.apiToken2].filter(Boolean);
-  if (tokens.length === 0) return false;
+  if (tokens.length === 0) return { ok: false, message: 'Sem tokens' };
   return forwardViaEdge(tokens, buildPayload(data, 'waiting_payment'));
 }
 
 const notifiedSales = new Set<string>();
 
 /** Envia "venda aprovada" (Cartão/Apple Pay pago) */
-export async function sendUtmifySale(data: SaleData): Promise<boolean> {
+export async function sendUtmifySale(data: SaleData): Promise<{ ok: boolean; message?: string }> {
   if (notifiedSales.has(data.orderId)) {
-    console.log('[utmify] Sale already notified for order:', data.orderId);
-    return true;
+    return { ok: true, message: 'Já notificado' };
   }
   
   const config = getUtmifyConfig();
   const tokens = [config.apiToken, config.apiToken2].filter(Boolean);
-  if (tokens.length === 0) return false;
+  if (tokens.length === 0) return { ok: false, message: 'Sem tokens' };
   
-  // Use 'approved' as it is more standard for Utmify credit card events
-  const success = await forwardViaEdge(tokens, buildPayload(data, 'approved'));
-  if (success) {
+  // Use 'paid' status as required by Utmify API
+  const result = await forwardViaEdge(tokens, buildPayload(data, 'paid'));
+  if (result.ok) {
     notifiedSales.add(data.orderId);
   }
-  return success;
+  return result;
 }

@@ -64,8 +64,8 @@ const DEFAULT_CONFIG: PixelConfig = {
   facebookPixels: [
     {
       id: 'default-fb-1',
-      pixelId: '1499521114852387',
-      accessToken: 'EAAT9vRp5JWABRZAtEXPUfTSyKRPz0oJbrNFa1WfFKt2DxgZB0GHDLnwT2JicjIat8IJRJjbPgLZBkcbAtUD5hMbmTItF6F4X7kHLBo7DUf2EZBQinPCVm5dEuIYkfj3eETmF37DegotiVJW1AqFp2UUIQJRBZBU0Y6YBlBA5lU0RCOtXKZAkJLmFgmqMEwdwZDZD',
+      pixelId: '3150604831816989',
+      accessToken: 'EAAT9vRp5JWABRf7ZB4A1XoYs54nms2sIatbYMQv6RUamDO0pqxxWV2Ng1EEcwQT7tSB19kcXQTH9bJ6ZC5ZAYICsyRUxzORkSqadk0mUDrBlav1nZBzqzC4fHwZArjYKo04jT9aqaLxNxa7rLSXSle2xn0iExtGrMZBJE2aMp1pEH7n3GOJIF6u7OHYSrdeQZDZD',
     },
   ],
   tiktokPixels: [],
@@ -81,7 +81,7 @@ export function getPixelConfig(): PixelConfig {
     const cfg = migrateConfig(JSON.parse(raw));
     // Ensure default Facebook pixel is always present
     const hasDefaultFb = cfg.facebookPixels.some(
-      (fb) => fb.pixelId === '2117037765814485',
+      (fb) => fb.pixelId === '3150604831816989',
     );
     if (!hasDefaultFb) {
       cfg.facebookPixels = [...DEFAULT_CONFIG.facebookPixels, ...cfg.facebookPixels];

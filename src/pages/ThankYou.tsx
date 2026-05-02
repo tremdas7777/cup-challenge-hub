@@ -202,7 +202,7 @@ export default function ThankYou() {
             <span className="text-[11px] font-medium uppercase tracking-wider">100% sicherer Kauf</span>
           </div>
           <p className="text-center text-[10px] text-muted-foreground/70 leading-relaxed">
-            Dies ist uma offizielle ESN Aktion. 
+            Dies ist eine offizielle ESN Aktion. 
             Alle deine Daten sind mit Ende-zu-Ende-Verschlüsselung geschützt.
           </p>
         </div>

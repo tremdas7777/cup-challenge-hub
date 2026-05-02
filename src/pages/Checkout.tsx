@@ -17,7 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { findNearestStore, type CentauroStore } from '@/lib/centauroStores';
 
 import { loadStripe, type Stripe } from '@stripe/stripe-js';
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, PaymentElement, ExpressCheckoutElement, useStripe, useElements } from '@stripe/react-stripe-js';
 
 interface CheckoutBuyer {
   nome: string;
@@ -106,34 +106,21 @@ export default function Checkout() {
     const formatted = formatCep(e.target.value);
     setCep(formatted);
 
-    if (formatted.length === 5 || formatted.length === 8) {
+    if (formatted.length === 5) {
       setCepLoading(true);
       try {
-        let url = '';
-        if (formatted.length === 5) {
-          url = `https://api.zippopotam.us/de/${formatted}`;
-        } else {
-          url = `https://viacep.com.br/ws/${formatted}/json/`;
-        }
-
+        const url = `https://api.zippopotam.us/de/${formatted}`;
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          if (formatted.length === 5) { // Germany
-            if (data.places && data.places.length > 0) {
-              const place = data.places[0];
-              setCidade(place['place name']);
-              setEstado(place['state']);
-              setBairro(place['place name']);
-            }
-          } else { // Brazil
-            if (!data.erro) {
-              setEndereco(data.logradouro);
-              setBairro(data.bairro);
-              setCidade(data.localidade);
-              setEstado(data.uf);
-            }
+          if (data.places && data.places.length > 0) {
+            const place = data.places[0];
+            setCidade(place['place name']);
+            setEstado(place['state']);
+            setBairro(place['place name']);
           }
+        } else {
+          setShowCepError(true);
         }
       } catch (error) {
         console.error('Error fetching address:', error);
@@ -530,13 +517,13 @@ export default function Checkout() {
           <p className="text-muted-foreground text-[10px]">© 2026 ESN - Elite Sports Nutrition. Alle Rechte vorbehalten.</p>
         </div>
 
-        {/* Store Unavailable Error Popup */}
+        {/* Shipping Method Information Popup (Optional if needed) */}
         <AlertDialog open={showStoreError} onOpenChange={setShowStoreError}>
         <AlertDialogContent className="max-w-[calc(100%-2rem)] mx-auto rounded-xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Unidade Indisponível</AlertDialogTitle>
+            <AlertDialogTitle>Versand-Information</AlertDialogTitle>
             <AlertDialogDescription>
-              A unidade <strong>{nearestStore ? nearestStore.name : 'Centauro mais próxima'}</strong> está indisponível para retirada presencial no momento. Por favor, selecione o envio via Correios SEDEX.
+              Der Standardversand erfolgt per DHL/Hermes. Die voraussichtliche Lieferzeit beträgt 3-5 Werktage.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -545,9 +532,9 @@ export default function Checkout() {
                 setShippingMethod('sedex');
                 setShowStoreError(false);
               }}
-              className="bg-centauro-green hover:bg-centauro-green/80"
+              className="bg-primary hover:bg-primary/80"
             >
-              Enviar por SEDEX — R$ {shippingCost.toFixed(2).replace('.', ',')}
+              OK, Verstanden — €{shippingCost.toFixed(2).replace('.', ',')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -588,8 +575,7 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onConfirm = async () => {
     if (!stripe || !elements) return;
 
     if (!isAddressValid) {
@@ -656,8 +642,28 @@ function PaymentForm({ amount, buyer, isAddressValid, onInvalidAddress, orderId 
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onConfirm();
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Express Checkout (Apple Pay, Google Pay, Link) */}
+      <div className="bg-white rounded-xl p-4 border border-border shadow-sm">
+        <p className="text-[10px] uppercase font-bold text-muted-foreground mb-3 text-center">Schnell bezahlen mit</p>
+        <ExpressCheckoutElement onConfirm={onConfirm} />
+      </div>
+
+      <div className="relative py-2">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted-foreground/20"></span>
+        </div>
+        <div className="relative flex justify-center text-[10px] uppercase font-bold">
+          <span className="bg-background px-2 text-muted-foreground">Oder mit Karte</span>
+        </div>
+      </div>
+
       <div className="bg-muted/30 rounded-lg p-4 border border-border">
         <PaymentElement options={{ layout: 'accordion' }} />
       </div>

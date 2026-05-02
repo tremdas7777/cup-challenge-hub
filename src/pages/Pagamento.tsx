@@ -4,6 +4,7 @@ import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import {
   Elements,
   PaymentElement,
+  ExpressCheckoutElement,
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
@@ -41,8 +42,7 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onConfirm = async () => {
     if (!stripe || !elements) return;
 
     setLoading(true);
@@ -102,8 +102,28 @@ function PaymentForm({ buyer, amount }: { buyer: CheckoutBuyer; amount: number }
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await onConfirm();
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Express Checkout (Apple Pay, Google Pay, Link) */}
+      <div className="bg-white rounded-xl p-4 border-2 border-primary/10">
+        <p className="text-[10px] uppercase font-bold text-muted-foreground mb-3 text-center">Schnell bezahlen mit</p>
+        <ExpressCheckoutElement onConfirm={onConfirm} />
+      </div>
+
+      <div className="relative py-2">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-muted-foreground/20"></span>
+        </div>
+        <div className="relative flex justify-center text-[10px] uppercase font-bold">
+          <span className="bg-background px-2 text-muted-foreground">Oder mit Karte/Klarna</span>
+        </div>
+      </div>
+
       <div className="bg-white rounded-xl p-4 border-2 border-primary/10">
         <PaymentElement
           options={{

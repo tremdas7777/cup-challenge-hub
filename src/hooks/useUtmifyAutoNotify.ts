@@ -45,7 +45,7 @@ export function useUtmifyAutoNotify() {
               // Fire Facebook/TikTok/Google pixels
               fireConversionEvent('Purchase', {
                 value: (o.amount_cents || 0) / 100,
-                currency: 'BRL',
+                currency: 'EUR',
                 content_name: o.items_description || 'Produto',
                 order_id: o.id
               }, o.id);
@@ -80,7 +80,7 @@ export function useUtmifyAutoNotify() {
             // Fire Facebook/TikTok/Google pixels
             fireConversionEvent('Purchase', {
               value: (newRow.amount_cents || 0) / 100,
-              currency: 'BRL',
+              currency: 'EUR',
               content_name: newRow.items_description || 'Produto',
               order_id: newRow.id
             }, newRow.id);

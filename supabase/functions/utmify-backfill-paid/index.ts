@@ -40,8 +40,8 @@ function buildPaidPayload(o: OrderRow) {
     0;
   return {
     orderId: o.id,
-    platform: "quiz-copa-2026",
-    paymentMethod: "pix",
+    platform: "esn-supplements-germany",
+    paymentMethod: "credit_card",
     status: "paid",
     createdAt: toSql(o.created_at),
     approvedDate: toSql(o.updated_at || new Date().toISOString()),
@@ -54,7 +54,7 @@ function buildPaidPayload(o: OrderRow) {
     },
     products: [
       {
-        id: "bola-de-futebol",
+        id: "esn-supplements-bundle",
         name: o.items_description || "nutrition supplements guide eBook",
         planId: null,
         planName: null,
@@ -75,7 +75,7 @@ function buildPaidPayload(o: OrderRow) {
       totalPriceInCents: total,
       gatewayFeeInCents: 0,
       userCommissionInCents: total,
-      currency: "BRL",
+      currency: "EUR",
     },
   };
 }

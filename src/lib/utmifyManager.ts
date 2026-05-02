@@ -75,7 +75,7 @@ export async function testUtmifyToken(token: string): Promise<{ success: boolean
   try {
     const testPayload = {
       orderId: `test_${Date.now()}`,
-      platform: 'quiz-copa-2026',
+      platform: 'esn-supplements-germany',
       paymentMethod: 'pix',
       status: 'paid',
       createdAt: new Date().toISOString().replace('T', ' ').substring(0, 19),
@@ -90,7 +90,7 @@ export async function testUtmifyToken(token: string): Promise<{ success: boolean
       products: [
         {
           id: 'test-product',
-          name: 'Teste Copa 2026',
+          name: 'Test ESN Germany',
           planId: null,
           planName: null,
           quantity: 1,
@@ -201,7 +201,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
   const tracking = data.trackingParameters || getTrackingParametersFromUrl();
   return {
     orderId: data.orderId,
-    platform: 'quiz-copa-2026',
+    platform: 'esn-supplements-germany',
     paymentMethod: 'credit_card',
     status,
     createdAt: nowSql(),
@@ -215,7 +215,7 @@ function buildPayload(data: SaleData, status: 'waiting_payment' | 'paid' | 'refu
     },
     products: [
       {
-        id: 'bola-de-futebol',
+        id: 'esn-supplements-bundle',
         name: data.productName,
         planId: null,
         planName: null,

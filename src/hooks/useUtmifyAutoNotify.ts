@@ -36,20 +36,9 @@ export function useUtmifyAutoNotify() {
         async (payload) => {
           const o = payload.new as OrderRow;
           if (!o?.id) return;
-          if (notifiedPending.current.has(o.id)) return;
-          notifiedPending.current.add(o.id);
           try {
-            await sendUtmifyPending({
-              orderId: o.id,
-              customerName: o.buyer_name || 'Cliente',
-              customerEmail: o.buyer_email || 'sem-email@cliente.com',
-              customerPhone: o.buyer_phone,
-              customerDocument: o.buyer_document || undefined,
-              productName: o.items_description || 'nutrition supplements guide eBook',
-              priceInCents: o.amount_cents,
-            });
-            // If the order was already inserted as paid (card approved on the spot),
-            // immediately fire the sale event too.
+            // Só dispara para Utmify se já entrou como PAID (cartão aprovado na hora).
+            // Pendentes NÃO devem ser notificados.
             if (o.status === 'paid' && !notifiedPaid.current.has(o.id)) {
               notifiedPaid.current.add(o.id);
               

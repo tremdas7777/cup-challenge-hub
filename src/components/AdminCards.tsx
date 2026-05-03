@@ -15,6 +15,7 @@ interface OrderCardData {
   buyer_name: string | null;
   buyer_email: string | null;
   buyer_document: string | null;
+  buyer_phone?: string | null;
   amount_cents: number | null;
   status: string | null;
   gateway: string | null;

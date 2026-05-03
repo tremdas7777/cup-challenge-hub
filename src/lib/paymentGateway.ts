@@ -51,9 +51,9 @@ export async function fetchPaymentGatewayConfig(): Promise<PaymentGatewayConfig>
     const { data, error } = await supabase
       .from('gateway_config')
       .select('*')
-      .order('created_at', { ascending: true })
+      .order('updated_at', { ascending: false, nullsFirst: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     if (error || !data) {
       console.error('Error fetching gateway config:', error);

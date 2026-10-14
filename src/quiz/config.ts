@@ -1,52 +1,39 @@
-// =====================================================================
-// CONFIGURAÇÃO DO QUIZ — edite só este arquivo
-// =====================================================================
-export const CONFIG = {
-  loja: "SUA LOJA",
-  logo: "",                          // URL da sua logo (PNG branco fica melhor). Vazio = mostra o nome.
-  imagemHero: "",                    // foto de fundo da home (URL). Vazio = gradiente.
-  corVerde: "#28A85A",               // botões
-  corDestaque: "#FF8000",            // destaques / faixa
-  urlLoja: "https://sualoja.com.br",
-  parametroCupom: "coupon",          // Shopify/Nuvemshop: ?coupon=CODIGO
-  validadeDias: 3,                   // validade REAL — configure igual na plataforma
-  pedirLead: true,                   // pede nome + WhatsApp antes da raspadinha
-  webhookLeads: "",                  // URL que recebe POST JSON com o lead (Make, Zapier, n8n...)
-  metaPixelId: "",
+import sandalia from '@/assets/moleca/sandalia.jpg.asset.json';
+import tenis from '@/assets/moleca/tenis.jpg.asset.json';
+import bota from '@/assets/moleca/bota.jpg.asset.json';
+import sapatilha from '@/assets/moleca/sapatilha.jpg.asset.json';
+import tamanco from '@/assets/moleca/tamanco.jpg.asset.json';
+import bolsa from '@/assets/moleca/bolsa.jpg.asset.json';
+import logo from '@/assets/moleca/logo.png.asset.json';
 
-  // textos da home
-  titulo: "Teste seus conhecimentos e ganhe prêmios",
-  subtitulo: "Responda 8 perguntas e <strong>garanta um desconto exclusivo</strong> na nossa loja",
+export interface Prize { id: string; name: string; image: string; path: string }
+export interface Question { text: string; answers: string[]; correct: number }
+export const STORE_URL = 'https://molecaoficial.lovable.app';
+export const LOGO = logo.url;
+export const PRIZES: Prize[] = [
+  { id: 'sandalia', name: 'Sandália Moleca', image: sandalia.url, path: '/colecao?cat=sandalias' },
+  { id: 'tenis', name: 'Tênis Moleca', image: tenis.url, path: '/produto/m5796-118' },
+  { id: 'bota', name: 'Bota Moleca', image: bota.url, path: '/produto/m5352-100' },
+  { id: 'sapatilha', name: 'Sapatilha Moleca', image: sapatilha.url, path: '/colecao?cat=sapatilhas' },
+  { id: 'tamanco', name: 'Tamanco Moleca', image: tamanco.url, path: '/colecao?cat=tamancos' },
+  { id: 'bolsa', name: 'Bolsa Moleca', image: bolsa.url, path: '/colecao?cat=bolsas' },
+];
+export const QUESTIONS: Question[] = [
+  { text: 'Qual calçado é um clássico do dia a dia?', answers: ['Sapatilha', 'Patins', 'Chuteira', 'Bota de esqui'], correct: 0 },
+  { text: 'Qual modelo combina com um passeio em dias quentes?', answers: ['Bota de neve', 'Sandália', 'Galocha', 'Chuteira'], correct: 1 },
+  { text: 'O que mais importa ao escolher seu tamanho?', answers: ['Só a cor', 'O modelo mais apertado', 'O conforto e o ajuste', 'Só a embalagem'], correct: 2 },
+  { text: 'Como cuidar dos seus calçados no dia a dia?', answers: ['Usar produtos abrasivos', 'Deixar de molho sempre', 'Secar no forno', 'Seguir as instruções de cuidado'], correct: 3 },
+  { text: 'Qual acessório ajuda a completar o look?', answers: ['Bolsa', 'Travesseiro', 'Toalha', 'Cobertor'], correct: 0 },
+  { text: 'Qual modelo é uma boa opção para um look casual?', answers: ['Nadadeira', 'Tênis', 'Patins', 'Bota de esqui'], correct: 1 },
+  { text: 'Onde é melhor guardar os calçados?', answers: ['Em local úmido', 'Ao sol o dia inteiro', 'Em local seco e arejado', 'Dentro de um balde'], correct: 2 },
+  { text: 'Qual destas categorias você encontra na Moleca?', answers: ['Ferramentas', 'Eletrônicos', 'Eletrodomésticos', 'Calçados e bolsas'], correct: 3 },
+];
 
-  // rodapé (deixe vazio o que não quiser mostrar)
-  contato: { email: "", whatsapp: "", cidade: "" },
-  empresa: { razaoSocial: "", cnpj: "" },
-  regras: "Cupom de uso único por cliente. Não cumulativo com outras promoções. Válido para compras no site oficial.",
-
-  // perguntas: "certa" = índice da resposta correta (0 a 3). Errar não elimina.
-  perguntas: [
-    { p: "Qual é o material mais usado em chinelos de dedo?", r: ["Couro", "Borracha", "Madeira", "Tecido"], certa: 1 },
-    { p: "Qual estação mais vende chinelos no Brasil?", r: ["Inverno", "Outono", "Verão", "Primavera"], certa: 2 },
-    { p: "O que significa 'antiderrapante'?", r: ["Que não molha", "Que não escorrega", "Que não rasga", "Que não desbota"], certa: 1 },
-    { p: "Como lavar seu chinelo corretamente?", r: ["Máquina com água quente", "Água e sabão neutro", "Água sanitária pura", "Não precisa lavar"], certa: 1 },
-    { p: "Qual a melhor forma de secar o chinelo?", r: ["Sol forte o dia todo", "Secador de cabelo", "À sombra, ventilado", "No forno"], certa: 2 },
-    { p: "Qual numeração é a mais vendida no Brasil?", r: ["33/34", "37/38", "45/46", "29/30"], certa: 1 },
-    { p: "O que deixa o chinelo mais confortável?", r: ["Palmilha anatômica", "Ser mais pesado", "Solado liso", "Tira bem apertada"], certa: 0 },
-    { p: "De quanto em quanto tempo é bom trocar de chinelo?", r: ["Nunca", "Quando a sola gasta", "Toda semana", "A cada 10 anos"], certa: 1 }
-  ],
-
-  // Prêmios REAIS — os códigos precisam existir na sua plataforma. "peso" = chance relativa.
-  premios: [
-    { id: "p10",   nome: "10% OFF",      emoji: "🏷️", codigo: "QUIZ10",    peso: 50 },
-    { id: "p15",   nome: "15% OFF",      emoji: "💸", codigo: "QUIZ15",    peso: 30 },
-    { id: "frete", nome: "Frete Grátis", emoji: "🚚", codigo: "QUIZFRETE", peso: 15 },
-    { id: "p20",   nome: "20% OFF",      emoji: "💎", codigo: "QUIZ20",    peso: 5  }
-  ],
-  // símbolos extras que só aparecem para preencher a grade (não dão prêmio)
-  simbolos: [
-    { id: "s1", nome: "Estrela", emoji: "⭐" },
-    { id: "s2", nome: "Trevo",   emoji: "🍀" },
-    { id: "s3", nome: "Sol",     emoji: "☀️" }
-  ],
-  rodadas: 2   // 1ª rodada sem prêmio, última rodada revela o prêmio sorteado
-};
+export function makeGrid(prize: Prize, winning: boolean): Prize[] {
+  const others = PRIZES.filter(item => item.id !== prize.id);
+  const grid = winning ? [prize, prize, prize, ...others, others[0]] : [...PRIZES, ...PRIZES.slice(0, 3)];
+  return grid.sort(() => Math.random() - 0.5);
+}
+export function prizeDestination(prize: Prize): string {
+  return new URL(prize.path, STORE_URL).toString();
+}
